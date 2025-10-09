@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ResponseType {
+  going
+  interested
+  not_going
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  telegramId   BigInt    @unique
+  username     String?
+  firstName    String?
+  lastName     String?
+  languageCode String?
+  createdAt    DateTime  @default(now())
+  concerts     Concert[]
+  responses    ConcertResponse[]
+}
+
+model Concert {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  artistName  String
+  venue       String
+  concertDate DateTime
+  concertTime DateTime?
+  url         String?
+  notes       String?
+  notified    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  responses   ConcertResponse[]
+
+  @@index([concertDate])
+  @@index([userId])
+}
+
+model ConcertResponse {
+  id           Int       @id @default(autoincrement())
+  concert      Concert   @relation(fields: [concertId], references: [id], onDelete: Cascade)
+  concertId    Int
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       Int
+  responseType String
+  createdAt    DateTime  @default(now())
+
+  @@unique([concertId, userId])
+}
