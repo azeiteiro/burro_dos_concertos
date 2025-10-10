@@ -12,6 +12,12 @@
     "name": "Daniel Azeiteiro",
     "email": "daniel.azeiteiro@gmail.com"
   },
+  "keywords": [
+    "concerts",
+    "telegram",
+    "bot"
+  ],
+  "license": "MIT",
   "scripts": {
     "dev": "tsx --watch src/bot.ts",
     "clean": "rimraf dist",
@@ -26,14 +32,11 @@
     "seed": "tsx prisma/seed.ts"
   },
   "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
+    "**/*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
-  "keywords": [
-    "concerts",
-    "telegram",
-    "bot"
-  ],
-  "license": "MIT",
   "packageManager": "pnpm@10.18.1",
   "dependencies": {
     "dotenv": "^17.2.3",

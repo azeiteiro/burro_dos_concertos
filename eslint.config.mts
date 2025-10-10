@@ -1,41 +1,35 @@
 import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import { defineConfig } from "eslint/config";
+import { defineConfig, globalIgnores } from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      globals: globals.node,
-    },
-    plugins: {
-      // you can add custom plugins here later, e.g. import/order
-    },
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: { ecmaVersion: "latest", globals: globals.node },
     rules: {
-      ...js.configs.recommended.rules,
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": "warn",
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-debugger": "error",
+      "prefer-const": "warn",
+      eqeqeq: ["warn", "always"],
+      curly: ["warn", "all"],
+      "no-var": "error",
+    },
+  },
+  globalIgnores(["src/generated/**"]),
+  tseslint.configs.recommended,
+  // optional: tests
+  {
+    files: ["**/*.test.ts", "**/*.spec.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
       "no-console": "off",
     },
   },
-  // TypeScript-specific rules
-  {
-    files: ["**/*.ts"],
-    ...tseslint.configs.recommendedTypeChecked,
-    languageOptions: {
-      parserOptions: {
-        project: "./tsconfig.json",
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
-    },
-  },
-  // Prettier integration
   eslintConfigPrettier,
 ]);

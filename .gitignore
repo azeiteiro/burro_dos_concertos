@@ -1,5 +1,18 @@
-node_modules
-# Keep environment variables out of version control
-.env
-
+# dependencies
+/node_modules
 /src/generated/prisma
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+/downloads
+/logs
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env
