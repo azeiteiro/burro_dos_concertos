@@ -7,15 +7,35 @@ import eslintConfigPrettier from "eslint-config-prettier/flat";
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
-    plugins: { js },
-    extends: ["js/recommended"],
-    languageOptions: { ecmaVersion: "latest", globals: globals.node },
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: globals.node,
+    },
+    plugins: {
+      // you can add custom plugins here later, e.g. import/order
+    },
     rules: {
-      "no-unused-vars": "warn",
+      ...js.configs.recommended.rules,
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "no-console": "off",
-      "@typescript-eslint/no-explicit-any": "off",
     },
   },
-  tseslint.configs.recommended,
+  // TypeScript-specific rules
+  {
+    files: ["**/*.ts"],
+    ...tseslint.configs.recommendedTypeChecked,
+    languageOptions: {
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+    },
+  },
+  // Prettier integration
   eslintConfigPrettier,
 ]);

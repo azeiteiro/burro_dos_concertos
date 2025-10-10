@@ -1,12 +1,23 @@
+import dotenv from "dotenv";
+import startCommand from "./commands/start";
+import i18n from "./config/i18n";
 import { Bot } from "grammy";
 
-const bot = new Bot("REDACTED_BOT_TOKEN"); // <-- put your bot token between the "" (https://t.me/BotFather)
+dotenv.config();
 
-// Reply to any message with "Hi there!".
-bot.on("message", (ctx) =>
-  ctx.reply("Olá eu sou o Burro dos Concertos e ainda só sei dizer isto!!!!!!")
-);
+const bot = new Bot(process.env.BOT_TOKEN!);
 
-console.log("Bot is running...");
+// Middleware to attach a translator to ctx
+bot.use(async (ctx, next) => {
+  const lang = ctx.from?.language_code || "en";
+  const t = (key: string, options?: Record<string, unknown>) =>
+    i18n.getFixedT(lang, "common")(key, options);
+  ctx.t = t;
+  await next();
+});
+
+// Register commands
+bot.command("start", startCommand);
 
 bot.start();
+console.log("🚀 Bot started!");
