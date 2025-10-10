@@ -5,11 +5,26 @@ const config: Config = {
   testEnvironment: "node",
   roots: ["<rootDir>/src"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
+  clearMocks: true,
+
+  // Coverage settings
   collectCoverage: true,
   coverageDirectory: "<rootDir>/coverage",
-  coverageReporters: ["text", "lcov"],
-  clearMocks: true,
-  coveragePathIgnorePatterns: ["/node_modules/", "prisma/client"],
+  coverageReporters: ["text", "lcov", "json-summary"],
+  coveragePathIgnorePatterns: ["/node_modules/", "prisma/client", "/dist/"],
+
+  // Minimum coverage enforcement
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
 };
 
 export default config;
