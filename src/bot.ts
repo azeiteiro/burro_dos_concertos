@@ -1,11 +1,25 @@
 import dotenv from "dotenv";
-import startCommand from "./commands/start";
+import { Bot, type Context } from "grammy";
+import {
+  type ConversationFlavor,
+  conversations,
+  createConversation,
+} from "@grammyjs/conversations";
 import i18n from "./config/i18n";
-import { Bot } from "grammy";
+import startCommand from "./commands/start";
+import { addConcertConversation } from "./conversations/add_concert";
+import { addConcertCommand } from "./commands/add_concert";
 
 dotenv.config();
 
-const bot = new Bot(process.env.BOT_TOKEN!);
+const bot = new Bot<ConversationFlavor<Context>>(process.env.BOT_TOKEN!);
+
+bot.use(conversations());
+bot.use(createConversation(addConcertConversation));
+
+bot.command("add_concert", async (ctx) => {
+  await addConcertCommand(ctx);
+});
 
 // Middleware to attach a translator to ctx
 bot.use(async (ctx, next) => {
