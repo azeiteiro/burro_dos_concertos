@@ -2,7 +2,7 @@ import { Context } from "grammy";
 import { Conversation } from "@grammyjs/conversations";
 import { validateConcertInput } from "@/utils/validators";
 import { ask } from "@/utils/helpers";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 
@@ -60,16 +60,10 @@ export const addConcertConversation = async (
   /// ✅ Save to database using external() to prevent replay issues
   await conversation.external(async () => {
     const formattedDate = format(concertDate, "yyyy-MM-dd");
+    const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
 
-    // Create the base date
-    const concertDateObj = new Date(`${formattedDate}T00:00:00Z`);
-
-    // Create the full time if provided
-    let concertTimeObj: Date | null = null;
-    if (concertTime) {
-      // Ensure valid ISO datetime format
-      concertTimeObj = new Date(`${formattedDate}T${concertTime}:00Z`);
-    }
+    // only create a valid time object if time was provided
+    const concertTimeObj = concertTime ? parseISO(`${formattedDate}T${concertTime}:00Z`) : null;
 
     try {
       await prisma.concert.create({
