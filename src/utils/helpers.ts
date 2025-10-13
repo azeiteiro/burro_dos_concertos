@@ -6,34 +6,6 @@ interface AskOptions {
   optional?: boolean;
 }
 
-export const askWithConfirmation = async (
-  conversation: Conversation,
-  ctx: Context,
-  question: string,
-  suggestion?: string,
-  includeSkip = false
-): Promise<"yes" | "no" | "skip"> => {
-  const keyboard = new InlineKeyboard().text("✅ Yes", "yes").text("❌ No", "no");
-
-  if (includeSkip) {
-    keyboard.text("➡️ Skip", "skip");
-  }
-
-  const sent = await ctx.reply(suggestion ? `${question}\n\n👉 ${suggestion}` : question, {
-    reply_markup: keyboard,
-  });
-
-  const response = await conversation.waitForCallbackQuery([
-    "yes",
-    "no",
-    ...(includeSkip ? ["skip"] : []),
-  ]);
-
-  await ctx.api.editMessageReplyMarkup(sent.chat.id, sent.message_id, undefined);
-
-  return response.callbackQuery.data as "yes" | "no" | "skip";
-};
-
 export async function ask<T = string>(
   conversation: Conversation,
   ctx: Context,
@@ -43,38 +15,38 @@ export async function ask<T = string>(
 ): Promise<T | null> {
   const { optional = false } = options;
 
+  await ctx.reply(
+    question,
+    optional ? { reply_markup: new InlineKeyboard().text("➡️ Skip", "skip") } : undefined
+  );
+
   while (true) {
-    const keyboard = optional ? new InlineKeyboard().text("➡️ Skip", "skip") : undefined;
-    await ctx.reply(question, keyboard ? { reply_markup: keyboard } : undefined);
+    const update = await conversation.wait();
 
-    const raw = await Promise.race([
-      conversation.waitFor("message:text"),
-      optional ? conversation.waitForCallbackQuery("skip") : new Promise(() => {}),
-    ]).catch(() => null);
-
-    if (!raw) continue;
-
-    if ("callbackQuery" in raw && raw.callbackQuery?.data === "skip") {
-      try {
-        await ctx.api.answerCallbackQuery(raw.callbackQuery.id);
-      } catch {
-        // Intentionally ignored
+    // Handle callback query
+    if ("callbackQuery" in update) {
+      const data = update.callbackQuery?.data;
+      if (data === "skip") {
+        try {
+          if (update.callbackQuery) {
+            await ctx.api.answerCallbackQuery(update.callbackQuery.id);
+          }
+        } catch {
+          // Ignore
+        }
+        await ctx.reply("⏭️ Skipped.");
+        return null;
       }
-      await ctx.reply("⏭️ Skipped.");
-      return null;
     }
 
-    if ("message" in raw && typeof raw.message?.text === "string") {
-      const input = raw.message.text.trim();
+    // Handle message text
+    if ("message" in update && typeof update.message?.text === "string") {
+      const input = update.message.text.trim();
       const result = validate(input);
-
-      // ✅ KEY FIX: errors must start with ❌
       if (typeof result === "string" && result.startsWith("❌")) {
         await ctx.reply(result);
         continue;
       }
-
-      // ✅ return actual value (Date, string, or null)
       return result as T | null;
     }
 
