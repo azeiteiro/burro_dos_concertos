@@ -3,6 +3,7 @@ export interface Concert {
   name: string;
   date: Date; // YYYY-MM-DD
   location: string;
+  url?: string;
   notes?: string;
   createdBy: string;
 }

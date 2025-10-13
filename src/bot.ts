@@ -9,6 +9,7 @@ import i18n from "./config/i18n";
 import startCommand from "./commands/start";
 import { addConcertConversation } from "./conversations/add_concert";
 import { addConcertCommand } from "./commands/add_concert";
+import { listConcertsCommand } from "./commands/list_concerts";
 
 dotenv.config();
 
@@ -19,6 +20,10 @@ bot.use(createConversation(addConcertConversation));
 
 bot.command("add_concert", async (ctx) => {
   await addConcertCommand(ctx);
+});
+
+bot.command("see_concerts", async (ctx) => {
+  await listConcertsCommand(ctx);
 });
 
 // Middleware to attach a translator to ctx
