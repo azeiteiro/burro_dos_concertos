@@ -1,7 +1,4 @@
-import "grammy";
+import { Context } from "grammy";
+import { ConversationFlavor } from "@grammyjs/conversations";
 
-declare module "grammy" {
-  interface Context {
-    t: (key: string, options?: Record<string, unknown>) => string;
-  }
-}
+export type BotContext = Context & ConversationFlavor;
