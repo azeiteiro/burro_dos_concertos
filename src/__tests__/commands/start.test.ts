@@ -1,11 +1,11 @@
-jest.mock("../config/db", () => ({
+import startCommand from "@/commands/start";
+import { prisma } from "@/config/db";
+
+jest.mock("@/config/db", () => ({
   prisma: {
     user: { findUnique: jest.fn(), create: jest.fn() },
   },
 }));
-
-import { startCommand } from "./start";
-import { prisma } from "../config/db";
 
 describe("startCommand", () => {
   let ctx: any;

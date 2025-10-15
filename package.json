@@ -44,29 +44,26 @@
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "grammy": "^1.38.3",
-    "i18next": "^25.5.3",
-    "i18next-fs-backend": "^2.6.0",
     "pino": "^10.0.0",
     "tsx": "^4.20.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.37.0",
     "@prisma/client": "6.17.0",
-    "@types/i18next": "^13.0.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.7.2",
     "eslint": "^9.37.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jiti": "^2.6.1",
-    "lint-staged": "^16.2.3",
+    "lint-staged": "^16.2.4",
     "prettier": "^3.6.2",
     "prisma": "6.17.0",
-    "ts-jest": "^29.4.4",
+    "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.0"
+    "typescript-eslint": "^8.46.1"
   }
 }

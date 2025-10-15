@@ -6,7 +6,6 @@ import { format, parseISO } from "date-fns";
 import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 
-// ✅ Return data instead of saving directly
 export const addConcertConversation = async (
   conversation: Conversation,
   ctx: Context,
@@ -28,7 +27,7 @@ export const addConcertConversation = async (
     validateConcertInput.location
   )) as string;
 
-  // --- Date (simplified - validator now returns Date directly) ---
+  // --- Date ---
   const concertDate = (await ask(
     conversation,
     ctx,
@@ -47,22 +46,20 @@ export const addConcertConversation = async (
     { optional: true }
   )) as string | null;
 
-  // --- URL ---
+  // --- URL (optional) ---
   const url = (await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
     optional: true,
   })) as string | null;
 
-  // --- Notes ---
+  // --- Notes (optional) ---
   const notes = (await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
     optional: true,
   })) as string | null;
 
-  /// ✅ Save to database using external() to prevent replay issues
+  // --- Save concert safely ---
   await conversation.external(async () => {
     const formattedDate = format(concertDate, "yyyy-MM-dd");
     const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
-
-    // only create a valid time object if time was provided
     const concertTimeObj = concertTime ? parseISO(`${formattedDate}T${concertTime}:00Z`) : null;
 
     try {
@@ -81,16 +78,15 @@ export const addConcertConversation = async (
       logAction(dbUserId, `Added concert "${artistName}" at ${venue}`);
     } catch (err) {
       console.error("Failed to create concert:", err);
-      throw err; // Re-throw to handle outside
+      throw err;
     }
   });
 
-  // ✅ Send success message after external operation
+  // --- Success message ---
   const formattedDateMsg = format(concertDate, "yyyy-MM-dd");
-  const formattedTimeMsg = concertTime && concertTime.length > 0 ? concertTime : null;
+  const formattedTimeMsg = concertTime && concertTime.length > 0 ? ` at ${concertTime}` : "";
 
   await ctx.reply(
-    `✅ Concert added: ${artistName} at ${venue} on ${formattedDateMsg}` +
-      (formattedTimeMsg ? ` at ${formattedTimeMsg}` : "")
+    `✅ Concert added: ${artistName} at ${venue} on ${formattedDateMsg}${formattedTimeMsg}`
   );
 };

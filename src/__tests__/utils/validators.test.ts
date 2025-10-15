@@ -1,4 +1,4 @@
-import { validateConcertInput } from "./validators";
+import { validateConcertInput } from "@/utils/validators";
 
 describe("validateConcertInput", () => {
   describe("name", () => {

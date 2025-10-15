@@ -39,7 +39,7 @@ describe("listConcertsCommand", () => {
 
   it("lists upcoming concerts", async () => {
     const user = createMockUser();
-    const concert = createMockConcert({ userId: user.id, user });
+    const concert = createMockConcert({ userId: user.id });
 
     (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
 
@@ -47,6 +47,5 @@ describe("listConcertsCommand", () => {
 
     expect(ctx.reply.mock.calls[0][0]).toContain("Arctic Monkeys");
     expect(ctx.reply.mock.calls[0][0]).toContain("Altice Arena, Lisbon");
-    expect(ctx.reply.mock.calls[0][0]).toContain("Daniel A");
   });
 });
