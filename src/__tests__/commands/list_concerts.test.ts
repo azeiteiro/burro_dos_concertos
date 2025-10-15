@@ -24,6 +24,11 @@ describe("listConcertsCommand", () => {
     ctx = {
       reply: jest.fn(),
       from: { id: 123 },
+      msg: {
+        from: {
+          id: 123, // mock Telegram user ID
+        },
+      },
     };
   });
 

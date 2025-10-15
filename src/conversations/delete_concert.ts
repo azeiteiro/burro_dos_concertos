@@ -3,6 +3,7 @@ import { InlineKeyboard } from "grammy";
 import { prisma } from "@/config/db";
 import { Concert } from "@/generated/prisma";
 import { BotContext } from "@/types/global";
+import { logAction } from "@/utils/logger";
 
 export const deleteConcertConversation = async (
   conversation: Conversation<BotContext>,
@@ -79,6 +80,8 @@ export const deleteConcertConversation = async (
   // 8. Delete concert
   await prisma.concert.delete({ where: { id: selected.id } });
   await callback.answerCallbackQuery({ text: "Concert deleted!" });
+
+  logAction(dbUserId, `Edited concert: ${selected.artistName} at ${selected.venue}`);
 
   await ctx.reply(`🗑️ Deleted *${selected.artistName} – ${selected.venue}*`, {
     parse_mode: "Markdown",
