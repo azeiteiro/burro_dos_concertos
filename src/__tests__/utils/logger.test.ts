@@ -1,6 +1,6 @@
+import { logAction } from "@/utils/logger";
 import fs from "fs";
 import path from "path";
-import { logAction } from "./logger";
 
 jest.mock("fs");
 

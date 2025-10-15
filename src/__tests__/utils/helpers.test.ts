@@ -1,4 +1,4 @@
-import { ask } from "./helpers";
+import { ask } from "@/utils/helpers";
 
 describe("ask helper", () => {
   let ctx: any;

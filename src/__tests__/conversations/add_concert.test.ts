@@ -1,5 +1,4 @@
-// src/conversations/add_concert.test.ts
-import { addConcertConversation } from "./add_concert";
+import { addConcertConversation } from "../../conversations/add_concert";
 import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 import { ask } from "@/utils/helpers";

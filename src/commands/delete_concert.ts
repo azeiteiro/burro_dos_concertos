@@ -1,7 +1,7 @@
-import { findOrCreateUser } from "@/utils/user";
 import { BotContext } from "@/types/global";
+import { findOrCreateUser } from "@/utils/user";
 
-export const addConcertCommand = async (ctx: BotContext) => {
+export const deleteConcertCommand = async (ctx: BotContext) => {
   const tgUser = ctx.from;
 
   if (!tgUser) {
@@ -11,5 +11,5 @@ export const addConcertCommand = async (ctx: BotContext) => {
 
   const user = await findOrCreateUser(tgUser);
 
-  await ctx.conversation.enter("addConcertConversation", { dbUserId: user.id });
+  await ctx.conversation.enter("deleteConcertConversation", { dbUserId: user.id });
 };
