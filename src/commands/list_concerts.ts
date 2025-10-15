@@ -2,6 +2,7 @@
 import { CommandContext, Context } from "grammy";
 import { prisma } from "@/config/db";
 import { format } from "date-fns";
+import { logAction } from "@/utils/logger";
 
 // Escape MarkdownV2 special characters
 const escapeMarkdownV2 = (text: string): string =>
@@ -61,6 +62,8 @@ export const listConcertsCommand = async (ctx: CommandContext<Context>) => {
         return `\n\n${monthHeader}\n\n${concertsText}`;
       })
       .join("\n\n"); // extra spacing between month sections
+
+    logAction(ctx.msg.from?.id ?? 0, `Accessed concert list`);
 
     await ctx.reply(message, { parse_mode: "MarkdownV2" });
   } catch (err) {

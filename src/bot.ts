@@ -8,6 +8,8 @@ import { listConcertsCommand } from "./commands/list_concerts";
 import { deleteConcertCommand } from "./commands/delete_concert";
 import { deleteConcertConversation } from "./conversations/delete_concert";
 import { type BotContext } from "./types/global";
+import { editConcertCommand } from "./commands/edit_concert";
+import { editConcertConversation } from "./conversations/edit_concert";
 
 dotenv.config({ debug: false });
 
@@ -16,6 +18,7 @@ const bot = new Bot<BotContext>(process.env.BOT_TOKEN!);
 bot.use(conversations());
 bot.use(createConversation(addConcertConversation));
 bot.use(createConversation(deleteConcertConversation));
+bot.use(createConversation(editConcertConversation));
 
 bot.command("add_concert", async (ctx: BotContext) => {
   await addConcertCommand(ctx);
@@ -27,6 +30,10 @@ bot.command("see_concerts", async (ctx: BotContext) => {
 
 bot.command("delete_concert", async (ctx: BotContext) => {
   await deleteConcertCommand(ctx);
+});
+
+bot.command("edit_concert", async (ctx: BotContext) => {
+  await editConcertCommand(ctx);
 });
 
 // Register commands
