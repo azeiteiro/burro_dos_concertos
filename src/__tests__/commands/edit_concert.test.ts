@@ -1,4 +1,4 @@
-import { editConcertCommand } from "@/commands/edit_concert";
+import { editConcertCommand } from "@/commands/concerts/edit_concert";
 import { findOrCreateUser } from "@/utils/user";
 
 jest.mock("@/utils/user", () => ({

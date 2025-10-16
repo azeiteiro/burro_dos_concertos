@@ -1,4 +1,4 @@
-import { deleteConcertCommand } from "@/commands/delete_concert";
+import { deleteConcertCommand } from "@/commands/concerts/delete_concert";
 import { prisma } from "@/config/db";
 import { CommandContext } from "grammy";
 import { ConversationFlavor } from "@grammyjs/conversations";

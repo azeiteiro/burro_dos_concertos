@@ -20,6 +20,7 @@ model User {
   firstName    String?
   lastName     String?
   languageCode String?
+  role         String    @default("User") // SuperAdmin | Admin | Moderator | User
   createdAt    DateTime  @default(now())
   concerts     Concert[]
   responses    ConcertResponse[]

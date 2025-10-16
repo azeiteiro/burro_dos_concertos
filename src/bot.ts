@@ -3,12 +3,12 @@ import { Bot } from "grammy";
 import { conversations, createConversation } from "@grammyjs/conversations";
 import startCommand from "./commands/start";
 import { addConcertConversation } from "./conversations/add_concert";
-import { addConcertCommand } from "./commands/add_concert";
-import { listConcertsCommand } from "./commands/list_concerts";
-import { deleteConcertCommand } from "./commands/delete_concert";
+import { addConcertCommand } from "./commands/concerts/add_concert";
+import { listConcertsCommand } from "./commands/concerts/list_concerts";
+import { deleteConcertCommand } from "./commands/concerts/delete_concert";
 import { deleteConcertConversation } from "./conversations/delete_concert";
 import { type BotContext } from "./types/global";
-import { editConcertCommand } from "./commands/edit_concert";
+import { editConcertCommand } from "./commands/concerts/edit_concert";
 import { editConcertConversation } from "./conversations/edit_concert";
 
 dotenv.config({ debug: false });
