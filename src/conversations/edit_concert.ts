@@ -2,29 +2,31 @@ import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard } from "grammy";
 import { prisma } from "@/config/db";
 import { Concert } from "@prisma/client";
-import { ask } from "@/utils/helpers";
+import { ask, canEditConcert } from "@/utils/helpers";
 import { validateConcertInput } from "@/utils/validators";
 import { logAction } from "@/utils/logger";
 
 export const editConcertConversation = async (
   conversation: Conversation,
   ctx: Context,
-  { dbUserId }: { dbUserId: number }
+  { dbUserId, userRole }: { dbUserId: number; userRole: string }
 ) => {
-  // Step 1: Fetch only user's concerts
+  // Step 1: Fetch all concerts (future-proof for mods/admins)
   const concerts: Concert[] = await prisma.concert.findMany({
-    where: { userId: dbUserId },
     orderBy: [{ concertDate: "desc" }, { concertTime: "desc" }],
   });
 
-  if (concerts.length === 0) {
-    await ctx.reply("🎵 You don’t have any concerts yet. Try adding one first.");
+  // Step 2: Filter by permissions
+  const editableConcerts = concerts.filter((c) => canEditConcert(c, dbUserId, userRole));
+
+  if (!editableConcerts.length) {
+    await ctx.reply("🎵 No concerts you are allowed to edit.");
     return;
   }
 
-  // Step 2: Show numbered list
+  // Step 3: Show numbered list
   let listMsg = "Select the concert to edit:\n\n";
-  concerts.forEach((c, i) => {
+  editableConcerts.forEach((c, i) => {
     const dateStr = c.concertDate?.toISOString().split("T")[0] ?? "no date";
     listMsg += `${i + 1}. ${c.artistName} – ${c.venue} (${dateStr})\n`;
   });
@@ -33,7 +35,7 @@ export const editConcertConversation = async (
   await ctx.reply(listMsg);
   await ctx.reply("Please send the number of the concert you want to edit:");
 
-  // Step 3: Wait for user selection
+  // Step 4: Wait for user selection
   const { message: reply } = await conversation.wait();
   const input = reply?.text?.trim();
   const index = input ? parseInt(input, 10) - 1 : -2;
@@ -43,14 +45,14 @@ export const editConcertConversation = async (
     return;
   }
 
-  if (isNaN(index) || index < 0 || index >= concerts.length) {
+  if (isNaN(index) || index < 0 || index >= editableConcerts.length) {
     await ctx.reply("❌ Invalid number. Edit canceled.");
     return;
   }
 
-  const concert = concerts[index];
+  const concert = editableConcerts[index];
 
-  // Step 4: Show editable fields (3-column layout)
+  // Step 5: Show editable fields
   const editKeyboard = new InlineKeyboard()
     .text("📝 Artist", "artist")
     .text("📍 Venue", "venue")
@@ -76,6 +78,7 @@ export const editConcertConversation = async (
     "notes",
     "cancel",
   ]);
+
   const field = fieldChoice.update.callback_query?.data;
 
   if (field === "cancel") {
@@ -83,7 +86,7 @@ export const editConcertConversation = async (
     return;
   }
 
-  // Step 5: Ask for new value using validators
+  // Step 6: Ask for new value
   let newValue: string | Date | null = null;
   switch (field) {
     case "artist":
@@ -144,7 +147,7 @@ export const editConcertConversation = async (
     return;
   }
 
-  // Step 6: Update concert in DB
+  // Step 7: Update concert in DB
   const updateData: Partial<Concert> = {};
   switch (field) {
     case "artist":

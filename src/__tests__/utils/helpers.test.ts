@@ -1,4 +1,4 @@
-import { ask } from "@/utils/helpers";
+import { ask, canDeleteConcert, canEditConcert } from "@/utils/helpers";
 
 describe("ask helper", () => {
   let ctx: any;
@@ -64,5 +64,57 @@ describe("ask helper", () => {
 
     expect(result).toBe("final");
     expect(ctx.reply).toHaveBeenCalledWith("❌ Unexpected input. Reply with text or Skip.");
+  });
+});
+
+describe("Permission helpers", () => {
+  const mockConcert = { id: 1, userId: 10, artistName: "Test", venue: "Venue" };
+
+  describe("canDeleteConcert", () => {
+    it("allows SuperAdmin to delete anything", () => {
+      expect(canDeleteConcert("SuperAdmin", 1, 999)).toBe(true);
+    });
+
+    it("allows Admin to delete anything", () => {
+      expect(canDeleteConcert("Admin", 1, 999)).toBe(true);
+    });
+
+    it("allows Moderator to delete own concert", () => {
+      expect(canDeleteConcert("Moderator", 10, 10)).toBe(true);
+    });
+
+    it("prevents Moderator from deleting others' concerts", () => {
+      expect(canDeleteConcert("Moderator", 10, 99)).toBe(false);
+    });
+
+    it("allows User to delete own concert", () => {
+      expect(canDeleteConcert("User", 10, 10)).toBe(true);
+    });
+
+    it("prevents User from deleting others' concerts", () => {
+      expect(canDeleteConcert("User", 10, 99)).toBe(false);
+    });
+  });
+
+  describe("canEditConcert", () => {
+    it("allows Admin to edit anything", () => {
+      expect(canEditConcert(mockConcert as any, 999, "Admin")).toBe(true);
+    });
+
+    it("allows Moderator to edit anything", () => {
+      expect(canEditConcert(mockConcert as any, 999, "Moderator")).toBe(true);
+    });
+
+    it("allows User to edit own concert", () => {
+      expect(canEditConcert(mockConcert as any, 10, "User")).toBe(true);
+    });
+
+    it("prevents User from editing others' concerts", () => {
+      expect(canEditConcert(mockConcert as any, 99, "User")).toBe(false);
+    });
+
+    it("prevents unknown role from editing", () => {
+      expect(canEditConcert(mockConcert as any, 10, "Guest")).toBe(false);
+    });
   });
 });

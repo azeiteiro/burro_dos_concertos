@@ -1,6 +1,7 @@
 import { InlineKeyboard } from "grammy";
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
+import { Concert } from "@prisma/client";
 
 interface AskOptions {
   optional?: boolean;
@@ -53,3 +54,34 @@ export async function ask<T = string>(
     await ctx.reply("❌ Unexpected input. Reply with text or Skip.");
   }
 }
+
+export const canDeleteConcert = (
+  userRole: string,
+  concertOwnerId: number,
+  currentUserId: number
+) => {
+  switch (userRole) {
+    case "SuperAdmin":
+      return true; // supergod
+    case "Admin":
+      return true; // can delete anything
+    case "Moderator":
+      return concertOwnerId === currentUserId; // only own
+    case "User":
+    default:
+      return concertOwnerId === currentUserId; // only own
+  }
+};
+
+export const canEditConcert = (concert: Concert, userId: number, role: string) => {
+  switch (role) {
+    case "Admin":
+      return true; // Admin can edit everything
+    case "Moderator":
+      return true; // Moderator can edit everything too
+    case "User":
+      return concert.userId === userId; // Only own concerts
+    default:
+      return false;
+  }
+};
