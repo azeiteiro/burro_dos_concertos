@@ -13,6 +13,13 @@ enum ResponseType {
   not_going
 }
 
+enum Role {
+  SuperAdmin
+  Admin
+  Moderator
+  User
+}
+
 model User {
   id           Int       @id @default(autoincrement())
   telegramId   BigInt    @unique
@@ -20,6 +27,7 @@ model User {
   firstName    String?
   lastName     String?
   languageCode String?
+  role         String    @default("User") // SuperAdmin | Admin | Moderator | User
   createdAt    DateTime  @default(now())
   concerts     Concert[]
   responses    ConcertResponse[]

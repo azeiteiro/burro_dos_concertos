@@ -3,13 +3,10 @@ import { Bot } from "grammy";
 import { conversations, createConversation } from "@grammyjs/conversations";
 import startCommand from "./commands/start";
 import { addConcertConversation } from "./conversations/add_concert";
-import { addConcertCommand } from "./commands/add_concert";
-import { listConcertsCommand } from "./commands/list_concerts";
-import { deleteConcertCommand } from "./commands/delete_concert";
 import { deleteConcertConversation } from "./conversations/delete_concert";
 import { type BotContext } from "./types/global";
-import { editConcertCommand } from "./commands/edit_concert";
 import { editConcertConversation } from "./conversations/edit_concert";
+import { registerCommands } from "./bot/commands";
 
 dotenv.config({ debug: false });
 
@@ -20,21 +17,7 @@ bot.use(createConversation(addConcertConversation));
 bot.use(createConversation(deleteConcertConversation));
 bot.use(createConversation(editConcertConversation));
 
-bot.command("add_concert", async (ctx: BotContext) => {
-  await addConcertCommand(ctx);
-});
-
-bot.command("see_concerts", async (ctx: BotContext) => {
-  await listConcertsCommand(ctx);
-});
-
-bot.command("delete_concert", async (ctx: BotContext) => {
-  await deleteConcertCommand(ctx);
-});
-
-bot.command("edit_concert", async (ctx: BotContext) => {
-  await editConcertCommand(ctx);
-});
+registerCommands(bot);
 
 // Register commands
 bot.command("start", startCommand);

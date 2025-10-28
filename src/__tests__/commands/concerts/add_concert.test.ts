@@ -4,7 +4,7 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
-import { addConcertCommand } from "@/commands/add_concert";
+import { addConcertCommand } from "@/commands/concerts/add_concert";
 import { prisma } from "@/config/db";
 
 describe("addConcertCommand", () => {
