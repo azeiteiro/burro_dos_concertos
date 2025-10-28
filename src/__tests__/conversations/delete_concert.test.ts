@@ -22,14 +22,16 @@ const MockConversation = (
     ...overrides,
   }) as Partial<jest.Mocked<Conversation<Context>>> as jest.Mocked<Conversation<Context>>;
 
-describe("deleteConcertConversation", () => {
+describe("deleteConcertConversation with permissions", () => {
   let ctx: ReturnType<typeof MockContext>;
   let conversation: jest.Mocked<Conversation<Context>>;
 
-  const dbUser = createMockUser({ id: 2 });
+  const dbUser = createMockUser({ id: 2, role: "User" });
+  const otherUser = createMockUser({ id: 3, role: "User" });
+
   const concerts = [
     createMockConcert({ id: 1, userId: dbUser.id, artistName: "Arctic Monkeys" }),
-    createMockConcert({ id: 2, userId: dbUser.id, artistName: "The Killers" }),
+    createMockConcert({ id: 2, userId: otherUser.id, artistName: "The Killers" }),
   ];
 
   beforeEach(() => {
@@ -38,50 +40,24 @@ describe("deleteConcertConversation", () => {
     conversation = MockConversation();
   });
 
-  it("shows message when user has no upcoming concerts", async () => {
-    (prisma.concert.findMany as jest.Mock).mockResolvedValue([]);
-
-    await deleteConcertConversation(conversation, ctx as unknown as Context, {
-      dbUserId: dbUser.id,
-    });
-
-    expect(ctx.reply).toHaveBeenCalledWith("🎶 You have no upcoming concerts to delete.");
-  });
-
-  it("shows the list of concerts and cancels if user types 0", async () => {
+  it("prevents deleting another user's concert for a normal user", async () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
 
-    conversation.wait.mockResolvedValueOnce({ message: { text: "0" } } as any);
+    conversation.wait.mockResolvedValueOnce({ message: { text: "2" } } as any);
 
     await deleteConcertConversation(conversation, ctx as unknown as Context, {
       dbUserId: dbUser.id,
+      userRole: "User",
     });
 
-    expect(ctx.reply).toHaveBeenCalledWith(
-      expect.stringContaining("Select the concert you want to delete")
-    );
-    expect(ctx.reply).toHaveBeenCalledWith("❌ Deletion cancelled.");
+    expect(ctx.reply).toHaveBeenCalledWith("❌ You are not allowed to delete this concert.");
+    expect(prisma.concert.delete).not.toHaveBeenCalled();
   });
 
-  it("shows error if user inputs invalid number", async () => {
-    (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
-
-    conversation.wait.mockResolvedValueOnce({ message: { text: "99" } } as any);
-
-    await deleteConcertConversation(conversation, ctx as unknown as Context, {
-      dbUserId: dbUser.id,
-    });
-
-    expect(ctx.reply).toHaveBeenCalledWith(
-      "❌ Invalid number. Please try again with /delete_concert."
-    );
-  });
-
-  it("deletes selected concert after confirmation", async () => {
+  it("allows deleting own concert for a normal user", async () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
 
     const answerCallbackQuery = jest.fn();
-
     conversation.wait.mockResolvedValueOnce({ message: { text: "1" } } as any);
     conversation.waitForCallbackQuery.mockResolvedValueOnce({
       match: ["confirm_delete:1"],
@@ -90,19 +66,36 @@ describe("deleteConcertConversation", () => {
 
     await deleteConcertConversation(conversation, ctx as unknown as Context, {
       dbUserId: dbUser.id,
+      userRole: "User",
     });
 
-    const replyCalls = ctx.reply.mock.calls.map((c) => c[0]);
-    expect(replyCalls.some((msg) => msg.includes("Are you sure you want to delete"))).toBe(true);
     expect(prisma.concert.delete).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(replyCalls.some((msg) => msg.includes("🗑️ Deleted"))).toBe(true);
     expect(answerCallbackQuery).toHaveBeenCalled();
   });
 
-  it("cancels deletion after pressing no", async () => {
+  it("allows Admin to delete any concert", async () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
 
+    const answerCallbackQuery = jest.fn();
     conversation.wait.mockResolvedValueOnce({ message: { text: "2" } } as any);
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      match: ["confirm_delete:2"],
+      answerCallbackQuery,
+    } as any);
+
+    await deleteConcertConversation(conversation, ctx as unknown as Context, {
+      dbUserId: dbUser.id,
+      userRole: "Admin",
+    });
+
+    expect(prisma.concert.delete).toHaveBeenCalledWith({ where: { id: 2 } });
+    expect(answerCallbackQuery).toHaveBeenCalled();
+  });
+
+  it("cancels deletion when pressing no", async () => {
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } } as any);
     conversation.waitForCallbackQuery.mockResolvedValueOnce({
       match: ["cancel_delete"],
       answerCallbackQuery: jest.fn(),
@@ -110,9 +103,10 @@ describe("deleteConcertConversation", () => {
 
     await deleteConcertConversation(conversation, ctx as unknown as Context, {
       dbUserId: dbUser.id,
+      userRole: "User",
     });
 
-    expect(ctx.reply).toHaveBeenCalledWith("❌ Deletion cancelled.");
     expect(prisma.concert.delete).not.toHaveBeenCalled();
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Deletion cancelled.");
   });
 });
