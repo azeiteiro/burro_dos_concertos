@@ -1,11 +1,12 @@
 import { prisma } from "@/config/db";
 import { BotContext } from "@/types/global";
-
-const roles = ["User", "Moderator", "Admin", "SuperAdmin"];
+import { roles } from "@/utils/constants";
+import { logAction } from "@/utils/logger";
 
 export const demoteUserCommand = async (ctx: BotContext) => {
   const args = ctx.message?.text?.split(" ") ?? [];
   const id = parseInt(args[1], 10);
+  const actorId = ctx.from?.id; // 👈 Telegram ID of the admin executing the command
 
   if (!id) {
     await ctx.reply("❌ Usage: /demote <userId>");
@@ -13,10 +14,16 @@ export const demoteUserCommand = async (ctx: BotContext) => {
   }
 
   const user = await prisma.user.findUnique({ where: { id } });
-  if (!user) return ctx.reply("❌ User not found.");
+  if (!user) {
+    await ctx.reply("❌ User not found.");
+    return;
+  }
 
   const currentIndex = roles.indexOf(user.role || "User");
-  if (currentIndex <= 0) return ctx.reply("⚠️ Already at lowest role.");
+  if (currentIndex <= 0) {
+    await ctx.reply("⚠️ Already at lowest role.");
+    return;
+  }
 
   const newRole = roles[currentIndex - 1];
 
@@ -25,5 +32,10 @@ export const demoteUserCommand = async (ctx: BotContext) => {
     data: { role: newRole },
   });
 
-  await ctx.reply(`✅ User ${user.username || id} demoted to ${newRole}`);
+  // ✅ Log who did it and what happened
+  logAction(actorId ?? 0, `Demoted user ${user.username || id} (ID: ${id}) to ${newRole}`);
+
+  await ctx.reply(
+    `✅ User ${user.username || id} demoted to ${newRole} by admin with Telegram ID ${actorId}`
+  );
 };

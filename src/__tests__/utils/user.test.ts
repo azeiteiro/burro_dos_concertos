@@ -1,5 +1,6 @@
-import { findOrCreateUser } from "@/utils/user";
+import { findOrCreateUser, isAdmin } from "@/utils/user";
 import { prisma } from "@/config/db";
+import { BotContext } from "@/types/global";
 
 jest.mock("@/config/db", () => ({
   prisma: {
@@ -61,5 +62,46 @@ describe("findOrCreateUser", () => {
     });
 
     expect(result).toEqual({ id: 2, telegramId: 456 });
+  });
+});
+
+describe("isAdmin", () => {
+  const OLD_ENV = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = { ...OLD_ENV };
+  });
+
+  afterAll(() => {
+    process.env = OLD_ENV;
+  });
+
+  it("returns true if ctx.from.id matches SUPER_ADMIN_ID", () => {
+    process.env.SUPER_ADMIN_ID = "12345";
+    const ctx = { from: { id: 12345 } } as BotContext;
+
+    expect(isAdmin(ctx)).toBe(true);
+  });
+
+  it("returns false if ctx.from.id does not match SUPER_ADMIN_ID", () => {
+    process.env.SUPER_ADMIN_ID = "12345";
+    const ctx = { from: { id: 67890 } } as BotContext;
+
+    expect(isAdmin(ctx)).toBe(false);
+  });
+
+  it("returns false if ctx.from is undefined", () => {
+    process.env.SUPER_ADMIN_ID = "12345";
+    const ctx = {} as BotContext;
+
+    expect(isAdmin(ctx)).toBe(false);
+  });
+
+  it("returns false if SUPER_ADMIN_ID is undefined", () => {
+    delete process.env.SUPER_ADMIN_ID;
+    const ctx = { from: { id: 12345 } } as BotContext;
+
+    expect(isAdmin(ctx)).toBe(false);
   });
 });
