@@ -1,7 +1,8 @@
 import { prisma } from "@/config/db";
+import { BotContext } from "@/types/global";
 import { UserFromGetMe } from "grammy/types";
 
-export async function findOrCreateUser(tgUser: UserFromGetMe) {
+export const findOrCreateUser = (tgUser: UserFromGetMe) => {
   return prisma.user.upsert({
     where: { telegramId: BigInt(tgUser.id) },
     update: {
@@ -18,4 +19,10 @@ export async function findOrCreateUser(tgUser: UserFromGetMe) {
       languageCode: tgUser.language_code ?? undefined,
     },
   });
-}
+};
+
+export const isAdmin = (ctx: BotContext) => {
+  const telegramId = ctx.from?.id;
+  // could also fetch from DB if you want dynamic role check
+  return telegramId === Number(process.env.SUPER_ADMIN_ID);
+};
