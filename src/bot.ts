@@ -7,6 +7,7 @@ import { deleteConcertConversation } from "./conversations/delete_concert";
 import { type BotContext } from "./types/global";
 import { editConcertConversation } from "./conversations/edit_concert";
 import { registerCommands } from "./bot/commands";
+import { startNotifications } from "./notifications/notifications";
 
 dotenv.config({ debug: false });
 
@@ -18,6 +19,8 @@ bot.use(createConversation(deleteConcertConversation));
 bot.use(createConversation(editConcertConversation));
 
 registerCommands(bot);
+
+startNotifications(bot);
 
 // Register commands
 bot.command("start", startCommand);
