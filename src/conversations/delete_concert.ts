@@ -4,30 +4,31 @@ import { prisma } from "@/config/db";
 import { Concert } from "@/generated/prisma";
 import { BotContext } from "@/types/global";
 import { logAction } from "@/utils/logger";
+import { canDeleteConcert } from "@/utils/helpers";
 
 export const deleteConcertConversation = async (
   conversation: Conversation<BotContext>,
   ctx: BotContext,
-  { dbUserId }: { dbUserId: number }
+  { dbUserId, userRole }: { dbUserId: number; userRole: string }
 ) => {
   // 1. Fetch user's upcoming concerts
   const concerts = await prisma.concert.findMany({
     where: {
-      userId: dbUserId,
       concertDate: { gte: new Date() },
     },
     orderBy: [{ concertDate: "asc" }, { concertTime: "asc" }],
   });
 
   if (concerts.length === 0) {
-    await ctx.reply("🎶 You have no upcoming concerts to delete.");
+    await ctx.reply("🎶 No upcoming concerts found.");
     return;
   }
 
   // 2. Build numbered list
   let message = "🎟 Select the concert you want to delete:\n\n";
   concerts.forEach((c: Concert, i: number) => {
-    message += `${i + 1}. ${c.artistName} – ${c.venue} (${c.concertDate.toDateString()})\n`;
+    const ownerFlag = c.userId === dbUserId ? "" : "(other user)";
+    message += `${i + 1}. ${c.artistName} – ${c.venue} (${c.concertDate.toDateString()}) ${ownerFlag}\n`;
   });
   message += `\n0. Cancel`;
 
@@ -58,7 +59,13 @@ export const deleteConcertConversation = async (
 
   const selected = concerts[index];
 
-  // 6. Ask for confirmation
+  // 6. Check permissions
+  if (!canDeleteConcert(userRole, selected.userId, dbUserId)) {
+    await ctx.reply("❌ You are not allowed to delete this concert.");
+    return;
+  }
+
+  // 7. Ask for confirmation
   const keyboard = new InlineKeyboard()
     .text("✅ Yes", `confirm_delete:${selected.id}`)
     .text("❌ No", "cancel_delete");
@@ -68,7 +75,7 @@ export const deleteConcertConversation = async (
     reply_markup: keyboard,
   });
 
-  // 7. Wait for callback
+  // 8. Wait for callback
   const callback = await conversation.waitForCallbackQuery(/confirm_delete|cancel_delete/);
 
   if (callback.match?.[0] === "cancel_delete") {
@@ -77,11 +84,11 @@ export const deleteConcertConversation = async (
     return;
   }
 
-  // 8. Delete concert
+  // 9. Delete concert
   await prisma.concert.delete({ where: { id: selected.id } });
   await callback.answerCallbackQuery({ text: "Concert deleted!" });
 
-  logAction(dbUserId, `Edited concert: ${selected.artistName} at ${selected.venue}`);
+  logAction(dbUserId, `Deleted concert: ${selected.artistName} at ${selected.venue}`);
 
   await ctx.reply(`🗑️ Deleted *${selected.artistName} – ${selected.venue}*`, {
     parse_mode: "Markdown",
