@@ -11,7 +11,7 @@ const config: Config = {
   collectCoverage: true,
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
-    "!src/__tests__/mocks/**",
+    "!src/__tests__/**",
     "!src/config/**",
     "!src/generated/**",
     "!src/types/**",
@@ -31,6 +31,7 @@ const config: Config = {
   },
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^node-cron$": "<rootDir>/src/__tests__/mocks/node-cron.ts",
   },
 };
 
