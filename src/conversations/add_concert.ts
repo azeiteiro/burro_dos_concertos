@@ -5,6 +5,7 @@ import { ask } from "@/utils/helpers";
 import { format, parseISO } from "date-fns";
 import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
+import { notifyNewConcert } from "@/notifications/helpers";
 
 export const addConcertConversation = async (
   conversation: Conversation,
@@ -57,13 +58,13 @@ export const addConcertConversation = async (
   })) as string | null;
 
   // --- Save concert safely ---
-  await conversation.external(async () => {
+  const savedConcert = await conversation.external(async () => {
     const formattedDate = format(concertDate, "yyyy-MM-dd");
     const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
     const concertTimeObj = concertTime ? parseISO(`${formattedDate}T${concertTime}:00Z`) : null;
 
     try {
-      await prisma.concert.create({
+      const concert = await prisma.concert.create({
         data: {
           userId: dbUserId,
           artistName,
@@ -76,6 +77,8 @@ export const addConcertConversation = async (
       });
 
       logAction(dbUserId, `Added concert "${artistName}" at ${venue}`);
+
+      return concert;
     } catch (err) {
       console.error("Failed to create concert:", err);
       throw err;
@@ -89,4 +92,6 @@ export const addConcertConversation = async (
   await ctx.reply(
     `✅ Concert added: ${artistName} at ${venue} on ${formattedDateMsg}${formattedTimeMsg}`
   );
+
+  await notifyNewConcert(ctx, savedConcert);
 };
