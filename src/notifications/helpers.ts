@@ -1,6 +1,7 @@
 import { prisma } from "@/config/db";
 import { Concert } from "@prisma/client";
-import { Bot } from "grammy";
+import { Bot, Context } from "grammy";
+import { format } from "date-fns";
 
 const GROUP_ID = process.env.GROUP_ID!;
 
@@ -62,3 +63,18 @@ export const sendMonthConcerts = async (bot: Bot) => {
     parse_mode: "Markdown",
   });
 };
+
+export async function notifyNewConcert(ctx: Context, concert: Concert) {
+  const GROUP_ID = process.env.GROUP_ID!;
+
+  const dateStr = concert.concertDate ? format(concert.concertDate, "yyyy-MM-dd") : "Unknown date";
+  const timeStr = concert.concertTime ? ` at ${format(concert.concertTime, "HH:mm")}` : "";
+  const urlStr = concert.url ? `\n🔗 [More info](${concert.url})` : "";
+  const notesStr = concert.notes ? `\n📝 ${concert.notes}` : "";
+
+  const message = `🎶 New concert added!\n\n🎤 **${concert.artistName}** at *${concert.venue}*\n📅 ${dateStr}${timeStr}${urlStr}${notesStr}`;
+
+  await ctx.api.sendMessage(GROUP_ID, message, {
+    parse_mode: "Markdown",
+  });
+}

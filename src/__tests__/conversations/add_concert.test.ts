@@ -14,6 +14,11 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
+jest.mock("@/notifications/helpers", () => ({
+  ...jest.requireActual("@/notifications/helpers"),
+  notifyNewConcert: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe("addConcertConversation", () => {
   let mockConversation: any;
   let mockCtx: any;
