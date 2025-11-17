@@ -9,8 +9,16 @@ export const helpCommand = async (ctx: BotContext) => {
   const userId = ctx.from?.id;
   if (!userId) return;
 
-  const user = await getUserByTelegramId(userId);
-  const isAdmin = user?.role === "Admin";
+  let isAdmin = false;
+
+  try {
+    const user = await getUserByTelegramId(userId);
+    isAdmin = user?.role === "Admin";
+  } catch (err) {
+    console.error("Failed to get user role:", err);
+    // fallback: treat as normal user
+    isAdmin = false;
+  }
 
   // Base commands
   const userCommands = [
