@@ -21,7 +21,7 @@ describe("startCommand", () => {
   it("replies with already_registered if user exists", async () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
     await startCommand(ctx);
-    expect(ctx.reply).toHaveBeenCalledWith("already_registered");
+    expect(ctx.reply).toHaveBeenCalledWith("You are already registered!");
   });
 
   it("creates a new user if not exists", async () => {
@@ -37,7 +37,9 @@ describe("startCommand", () => {
         firstName: "TestUser",
       },
     });
-    expect(ctx.reply).toHaveBeenCalledWith("start_welcome");
+    expect(ctx.reply).toHaveBeenCalledWith(
+      "Welcome, TestUser! You have been registered successfully."
+    );
   });
 
   it("defaults firstName to 'friend' if missing", async () => {
