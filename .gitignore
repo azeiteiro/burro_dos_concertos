@@ -8,6 +8,7 @@
 /coverage
 /downloads
 /logs
+jest-storage
 
 # production
 /build

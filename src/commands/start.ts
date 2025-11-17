@@ -10,7 +10,7 @@ export const startCommand = async (ctx: Context) => {
   });
 
   if (existingUser) {
-    return ctx.reply(ctx.t("already_registered"));
+    return ctx.reply("You are already registered!");
   }
 
   await prisma.user.create({
@@ -21,7 +21,7 @@ export const startCommand = async (ctx: Context) => {
     },
   });
 
-  await ctx.reply(ctx.t("start_welcome", { name: firstName }));
+  await ctx.reply(`Welcome, ${firstName}! You have been registered successfully.`);
 };
 
 export default startCommand;
