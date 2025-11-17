@@ -24,6 +24,7 @@
     "build": "pnpm clean && tsc",
     "start": "node dist/bot.js",
     "test": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage",
+    "test:ci": "jest --coverage",
     "test:watch": "jest --watch",
     "format": "prettier --write src/**/*",
     "lint": "eslint 'src/**/*.{js,ts}'",
