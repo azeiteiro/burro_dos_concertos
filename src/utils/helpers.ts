@@ -2,6 +2,7 @@ import { InlineKeyboard } from "grammy";
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
 import { Concert } from "@prisma/client";
+import { prisma } from "../config/db";
 
 interface AskOptions {
   optional?: boolean;
@@ -84,4 +85,10 @@ export const canEditConcert = (concert: Concert, userId: number, role: string) =
     default:
       return false;
   }
+};
+
+export const getUserByTelegramId = (userId: number) => {
+  return prisma.user.findUnique({
+    where: { telegramId: userId },
+  });
 };
