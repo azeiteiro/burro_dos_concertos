@@ -2,11 +2,11 @@
   "name": "burro_dos_concertos",
   "version": "1.0.0",
   "description": "telegram concert manager bot",
-  "main": "bot.ts",
-  "exports": "./bot.js",
+  "main": "dist/bot.js",
+  "exports": "./dist/bot.js",
   "private": true,
   "engines": {
-    "node": ">=20.x"
+    "node": ">=20"
   },
   "author": {
     "name": "Daniel Azeiteiro",
@@ -20,17 +20,18 @@
   "license": "MIT",
   "scripts": {
     "dev": "tsx --watch src/bot.ts",
+    "dev:test": "NODE_ENV=test tsx --watch src/bot.ts",
     "clean": "rimraf dist",
-    "build": "pnpm clean && tsc",
+    "build": "pnpm clean && tsc && tsc-alias",
     "start": "node dist/bot.js",
     "test": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage",
     "test:ci": "jest --coverage",
     "test:watch": "jest --watch",
-    "format": "prettier --write src/**/*",
-    "lint": "eslint 'src/**/*.{js,ts}'",
+    "format": "prettier --write \"src/**/*\"",
+    "lint": "eslint \"src/**/*.{js,ts}\"",
     "lint:fix": "pnpm lint --fix",
-    "prepare": "husky",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "node dist/prisma/seed.js",
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') { require('child_process').execSync('husky', {stdio: 'inherit'}) }\""
   },
   "lint-staged": {
     "**/*.{js,ts,tsx}": [
@@ -47,11 +48,13 @@
     "grammy": "^1.38.3",
     "node-cron": "^4.2.1",
     "pino": "^10.1.0",
-    "tsx": "^4.20.6"
+    "rimraf": "^6.1.0",
+    "tsx": "^4.20.6",
+    "@prisma/client": "6.19.0",
+    "prisma": "6.19.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@prisma/client": "6.19.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
@@ -62,9 +65,9 @@
     "jiti": "^2.6.1",
     "lint-staged": "^16.2.6",
     "prettier": "^3.6.2",
-    "prisma": "6.19.0",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.4"
   }

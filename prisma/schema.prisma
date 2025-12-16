@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["linux-musl-openssl-3.0.x"] // ✅ For Alpine Linux
 }
 
 datasource db {
@@ -7,35 +8,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ResponseType {
-  going
-  interested
-  not_going
-}
-
-enum Role {
-  SuperAdmin
-  Admin
-  Moderator
-  User
-}
-
 model User {
-  id           Int       @id @default(autoincrement())
-  telegramId   BigInt    @unique
+  id           Int               @id @default(autoincrement())
+  telegramId   BigInt            @unique
   username     String?
   firstName    String?
   lastName     String?
   languageCode String?
-  role         String    @default("User") // SuperAdmin | Admin | Moderator | User
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime          @default(now())
+  role         String            @default("User")
   concerts     Concert[]
   responses    ConcertResponse[]
 }
 
 model Concert {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int               @id @default(autoincrement())
   userId      Int
   artistName  String
   venue       String
@@ -43,9 +30,10 @@ model Concert {
   concertTime DateTime?
   url         String?
   notes       String?
-  notified    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  notified    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   responses   ConcertResponse[]
 
   @@index([concertDate])
@@ -53,13 +41,19 @@ model Concert {
 }
 
 model ConcertResponse {
-  id           Int       @id @default(autoincrement())
-  concert      Concert   @relation(fields: [concertId], references: [id], onDelete: Cascade)
+  id           Int      @id @default(autoincrement())
   concertId    Int
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int
   responseType String
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
+  concert      Concert  @relation(fields: [concertId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([concertId, userId])
+}
+
+enum ResponseType {
+  going
+  interested
+  not_going
 }

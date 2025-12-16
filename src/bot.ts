@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "path";
 import { Bot } from "grammy";
 import { conversations, createConversation } from "@grammyjs/conversations";
 import startCommand from "./commands/start";
@@ -12,7 +13,20 @@ import { setupCommands } from "./setupCommands";
 import { helpCommand } from "./commands/help";
 import { aboutCommand } from "./commands/about";
 
-dotenv.config({ debug: false });
+// Load environment-specific .env file
+const envFile =
+  process.env.NODE_ENV === "test"
+    ? ".env.test"
+    : process.env.NODE_ENV === "production"
+      ? ".env.production"
+      : ".env.local";
+
+dotenv.config({ path: path.resolve(process.cwd(), envFile), debug: false });
+
+// Fallback to .env if specific file doesn't exist
+if (!process.env.BOT_TOKEN) {
+  dotenv.config();
+}
 
 // 🎯 Initialize bot
 const bot = new Bot<BotContext>(process.env.BOT_TOKEN!);
