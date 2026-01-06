@@ -8,6 +8,7 @@ export const createMockUser = (overrides?: Partial<User>): User => ({
   telegramId: 0n,
   languageCode: null,
   createdAt: new Date(),
+  role: "User",
   ...overrides,
 });
 

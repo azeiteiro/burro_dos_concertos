@@ -2,6 +2,7 @@ import { Context } from "grammy";
 import { prisma } from "../config/db";
 
 export const startCommand = async (ctx: Context) => {
+  console.log("Received /start command");
   const telegramId = ctx.from?.id;
   const firstName = ctx.from?.first_name || "friend";
 
