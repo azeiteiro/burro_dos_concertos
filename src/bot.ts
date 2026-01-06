@@ -31,6 +31,8 @@ if (!process.env.BOT_TOKEN) {
 // 🎯 Initialize bot
 const bot = new Bot<BotContext>(process.env.BOT_TOKEN!);
 
+console.log(`🤖 Bot initialized in ${process.env.NODE_ENV || "development"} mode.`);
+
 // 🗣️ Conversations
 bot.use(conversations());
 bot.use(createConversation(addConcertConversation));
@@ -46,13 +48,15 @@ setupCommands(bot);
 // 🔔 Start notifications listener
 startNotifications(bot);
 
+console.log("🔔 Notifications system initialized.");
+
 // 🚀 Start command
 bot.command("start", startCommand);
 bot.command("help", helpCommand);
 bot.command("about", aboutCommand);
 
 // 🏁 Run the bot
-if (process.env.NODE_ENV !== "test") {
+if (process.env.JEST_WORKER_ID === undefined) {
   bot.start();
   console.log("🚀 Bot started!");
 }
