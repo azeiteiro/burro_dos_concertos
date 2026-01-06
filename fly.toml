@@ -1,0 +1,14 @@
+app = "burro-dos-concertos"
+primary_region = "lhr"
+
+[build]
+
+[deploy]
+  release_command = "sh -c 'pnpm exec prisma migrate deploy || echo \"Database already initialized\"'"
+
+[env]
+  NODE_ENV = "production"
+  GROUP_ID = "-5010567459"
+  SUPER_ADMIN_ID = "144133589"
+
+# BOT_TOKEN set via: fly secrets set BOT_TOKEN=xxx
