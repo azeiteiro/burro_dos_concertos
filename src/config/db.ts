@@ -1,14 +1,21 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
 declare global {
-  // Prevent multiple instances during hot reload in development
   var prisma: PrismaClient | undefined;
 }
 
+const adapter = new PrismaPg({
+  connectionString: process.env.DATABASE_URL,
+});
+
 export const prisma =
-  global.prisma ||
+  global.prisma ??
   new PrismaClient({
-    log: ["query"], // optional: logs every SQL query
+    adapter,
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
-if (process.env.NODE_ENV !== "production") global.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  global.prisma = prisma;
+}

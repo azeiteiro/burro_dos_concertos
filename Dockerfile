@@ -19,8 +19,8 @@ COPY prisma ./prisma
 # Install ALL dependencies (needed for build)
 RUN pnpm install --frozen-lockfile
 
-# Generate Prisma client
-RUN npx prisma generate
+# Generate Prisma client with the new schema
+RUN pnpm exec prisma generate
 
 # Copy source and build
 COPY src ./src
@@ -44,8 +44,8 @@ COPY prisma ./prisma
 # Install ONLY production dependencies, skip scripts
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
-# Generate Prisma client separately
-RUN npx prisma generate
+# Generate Prisma client for production
+RUN pnpm exec prisma generate
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
