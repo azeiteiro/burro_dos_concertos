@@ -7,57 +7,18 @@ import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 import { notifyNewConcert } from "@/notifications/helpers";
 
-export const addConcertConversation = async (
+// Helper function to save concert
+async function saveConcert(
   conversation: Conversation,
   ctx: Context,
-  { dbUserId }: { dbUserId: number }
-) => {
-  // --- Artist ---
-  const artistName = (await ask(
-    conversation,
-    ctx,
-    "🎤 Who is the artist?",
-    validateConcertInput.name
-  )) as string;
-
-  // --- Venue ---
-  const venue = (await ask(
-    conversation,
-    ctx,
-    "🏟️ Where is the concert?",
-    validateConcertInput.location
-  )) as string;
-
-  // --- Date ---
-  const concertDate = (await ask(
-    conversation,
-    ctx,
-    "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
-    validateConcertInput.date
-  )) as Date;
-
-  await ctx.reply(`✅ Date accepted: ${format(concertDate, "yyyy-MM-dd")}`);
-
-  // --- Time (optional) ---
-  const concertTime = (await ask(
-    conversation,
-    ctx,
-    "⏰ Enter concert time (HH:mm) or skip:",
-    validateConcertInput.time,
-    { optional: true }
-  )) as string | null;
-
-  // --- URL (optional) ---
-  const url = (await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
-    optional: true,
-  })) as string | null;
-
-  // --- Notes (optional) ---
-  const notes = (await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
-    optional: true,
-  })) as string | null;
-
-  // --- Save concert safely ---
+  dbUserId: number,
+  artistName: string,
+  venue: string,
+  concertDate: Date,
+  concertTime: string | null,
+  url: string | null,
+  notes: string | null
+) {
   const savedConcert = await conversation.external(async () => {
     const formattedDate = format(concertDate, "yyyy-MM-dd");
     const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
@@ -85,7 +46,7 @@ export const addConcertConversation = async (
     }
   });
 
-  // --- Success message ---
+  // Success message
   const formattedDateMsg = format(concertDate, "yyyy-MM-dd");
   const formattedTimeMsg = concertTime && concertTime.length > 0 ? ` at ${concertTime}` : "";
 
@@ -94,4 +55,132 @@ export const addConcertConversation = async (
   );
 
   await notifyNewConcert(ctx, savedConcert);
+}
+
+export const addConcertConversation = async (
+  conversation: Conversation,
+  ctx: Context,
+  { dbUserId }: { dbUserId: number }
+) => {
+  // --- Artist ---
+  const artistName = await ask(
+    conversation,
+    ctx,
+    "🎤 Who is the artist?",
+    validateConcertInput.name,
+    { showCancel: true }
+  );
+
+  if (artistName === "CANCEL") return;
+
+  // --- Venue ---
+  const venue = await ask(
+    conversation,
+    ctx,
+    "🏟️ Where is the concert?",
+    validateConcertInput.location,
+    { showCancel: true }
+  );
+
+  if (venue === "CANCEL") return;
+
+  // --- Date ---
+  const concertDate = await ask(
+    conversation,
+    ctx,
+    "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
+    validateConcertInput.date,
+    { showCancel: true }
+  );
+
+  if (concertDate === "CANCEL") return;
+
+  await ctx.reply(`✅ Date accepted: ${format(concertDate as Date, "yyyy-MM-dd")}`);
+
+  // --- Time (optional) ---
+  const concertTime = await ask(
+    conversation,
+    ctx,
+    "⏰ Enter concert time (HH:mm) or skip:",
+    validateConcertInput.time,
+    { optional: true, showFinish: true, showCancel: true }
+  );
+
+  if (concertTime === "CANCEL") return;
+  if (concertTime === "FINISH") {
+    // Save with mandatory fields only
+    await saveConcert(
+      conversation,
+      ctx,
+      dbUserId,
+      artistName as string,
+      venue as string,
+      concertDate as Date,
+      null,
+      null,
+      null
+    );
+    return;
+  }
+
+  // --- URL (optional) ---
+  const url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
+    optional: true,
+    showFinish: true,
+    showCancel: true,
+  });
+
+  if (url === "CANCEL") return;
+  if (url === "FINISH") {
+    // Save with fields collected so far
+    await saveConcert(
+      conversation,
+      ctx,
+      dbUserId,
+      artistName as string,
+      venue as string,
+      concertDate as Date,
+      concertTime as string | null,
+      null,
+      null
+    );
+    return;
+  }
+
+  // --- Notes (optional) ---
+  const notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
+    optional: true,
+    showFinish: true,
+    showCancel: true,
+  });
+
+  if (notes === "CANCEL") return;
+  if (notes === "FINISH") {
+    // Save with all fields except notes
+    await saveConcert(
+      conversation,
+      ctx,
+      dbUserId,
+      artistName as string,
+      venue as string,
+      concertDate as Date,
+      concertTime as string | null,
+      url as string | null,
+      null
+    );
+    return;
+  }
+
+  // --- Save concert with all fields ---
+  await saveConcert(
+    conversation,
+    ctx,
+    dbUserId,
+    artistName as string,
+    venue as string,
+    concertDate as Date,
+    concertTime as string | null,
+    url as string | null,
+    notes as string | null
+  );
 };
