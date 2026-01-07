@@ -10,7 +10,7 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy dependency files
 COPY package.json pnpm-lock.yaml tsconfig.json ./
@@ -34,15 +34,18 @@ WORKDIR /app
 # Install runtime dependencies (Alpine uses apk)
 RUN apk add --no-cache openssl
 
-# Install pnpm
-RUN npm install -g pnpm
+# Enable corepack for pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
 
-# Install ONLY production dependencies, skip scripts
-RUN pnpm install --prod --frozen-lockfile --ignore-scripts
+# Fetch only production dependencies to store (faster)
+RUN pnpm fetch --prod
+
+# Install production dependencies using offline mode
+RUN pnpm install --prod --frozen-lockfile --offline --ignore-scripts
 
 # Generate Prisma client for production
 RUN pnpm exec prisma generate
@@ -50,8 +53,15 @@ RUN pnpm exec prisma generate
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Clean up
-RUN rm -rf /root/.npm /root/.cache /tmp/*
+# Aggressive cleanup - remove pnpm and all caches
+RUN rm -rf \
+    /root/.local/share/pnpm \
+    /root/.npm \
+    /root/.cache \
+    /tmp/* \
+    /app/.pnpm-store \
+    $(which pnpm) \
+    /root/.cache/node/corepack
 
 ENV NODE_ENV=production
 

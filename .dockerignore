@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+coverage
+
+# Git
+.git
+.github
+.gitignore
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage
+jest-storage
+
+# Documentation
+*.md
+!README.md
+
+# Git hooks and linting
+.husky
+.eslintcache
+
+# Misc
+.prettierrc
+.eslintrc
+tsconfig.json
+jest.config.*
