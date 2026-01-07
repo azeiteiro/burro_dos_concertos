@@ -41,5 +41,4 @@ jest-storage
 # Misc
 .prettierrc
 .eslintrc
-tsconfig.json
 jest.config.*
