@@ -40,6 +40,34 @@ describe("ask helper", () => {
     expect(ctx.reply).toHaveBeenCalledWith("⏭️ Skipped.");
   });
 
+  it("handles finish callback", async () => {
+    const validate = jest.fn();
+
+    conversation.wait.mockResolvedValueOnce({
+      callbackQuery: { id: "abc", data: "finish" },
+    });
+
+    const result = await ask(conversation, ctx, "Question?", validate, { showFinish: true });
+
+    expect(result).toBe("FINISH");
+    expect(ctx.api.answerCallbackQuery).toHaveBeenCalledWith("abc");
+    expect(ctx.reply).toHaveBeenCalledWith("✅ Finishing up...");
+  });
+
+  it("handles cancel callback", async () => {
+    const validate = jest.fn();
+
+    conversation.wait.mockResolvedValueOnce({
+      callbackQuery: { id: "abc", data: "cancel" },
+    });
+
+    const result = await ask(conversation, ctx, "Question?", validate, { showCancel: true });
+
+    expect(result).toBe("CANCEL");
+    expect(ctx.api.answerCallbackQuery).toHaveBeenCalledWith("abc");
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Concert creation cancelled.");
+  });
+
   it("replies with validation error and asks again", async () => {
     const validate = jest.fn().mockReturnValueOnce("❌ Invalid").mockReturnValueOnce("ok");
 
@@ -63,7 +91,9 @@ describe("ask helper", () => {
     const result = await ask(conversation, ctx, "Question?", validate);
 
     expect(result).toBe("final");
-    expect(ctx.reply).toHaveBeenCalledWith("❌ Unexpected input. Reply with text or Skip.");
+    expect(ctx.reply).toHaveBeenCalledWith(
+      "❌ Unexpected input. Reply with text or use the buttons."
+    );
   });
 });
 
