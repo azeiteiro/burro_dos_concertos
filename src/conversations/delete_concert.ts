@@ -1,10 +1,11 @@
 import { Conversation } from "@grammyjs/conversations";
 import { InlineKeyboard } from "grammy";
 import { prisma } from "@/config/db";
-import { Concert } from "@/generated/prisma";
+
 import { BotContext } from "@/types/global";
 import { logAction } from "@/utils/logger";
 import { canDeleteConcert } from "@/utils/helpers";
+import { Concert } from "@prisma/client";
 
 export const deleteConcertConversation = async (
   conversation: Conversation<BotContext>,
