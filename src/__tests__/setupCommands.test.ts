@@ -99,6 +99,8 @@ describe("setupCommands", () => {
         { command: "about", description: "About this bot" },
         { command: "add_concert", description: "Add a new concert" },
         { command: "see_concerts", description: "View upcoming concerts" },
+        { command: "edit_concert", description: "Edit your concerts" },
+        { command: "delete_concert", description: "Delete your concerts" },
       ],
       { scope: { type: "chat", chat_id: 123 } }
     );

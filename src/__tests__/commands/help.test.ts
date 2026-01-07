@@ -47,10 +47,11 @@ describe("helpCommand", () => {
     expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
     expect(text).toContain(escape("/see_concerts"));
-    expect(text).toContain(escape("/delete_concert"));
     expect(text).toContain(escape("/edit_concert"));
+    expect(text).toContain(escape("/delete_concert"));
     expect(text).toContain("/about");
 
+    // Users should NOT see admin commands
     expect(text).not.toContain(escape("/list_users"));
     expect(text).not.toContain(escape("/promote_user"));
   });
@@ -64,11 +65,49 @@ describe("helpCommand", () => {
 
     expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
+    expect(text).toContain(escape("/edit_concert"));
+    expect(text).toContain(escape("/delete_concert"));
 
     expect(text).toContain(escape("/list_users"));
     expect(text).toContain(escape("/promote_user"));
     expect(text).toContain(escape("/demote_user"));
     expect(text).toContain(escape("/user_info"));
+  });
+
+  it("replies with SuperAdmin commands in private chat", async () => {
+    (getUserByTelegramId as jest.Mock).mockResolvedValue({ role: "SuperAdmin" });
+
+    await helpCommand(ctx as BotContext);
+
+    const text = replyMock.mock.calls[0][0];
+
+    expect(text).toContain("/start");
+    expect(text).toContain(escape("/add_concert"));
+    expect(text).toContain(escape("/edit_concert"));
+    expect(text).toContain(escape("/delete_concert"));
+
+    expect(text).toContain(escape("/list_users"));
+    expect(text).toContain(escape("/promote_user"));
+    expect(text).toContain(escape("/demote_user"));
+    expect(text).toContain(escape("/user_info"));
+  });
+
+  it("replies with moderator commands in private chat", async () => {
+    (getUserByTelegramId as jest.Mock).mockResolvedValue({ role: "Moderator" });
+
+    await helpCommand(ctx as BotContext);
+
+    const text = replyMock.mock.calls[0][0];
+
+    expect(text).toContain("/start");
+    expect(text).toContain(escape("/add_concert"));
+    expect(text).toContain(escape("/see_concerts"));
+    expect(text).toContain(escape("/edit_concert"));
+    expect(text).toContain(escape("/delete_concert"));
+
+    // Moderators should NOT see admin commands
+    expect(text).not.toContain(escape("/list_users"));
+    expect(text).not.toContain(escape("/promote_user"));
   });
 
   it("replies with warning if command is used in a group chat", async () => {
