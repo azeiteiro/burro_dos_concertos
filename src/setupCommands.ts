@@ -80,7 +80,7 @@ export const setupCommands = (bot: Bot<BotContext>) => {
 
         console.log(`✅ Moderator commands set for user ${userId}`);
       } else {
-        // 👤 Normal user: Can view and add concerts
+        // 👤 Normal user: Can manage their own concerts
         await ctx.api.setMyCommands(
           [
             { command: "start", description: "Start the bot" },
@@ -88,6 +88,8 @@ export const setupCommands = (bot: Bot<BotContext>) => {
             { command: "about", description: "About this bot" },
             { command: "add_concert", description: "Add a new concert" },
             { command: "see_concerts", description: "View upcoming concerts" },
+            { command: "edit_concert", description: "Edit your concerts" },
+            { command: "delete_concert", description: "Delete your concerts" },
           ],
           { scope: { type: "chat", chat_id: userId } }
         );
