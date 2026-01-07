@@ -40,6 +40,24 @@ describe("notifications helpers", () => {
     expect(msg).toContain("Muse – Lisbon (2025-10-10 at 20:00)");
   });
 
+  it("formatConcertList escapes special Markdown characters", () => {
+    const concerts = [
+      {
+        artistName: "AC/DC",
+        venue: "Rock_Arena (Main)",
+        concertDate: new Date("2025-10-10"),
+        concertTime: null,
+      },
+    ] as any;
+
+    const msg = formatConcertList("Special * Characters_", concerts);
+
+    // Should escape special characters
+    expect(msg).toContain("AC/DC");
+    expect(msg).toContain("Rock\\_Arena \\(Main\\)");
+    expect(msg).toContain("Special \\* Characters\\_");
+  });
+
   it("sendTodayConcerts sends message when concerts exist", async () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue([
       { id: 1, artistName: "Muse", venue: "Lisbon", concertDate: new Date(), concertTime: null },
@@ -82,6 +100,32 @@ describe("notifications helpers", () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue([]);
     await sendMonthConcerts(bot);
     expect(bot.api.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("handles errors gracefully when sending daily notification fails", async () => {
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([
+      { id: 1, artistName: "Muse", venue: "Lisbon", concertDate: new Date(), concertTime: null },
+    ]);
+    (bot.api.sendMessage as jest.Mock).mockRejectedValue(new Error("Telegram API error"));
+
+    // Should not throw - error is caught and logged
+    await expect(sendTodayConcerts(bot)).resolves.not.toThrow();
+  });
+
+  it("skips sending when GROUP_ID is not configured", async () => {
+    const originalGroupId = process.env.GROUP_ID;
+    delete process.env.GROUP_ID;
+
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([
+      { id: 1, artistName: "Muse", venue: "Lisbon", concertDate: new Date(), concertTime: null },
+    ]);
+
+    await sendWeekConcerts(bot);
+
+    expect(bot.api.sendMessage).not.toHaveBeenCalled();
+
+    // Restore GROUP_ID
+    process.env.GROUP_ID = originalGroupId;
   });
 });
 
@@ -222,5 +266,22 @@ describe("notifyNewConcert", () => {
     expect(mockSendMessage).toHaveBeenCalledWith("-9998887776666", expect.any(String), {
       parse_mode: "Markdown",
     });
+  });
+
+  it("handles errors gracefully when sending notification fails", async () => {
+    mockSendMessage.mockRejectedValue(new Error("Network error"));
+
+    const concert: Partial<Concert> = {
+      id: 99,
+      artistName: "Test Artist",
+      venue: "Test Venue",
+      concertDate: new Date("2025-12-25T00:00:00Z"),
+      concertTime: null,
+      url: null,
+      notes: null,
+    };
+
+    // Should not throw - error is caught and logged
+    await expect(notifyNewConcert(mockCtx as Context, concert as Concert)).resolves.not.toThrow();
   });
 });

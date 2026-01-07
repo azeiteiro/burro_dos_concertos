@@ -76,5 +76,19 @@ describe("registerCommands", () => {
     )[1];
     await listUsersCallback(ctx);
     expect(ctx.reply).toHaveBeenCalledWith("❌ Not authorized.");
+
+    const promoteCallback = bot.command.mock.calls.find(
+      (call: any) => call[0] === "promote_user"
+    )[1];
+    await promoteCallback(ctx);
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Not authorized.");
+
+    const demoteCallback = bot.command.mock.calls.find((call: any) => call[0] === "demote_user")[1];
+    await demoteCallback(ctx);
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Not authorized.");
+
+    const infoCallback = bot.command.mock.calls.find((call: any) => call[0] === "user_info")[1];
+    await infoCallback(ctx);
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Not authorized.");
   });
 });
