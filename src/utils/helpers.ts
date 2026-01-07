@@ -6,6 +6,8 @@ import { prisma } from "../config/db";
 
 interface AskOptions {
   optional?: boolean;
+  showFinish?: boolean;
+  showCancel?: boolean;
 }
 
 export async function ask<T = string>(
@@ -14,13 +16,25 @@ export async function ask<T = string>(
   question: string,
   validate: (input: string) => T | string | null,
   options: AskOptions = {}
-): Promise<T | null> {
-  const { optional = false } = options;
+): Promise<T | null | "FINISH" | "CANCEL"> {
+  const { optional = false, showFinish = false, showCancel = false } = options;
 
-  await ctx.reply(
-    question,
-    optional ? { reply_markup: new InlineKeyboard().text("➡️ Skip", "skip") } : undefined
-  );
+  // Build keyboard based on options
+  let keyboard: InlineKeyboard | undefined;
+  if (optional || showFinish || showCancel) {
+    keyboard = new InlineKeyboard();
+    if (optional) {
+      keyboard.text("➡️ Skip", "skip");
+    }
+    if (showFinish) {
+      keyboard.text("✅ Finish", "finish");
+    }
+    if (showCancel) {
+      keyboard.text("❌ Cancel", "cancel");
+    }
+  }
+
+  await ctx.reply(question, keyboard ? { reply_markup: keyboard } : undefined);
 
   while (true) {
     const update = await conversation.wait();
@@ -28,7 +42,7 @@ export async function ask<T = string>(
     // Handle callback query
     if ("callbackQuery" in update) {
       const data = update.callbackQuery?.data;
-      if (data === "skip") {
+      if (data === "skip" || data === "finish" || data === "cancel") {
         try {
           if (update.callbackQuery) {
             await ctx.api.answerCallbackQuery(update.callbackQuery.id);
@@ -36,8 +50,17 @@ export async function ask<T = string>(
         } catch {
           // Ignore
         }
-        await ctx.reply("⏭️ Skipped.");
-        return null;
+
+        if (data === "skip") {
+          await ctx.reply("⏭️ Skipped.");
+          return null;
+        } else if (data === "finish") {
+          await ctx.reply("✅ Finishing up...");
+          return "FINISH";
+        } else if (data === "cancel") {
+          await ctx.reply("❌ Concert creation cancelled.");
+          return "CANCEL";
+        }
       }
     }
 
@@ -52,7 +75,7 @@ export async function ask<T = string>(
       return result as T | null;
     }
 
-    await ctx.reply("❌ Unexpected input. Reply with text or Skip.");
+    await ctx.reply("❌ Unexpected input. Reply with text or use the buttons.");
   }
 }
 
