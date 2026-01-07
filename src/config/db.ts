@@ -22,9 +22,6 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
-// Debug: Check what DATABASE_URL is being used
-console.log("🔍 DATABASE_URL:", process.env.DATABASE_URL);
-
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
 });
