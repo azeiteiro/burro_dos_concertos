@@ -37,6 +37,9 @@ RUN apk add --no-cache openssl
 # Enable corepack for pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Set NODE_ENV before install to skip husky in prepare script
+ENV NODE_ENV=production
+
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma
@@ -62,7 +65,5 @@ RUN rm -rf \
     /app/.pnpm-store \
     $(which pnpm) \
     /root/.cache/node/corepack
-
-ENV NODE_ENV=production
 
 CMD ["node", "dist/bot.js"]
