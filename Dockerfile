@@ -45,11 +45,10 @@ COPY prisma ./prisma
 RUN pnpm fetch --prod
 
 # Install production dependencies using offline mode
-RUN pnpm install --prod --frozen-lockfile --offline --ignore-scripts
+RUN pnpm install --prod --frozen-lockfile --offline
 
-# Copy generated Prisma client from builder (no need to regenerate)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+# Generate Prisma client in production (prisma must be in dependencies)
+RUN pnpm exec prisma generate
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist

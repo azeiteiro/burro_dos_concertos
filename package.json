@@ -49,7 +49,8 @@
     "dotenv": "^17.2.3",
     "grammy": "^1.39.2",
     "node-cron": "^4.2.1",
-    "pino": "^10.1.0"
+    "pino": "^10.1.0",
+    "prisma": "7.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
@@ -63,7 +64,6 @@
     "jiti": "^2.6.1",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "prisma": "7.2.0",
     "rimraf": "^6.1.2",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
