@@ -41,8 +41,10 @@ export const setupCommands = (bot: Bot<BotContext>) => {
 
       console.log(`🔍 Checking commands for user ${userId} — Role: ${user?.role}`);
 
-      if (user?.role === "Admin") {
-        // ✅ Admin-only commands
+      const role = user?.role || "User";
+
+      if (role === "Admin" || role === "SuperAdmin") {
+        // ✅ Admin/SuperAdmin: Full access
         await ctx.api.setMyCommands(
           [
             { command: "start", description: "Start the bot" },
@@ -61,13 +63,30 @@ export const setupCommands = (bot: Bot<BotContext>) => {
         );
 
         console.log(`✅ Admin commands set for user ${userId}`);
-      } else {
-        // 👤 Normal user commands
+      } else if (role === "Moderator") {
+        // 👮 Moderator: Concert management only
         await ctx.api.setMyCommands(
           [
             { command: "start", description: "Start the bot" },
             { command: "help", description: "Show help information" },
             { command: "about", description: "About this bot" },
+            { command: "add_concert", description: "Add a new concert" },
+            { command: "see_concerts", description: "View upcoming concerts" },
+            { command: "edit_concert", description: "Edit an existing concert" },
+            { command: "delete_concert", description: "Delete a concert" },
+          ],
+          { scope: { type: "chat", chat_id: userId } }
+        );
+
+        console.log(`✅ Moderator commands set for user ${userId}`);
+      } else {
+        // 👤 Normal user: Can view and add concerts
+        await ctx.api.setMyCommands(
+          [
+            { command: "start", description: "Start the bot" },
+            { command: "help", description: "Show help information" },
+            { command: "about", description: "About this bot" },
+            { command: "add_concert", description: "Add a new concert" },
             { command: "see_concerts", description: "View upcoming concerts" },
           ],
           { scope: { type: "chat", chat_id: userId } }
