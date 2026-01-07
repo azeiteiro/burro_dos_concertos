@@ -13,7 +13,7 @@ export const listUsersCommand = async (ctx: BotContext) => {
 
   let msg = "👥 Users list:\n\n";
   users.forEach((u) => {
-    msg += `• ${u.username || "Unknown"} (ID: ${u.id}) — Role: ${u.role || "User"}\n`;
+    msg += `• ${u.username || u.firstName || "Unknown"} (ID: ${u.id}) — Role: ${u.role || "User"}\n`;
   });
 
   await ctx.reply(msg);
