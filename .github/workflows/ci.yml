@@ -15,7 +15,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        # Don't specify version - it will read from package.json packageManager field
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -28,6 +27,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
 
       - name: Run ESLint
         run: pnpm lint
