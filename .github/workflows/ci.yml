@@ -11,22 +11,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       # Install pnpm
       - name: Setup pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
 
       - name: Run ESLint
         run: pnpm lint
 
       - name: Run tests
         run: pnpm test:ci
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
