@@ -9,27 +9,29 @@ export const helpCommand = async (ctx: BotContext) => {
   const userId = ctx.from?.id;
   if (!userId) return;
 
-  let isAdmin = false;
+  let role = "User";
 
   try {
     const user = await getUserByTelegramId(userId);
-    isAdmin = user?.role === "Admin";
+    role = user?.role || "User";
   } catch (err) {
     console.error("Failed to get user role:", err);
     // fallback: treat as normal user
-    isAdmin = false;
+    role = "User";
   }
 
-  // Base commands
-  const userCommands = [
+  // Base commands for all users
+  const baseCommands = [
     { command: "/start", description: "Start the bot" },
+    { command: "/help", description: "Show this help message" },
+    { command: "/about", description: "Learn more about the bot" },
     { command: "/add_concert", description: "Add a new concert" },
     { command: "/see_concerts", description: "View upcoming concerts" },
-    { command: "/delete_concert", description: "Delete one of your concerts" },
-    { command: "/edit_concert", description: "Edit one of your concerts" },
-    { command: "/about", description: "Learn more about the bot" },
+    { command: "/edit_concert", description: "Edit your concerts" },
+    { command: "/delete_concert", description: "Delete your concerts" },
   ];
 
+  // User management (for Admins and SuperAdmins only)
   const adminCommands = [
     { command: "/list_users", description: "📋 List all users" },
     { command: "/promote_user", description: "⬆️ Promote a user to admin" },
@@ -37,7 +39,13 @@ export const helpCommand = async (ctx: BotContext) => {
     { command: "/user_info", description: "ℹ️ Get information about a user" },
   ];
 
-  const allCommands = isAdmin ? [...userCommands, ...adminCommands] : userCommands;
+  let allCommands = [...baseCommands];
+
+  // Admins and SuperAdmins see everything
+  if (role === "Admin" || role === "SuperAdmin") {
+    allCommands = [...allCommands, ...adminCommands];
+  }
+  // Moderators and Users just see base commands (which includes concert management)
 
   const escapeMarkdown = (text: string) => text.replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
 
