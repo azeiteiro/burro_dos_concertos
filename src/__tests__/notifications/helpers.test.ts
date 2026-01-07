@@ -37,7 +37,7 @@ describe("notifications helpers", () => {
     const msg = formatConcertList("Title", concerts);
 
     expect(msg).toContain("🎶 *Title*");
-    expect(msg).toContain("Muse – Lisbon (2025-10-10 20:00)");
+    expect(msg).toContain("Muse – Lisbon (2025-10-10 at 20:00)");
   });
 
   it("sendTodayConcerts sends message when concerts exist", async () => {
