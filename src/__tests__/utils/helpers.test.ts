@@ -109,12 +109,9 @@ describe("Permission helpers", () => {
       expect(canDeleteConcert("Admin", 1, 999)).toBe(true);
     });
 
-    it("allows Moderator to delete own concert", () => {
+    it("allows Moderator to delete any concert", () => {
       expect(canDeleteConcert("Moderator", 10, 10)).toBe(true);
-    });
-
-    it("prevents Moderator from deleting others' concerts", () => {
-      expect(canDeleteConcert("Moderator", 10, 99)).toBe(false);
+      expect(canDeleteConcert("Moderator", 10, 99)).toBe(true);
     });
 
     it("allows User to delete own concert", () => {
@@ -127,6 +124,10 @@ describe("Permission helpers", () => {
   });
 
   describe("canEditConcert", () => {
+    it("allows SuperAdmin to edit anything", () => {
+      expect(canEditConcert(mockConcert as any, 999, "SuperAdmin")).toBe(true);
+    });
+
     it("allows Admin to edit anything", () => {
       expect(canEditConcert(mockConcert as any, 999, "Admin")).toBe(true);
     });

@@ -90,7 +90,7 @@ export const canDeleteConcert = (
     case "Admin":
       return true; // can delete anything
     case "Moderator":
-      return concertOwnerId === currentUserId; // only own
+      return true; // Moderator can delete all concerts
     case "User":
     default:
       return concertOwnerId === currentUserId; // only own
@@ -99,6 +99,8 @@ export const canDeleteConcert = (
 
 export const canEditConcert = (concert: Concert, userId: number, role: string) => {
   switch (role) {
+    case "SuperAdmin":
+      return true; // SuperAdmin can edit everything
     case "Admin":
       return true; // Admin can edit everything
     case "Moderator":
