@@ -11,16 +11,19 @@ export const editConcertConversation = async (
   ctx: Context,
   { dbUserId, userRole }: { dbUserId: number; userRole: string }
 ) => {
-  // Step 1: Fetch all concerts (future-proof for mods/admins)
+  // Step 1: Fetch upcoming concerts only
   const concerts: Concert[] = await prisma.concert.findMany({
-    orderBy: [{ concertDate: "desc" }, { concertTime: "desc" }],
+    where: {
+      concertDate: { gte: new Date() },
+    },
+    orderBy: [{ concertDate: "asc" }, { concertTime: "asc" }],
   });
 
   // Step 2: Filter by permissions
   const editableConcerts = concerts.filter((c) => canEditConcert(c, dbUserId, userRole));
 
   if (!editableConcerts.length) {
-    await ctx.reply("🎵 No concerts you are allowed to edit.");
+    await ctx.reply("🎵 No upcoming concerts you are allowed to edit.");
     return;
   }
 

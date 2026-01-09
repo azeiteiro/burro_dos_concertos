@@ -40,18 +40,28 @@ describe("deleteConcertConversation with permissions", () => {
     conversation = MockConversation();
   });
 
-  it("prevents deleting another user's concert for a normal user", async () => {
+  it("only shows own concerts for a normal user", async () => {
     (prisma.concert.findMany as jest.Mock).mockResolvedValue(concerts);
 
-    conversation.wait.mockResolvedValueOnce({ message: { text: "2" } } as any);
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } } as any);
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      match: ["confirm_delete", "1"],
+      update: { callback_query: { id: "test" } },
+      answerCallbackQuery: jest.fn(),
+    } as any);
 
     await deleteConcertConversation(conversation, ctx as unknown as Context, {
       dbUserId: dbUser.id,
       userRole: "User",
     });
 
-    expect(ctx.reply).toHaveBeenCalledWith("❌ You are not allowed to delete this concert.");
-    expect(prisma.concert.delete).not.toHaveBeenCalled();
+    // Should only show own concert (Arctic Monkeys), not The Killers
+    const replyCall = (ctx.reply as jest.Mock).mock.calls[0][0];
+    expect(replyCall).toContain("Arctic Monkeys");
+    expect(replyCall).not.toContain("The Killers");
+
+    // Should successfully delete own concert
+    expect(prisma.concert.delete).toHaveBeenCalledWith({ where: { id: 1 } });
   });
 
   it("allows deleting own concert for a normal user", async () => {

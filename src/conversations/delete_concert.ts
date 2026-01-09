@@ -12,7 +12,7 @@ export const deleteConcertConversation = async (
   ctx: BotContext,
   { dbUserId, userRole }: { dbUserId: number; userRole: string }
 ) => {
-  // 1. Fetch user's upcoming concerts
+  // 1. Fetch upcoming concerts
   const concerts = await prisma.concert.findMany({
     where: {
       concertDate: { gte: new Date() },
@@ -20,23 +20,25 @@ export const deleteConcertConversation = async (
     orderBy: [{ concertDate: "asc" }, { concertTime: "asc" }],
   });
 
-  if (concerts.length === 0) {
-    await ctx.reply("🎶 No upcoming concerts found.");
+  // 2. Filter by permissions
+  const deletableConcerts = concerts.filter((c) => canDeleteConcert(userRole, c.userId, dbUserId));
+
+  if (deletableConcerts.length === 0) {
+    await ctx.reply("🎶 No upcoming concerts you are allowed to delete.");
     return;
   }
 
-  // 2. Build numbered list
+  // 3. Build numbered list
   let message = "🎟 Select the concert you want to delete:\n\n";
-  concerts.forEach((c: Concert, i: number) => {
-    const ownerFlag = c.userId === dbUserId ? "" : "(other user)";
-    message += `${i + 1}. ${c.artistName} – ${c.venue} (${c.concertDate.toDateString()}) ${ownerFlag}\n`;
+  deletableConcerts.forEach((c: Concert, i: number) => {
+    message += `${i + 1}. ${c.artistName} – ${c.venue} (${c.concertDate.toDateString()})\n`;
   });
   message += `\n0. Cancel`;
 
   await ctx.reply(message);
   await ctx.reply("Please send the number of the concert you want to delete:");
 
-  // 3. Wait for user input
+  // 4. Wait for user input
   const { message: reply } = await conversation.wait();
   const input = reply?.text?.trim();
 
@@ -45,26 +47,20 @@ export const deleteConcertConversation = async (
     return;
   }
 
-  // 4. Handle cancel
+  // 5. Handle cancel
   if (input === "0") {
     await ctx.reply("❌ Deletion cancelled.");
     return;
   }
 
-  // 5. Parse number and validate
+  // 6. Parse number and validate
   const index = Number(input) - 1;
-  if (!Number.isInteger(index) || index < 0 || index >= concerts.length) {
+  if (!Number.isInteger(index) || index < 0 || index >= deletableConcerts.length) {
     await ctx.reply("❌ Invalid number. Please try again with /delete_concert.");
     return;
   }
 
-  const selected = concerts[index];
-
-  // 6. Check permissions
-  if (!canDeleteConcert(userRole, selected.userId, dbUserId)) {
-    await ctx.reply("❌ You are not allowed to delete this concert.");
-    return;
-  }
+  const selected = deletableConcerts[index];
 
   // 7. Ask for confirmation
   const keyboard = new InlineKeyboard()

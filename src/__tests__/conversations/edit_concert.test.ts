@@ -47,7 +47,7 @@ describe("editConcertConversation", () => {
 
     await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
 
-    expect(ctx.reply).toHaveBeenCalledWith("🎵 No concerts you are allowed to edit.");
+    expect(ctx.reply).toHaveBeenCalledWith("🎵 No upcoming concerts you are allowed to edit.");
   });
 
   it("edits venue correctly as Admin", async () => {
@@ -132,17 +132,11 @@ describe("editConcertConversation", () => {
     const concert = { ...mockConcert(), userId: 999 }; // different owner
     (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
 
-    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } });
-
-    conversation.waitForCallbackQuery.mockResolvedValueOnce({
-      update: { callback_query: { data: "venue" } },
-    });
-    (ask as jest.Mock).mockResolvedValueOnce("New Venue");
-
     await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
 
+    // User can't see other users' concerts in the list
     expect(prisma.concert.update).not.toHaveBeenCalled();
-    expect(ctx.reply).toHaveBeenCalledWith("🎵 No concerts you are allowed to edit.");
+    expect(ctx.reply).toHaveBeenCalledWith("🎵 No upcoming concerts you are allowed to edit.");
   });
 
   it("handles DB update error gracefully", async () => {
