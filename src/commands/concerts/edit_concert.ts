@@ -11,5 +11,8 @@ export const editConcertCommand = async (ctx: BotContext) => {
 
   const user = await findOrCreateUser(tgUser);
 
-  await ctx.conversation.enter("editConcertConversation", { dbUserId: user.id });
+  await ctx.conversation.enter("editConcertConversation", {
+    dbUserId: user.id,
+    userRole: user.role,
+  });
 };

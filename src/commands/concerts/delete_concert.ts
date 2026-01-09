@@ -11,5 +11,8 @@ export const deleteConcertCommand = async (ctx: BotContext) => {
 
   const user = await findOrCreateUser(tgUser);
 
-  await ctx.conversation.enter("deleteConcertConversation", { dbUserId: user.id });
+  await ctx.conversation.enter("deleteConcertConversation", {
+    dbUserId: user.id,
+    userRole: user.role,
+  });
 };
