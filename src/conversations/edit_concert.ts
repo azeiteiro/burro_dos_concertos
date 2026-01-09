@@ -33,20 +33,41 @@ export const editConcertConversation = async (
     const dateStr = c.concertDate?.toISOString().split("T")[0] ?? "no date";
     listMsg += `${i + 1}. ${c.artistName} – ${c.venue} (${dateStr})\n`;
   });
-  listMsg += `\n0. Cancel`;
 
   await ctx.reply(listMsg);
-  await ctx.reply("Please send the number of the concert you want to edit:");
+
+  const cancelKeyboard = new InlineKeyboard().text("❌ Cancel", "cancel_edit");
+  await ctx.reply("Please send the number of the concert you want to edit:", {
+    reply_markup: cancelKeyboard,
+  });
 
   // Step 4: Wait for user selection
-  const { message: reply } = await conversation.wait();
-  const input = reply?.text?.trim();
-  const index = input ? parseInt(input, 10) - 1 : -2;
+  const update = await conversation.wait();
 
-  if (input === "0") {
-    await ctx.reply("🚫 Edit canceled.");
+  // Handle cancel button
+  if ("callbackQuery" in update) {
+    const data = update.callbackQuery?.data;
+    if (data === "cancel_edit") {
+      try {
+        if (update.callbackQuery) {
+          await ctx.api.answerCallbackQuery(update.callbackQuery.id);
+        }
+      } catch {
+        // Ignore
+      }
+      await ctx.reply("🚫 Edit canceled.");
+      return;
+    }
+  }
+
+  // Handle number input
+  if (!("message" in update) || typeof update.message?.text !== "string") {
+    await ctx.reply("❌ Invalid input. Edit canceled.");
     return;
   }
+
+  const input = update.message.text.trim();
+  const index = parseInt(input, 10) - 1;
 
   if (isNaN(index) || index < 0 || index >= editableConcerts.length) {
     await ctx.reply("❌ Invalid number. Edit canceled.");

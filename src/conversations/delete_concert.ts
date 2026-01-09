@@ -33,27 +33,40 @@ export const deleteConcertConversation = async (
   deletableConcerts.forEach((c: Concert, i: number) => {
     message += `${i + 1}. ${c.artistName} – ${c.venue} (${c.concertDate.toDateString()})\n`;
   });
-  message += `\n0. Cancel`;
 
   await ctx.reply(message);
-  await ctx.reply("Please send the number of the concert you want to delete:");
+
+  const cancelKeyboard = new InlineKeyboard().text("❌ Cancel", "cancel_delete_select");
+  await ctx.reply("Please send the number of the concert you want to delete:", {
+    reply_markup: cancelKeyboard,
+  });
 
   // 4. Wait for user input
-  const { message: reply } = await conversation.wait();
-  const input = reply?.text?.trim();
+  const update = await conversation.wait();
 
-  if (!input) {
+  // Handle cancel button
+  if ("callbackQuery" in update) {
+    const data = update.callbackQuery?.data;
+    if (data === "cancel_delete_select") {
+      try {
+        if (update.callbackQuery) {
+          await ctx.api.answerCallbackQuery(update.callbackQuery.id);
+        }
+      } catch {
+        // Ignore
+      }
+      await ctx.reply("❌ Deletion cancelled.");
+      return;
+    }
+  }
+
+  // Handle number input
+  if (!("message" in update) || typeof update.message?.text !== "string") {
     await ctx.reply("❌ Invalid input. Please try again with /delete_concert.");
     return;
   }
 
-  // 5. Handle cancel
-  if (input === "0") {
-    await ctx.reply("❌ Deletion cancelled.");
-    return;
-  }
-
-  // 6. Parse number and validate
+  const input = update.message.text.trim();
   const index = Number(input) - 1;
   if (!Number.isInteger(index) || index < 0 || index >= deletableConcerts.length) {
     await ctx.reply("❌ Invalid number. Please try again with /delete_concert.");
