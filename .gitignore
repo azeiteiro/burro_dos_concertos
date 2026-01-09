@@ -9,10 +9,18 @@
 /downloads
 /logs
 jest-storage
+*.log
 
 # production
 /build
 /dist
+
+# database
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+schema.sql
 
 # misc
 .DS_Store
@@ -21,5 +29,17 @@ jest-storage
 .env.test
 .env.production
 .env*.local
+*.bak
+*.tmp
+*.swp
+*~
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+*.sublime-*
+.claude
 
 !.env.example

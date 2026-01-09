@@ -1,72 +1,95 @@
-# Burro dos Concertos Bot
+# 🎵 Burro dos Concertos Bot
 
-Telegram bot to manage concert listings for a private group.
+Telegram bot to manage concert listings for private groups.
 
 ## Features
 
-- Add concerts with `/add` command
-- List upcoming concerts with `/list`
-- Stores users and concerts in PostgreSQL
-- Future: RSVP / voting system
+- 🎸 Add, edit, and delete concerts
+- 📋 List upcoming concerts
+- 🔔 Automated daily/weekly/monthly notifications
+- 👥 Role-based permissions (User, Moderator, Admin, SuperAdmin)
+- 💾 PostgreSQL database with Prisma ORM
 
 ## Tech Stack
 
-- Node.js 20+
-- TypeScript
-- Telegram Bot API via grammY
-- PostgreSQL (local or cloud)
-- Prisma ORM
-- Jest for testing
-- Husky + lint-staged + Prettier + ESLint for code quality
+- Node.js 22 + TypeScript
+- [grammY](https://grammy.dev/) - Telegram Bot framework
+- PostgreSQL + Prisma 7
+- Jest (82%+ test coverage)
+- Deployed on Fly.io
 
-## Setup
+## Quick Start
 
-1. Clone repo:
-
-```bash
-git clone git@github.com:yourusername/burro_dos_concertos.git
-cd burro_dos_concertos
-```
-
-2. Install dependencies:
+### 1. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-3. Configure .env:
+### 2. Configure environment
+
+Create `.env.local`:
 
 ```bash
-BOT_TOKEN=<your-telegram-token>
+BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=postgresql://user:password@localhost:5432/concerts_bot
-GROUP_ID=-1001234567890
+GROUP_ID=-100123456789  # Your Telegram group ID (optional for notifications)
 ```
 
-4. Run Prisma migrations:
+### 3. Setup database
 
 ```bash
-pnpm prisma migrate dev --name init
-pnpm prisma generate
+pnpm exec prisma migrate dev
+pnpm exec prisma generate
 ```
 
-5. Seed database:
-
-```bash
-pnpm seed
-```
-
-6. Start bot in dev mode:
+### 4. Run the bot
 
 ```bash
 pnpm dev
 ```
 
-7. Run tests:
+## Commands
+
+**Everyone:**
+- `/start` - Start the bot
+- `/help` - Show available commands
+- `/add_concert` - Add a new concert
+- `/see_concerts` - View upcoming concerts
+- `/edit_concert` - Edit your concerts
+- `/delete_concert` - Delete your concerts
+
+**Admin/SuperAdmin only:**
+- `/list_users` - List all users
+- `/promote_user` - Promote user to admin
+- `/demote_user` - Demote admin to user
+- `/user_info` - Get user information
+
+## Development
 
 ```bash
-pnpm test
+pnpm dev          # Start in development mode
+pnpm test         # Run tests
+pnpm test:watch   # Run tests in watch mode
+pnpm lint         # Run linter
+pnpm build        # Build for production
 ```
 
-Commands
-• /add – start adding a new concert
-• /list – list upcoming concerts
+## Deployment
+
+Deploy to Fly.io:
+
+```bash
+fly deploy
+```
+
+Auto-deploy via GitHub Actions on version tags:
+
+```bash
+git tag v1.0.3 -m "Release description"
+git push origin v1.0.3
+```
+
+## License
+
+MIT
