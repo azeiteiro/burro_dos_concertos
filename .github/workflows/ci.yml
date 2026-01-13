@@ -38,3 +38,8 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
