@@ -3,11 +3,9 @@
 [![CI](https://github.com/azeiteiro/burro_dos_concertos/actions/workflows/ci.yml/badge.svg)](https://github.com/azeiteiro/burro_dos_concertos/actions)
 [![Coverage Status](https://coveralls.io/repos/github/azeiteiro/burro_dos_concertos/badge.svg?branch=master)](https://coveralls.io/github/azeiteiro/burro_dos_concertos?branch=master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![grammY](https://img.shields.io/badge/grammY-Bot_Framework-blue)](https://grammy.dev)
 [![Fly.io](https://img.shields.io/badge/deployed-fly.io-blueviolet)](https://fly.io)
-[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg)](https://pnpm.io/)  # Package manager is internal detail
 
 Telegram bot to manage concert listings for private groups.
 
