@@ -35,7 +35,8 @@ describe("helpCommand", () => {
   });
 
   // Use escaped strings to match MarkdownV2
-  const escape = (s: string) => s.replace(/_/g, "\\_");
+  const escape = (s: string) =>
+    s.replace(/\\/g, "\\\\").replace(/_/g, "\\_");
 
   it("replies with user commands in private chat", async () => {
     (getUserByTelegramId as jest.Mock).mockResolvedValue({ role: "User" });
