@@ -46,7 +46,6 @@ describe("setupCommands", () => {
 
     expect(bot.api.setMyCommands).toHaveBeenCalledWith(
       [
-        { command: "start", description: "Start the bot" },
         { command: "help", description: "Show help information" },
         { command: "about", description: "About this bot" },
       ],
@@ -94,7 +93,6 @@ describe("setupCommands", () => {
 
     expect(bot.api.setMyCommands).toHaveBeenCalledWith(
       [
-        { command: "start", description: "Start the bot" },
         { command: "help", description: "Show help information" },
         { command: "about", description: "About this bot" },
         { command: "add_concert", description: "Add a new concert" },

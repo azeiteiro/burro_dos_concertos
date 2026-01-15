@@ -11,7 +11,6 @@ export const setupCommands = (bot: Bot<BotContext>) => {
   bot.api
     .setMyCommands(
       [
-        { command: "start", description: "Start the bot" },
         { command: "help", description: "Show help information" },
         { command: "about", description: "About this bot" },
       ],
@@ -47,7 +46,6 @@ export const setupCommands = (bot: Bot<BotContext>) => {
         // ✅ Admin/SuperAdmin: Full access
         await ctx.api.setMyCommands(
           [
-            { command: "start", description: "Start the bot" },
             { command: "help", description: "Show help information" },
             { command: "about", description: "About this bot" },
             { command: "add_concert", description: "Add a new concert" },
@@ -67,7 +65,6 @@ export const setupCommands = (bot: Bot<BotContext>) => {
         // 👮 Moderator: Concert management only
         await ctx.api.setMyCommands(
           [
-            { command: "start", description: "Start the bot" },
             { command: "help", description: "Show help information" },
             { command: "about", description: "About this bot" },
             { command: "add_concert", description: "Add a new concert" },
@@ -83,7 +80,6 @@ export const setupCommands = (bot: Bot<BotContext>) => {
         // 👤 Normal user: Can manage their own concerts
         await ctx.api.setMyCommands(
           [
-            { command: "start", description: "Start the bot" },
             { command: "help", description: "Show help information" },
             { command: "about", description: "About this bot" },
             { command: "add_concert", description: "Add a new concert" },

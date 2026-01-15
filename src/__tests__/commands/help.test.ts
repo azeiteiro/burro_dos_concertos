@@ -35,8 +35,7 @@ describe("helpCommand", () => {
   });
 
   // Use escaped strings to match MarkdownV2
-  const escape = (s: string) =>
-    s.replace(/\\/g, "\\\\").replace(/_/g, "\\_");
+  const escape = (s: string) => s.replace(/\\/g, "\\\\").replace(/_/g, "\\_");
 
   it("replies with user commands in private chat", async () => {
     (getUserByTelegramId as jest.Mock).mockResolvedValue({ role: "User" });
@@ -45,7 +44,6 @@ describe("helpCommand", () => {
 
     const text = replyMock.mock.calls[0][0];
 
-    expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
     expect(text).toContain(escape("/see_concerts"));
     expect(text).toContain(escape("/edit_concert"));
@@ -64,7 +62,6 @@ describe("helpCommand", () => {
 
     const text = replyMock.mock.calls[0][0];
 
-    expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
     expect(text).toContain(escape("/edit_concert"));
     expect(text).toContain(escape("/delete_concert"));
@@ -82,7 +79,6 @@ describe("helpCommand", () => {
 
     const text = replyMock.mock.calls[0][0];
 
-    expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
     expect(text).toContain(escape("/edit_concert"));
     expect(text).toContain(escape("/delete_concert"));
@@ -100,7 +96,6 @@ describe("helpCommand", () => {
 
     const text = replyMock.mock.calls[0][0];
 
-    expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
     expect(text).toContain(escape("/see_concerts"));
     expect(text).toContain(escape("/edit_concert"));
@@ -134,7 +129,6 @@ describe("helpCommand", () => {
     await helpCommand(ctx as BotContext);
 
     const text = replyMock.mock.calls[0][0];
-    expect(text).toContain("/start");
     expect(text).toContain(escape("/add_concert"));
   });
 });

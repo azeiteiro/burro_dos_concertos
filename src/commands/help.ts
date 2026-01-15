@@ -22,7 +22,6 @@ export const helpCommand = async (ctx: BotContext) => {
 
   // Base commands for all users
   const baseCommands = [
-    { command: "/start", description: "Start the bot" },
     { command: "/help", description: "Show this help message" },
     { command: "/about", description: "Learn more about the bot" },
     { command: "/add_concert", description: "Add a new concert" },
