@@ -1,0 +1,61 @@
+name: Deploy Staging to Digital Ocean
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - master  # Deploy staging on every push to master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm exec prisma generate
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+
+      - name: Run tests
+        run: pnpm test:ci
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          NODE_ENV: test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Deploy to Digital Ocean
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DO_STAGING_HOST }}
+          username: ${{ secrets.DO_STAGING_USER }}
+          key: ${{ secrets.DO_STAGING_SSH_KEY }}
+          port: ${{ secrets.DO_STAGING_PORT || 22 }}
+          script: |
+            cd ${{ secrets.DO_STAGING_APP_PATH }}
+            git fetch origin
+            git reset --hard origin/master
+            pnpm install --frozen-lockfile
+            pnpm exec prisma generate
+            pnpm exec prisma migrate deploy
+            pnpm build
+            pm2 restart burro_dos_concertos_staging || pm2 start ecosystem.config.js --only burro_dos_concertos_staging
