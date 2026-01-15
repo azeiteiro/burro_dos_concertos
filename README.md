@@ -84,18 +84,20 @@ pnpm build        # Build for production
 
 ## Deployment
 
-Deploy to Fly.io:
-
-```bash
-fly deploy
-```
-
-Auto-deploy via GitHub Actions on version tags:
+**Production (Fly.io):** Auto-deploys on version tags
 
 ```bash
 git tag v1.0.3 -m "Release description"
 git push origin v1.0.3
 ```
+
+**Staging (Digital Ocean):** Auto-deploys on push to `master`
+
+```bash
+git push origin master
+```
+
+For detailed deployment setup and troubleshooting, see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ## License
 
