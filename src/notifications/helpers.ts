@@ -16,7 +16,7 @@ if (!getGroupId()) {
 
 // Escape Markdown special characters to prevent formatting issues
 const escapeMarkdown = (text: string): string => {
-  return text.replace(/([_*[\]()~`>#+=|{}.!-])/g, "\\$1");
+  return text.replace(/([_*[\]()~`>#+=|{}.!\-\\])/g, "\\$1");
 };
 
 export const formatConcertList = (title: string, concerts: Concert[]) => {
