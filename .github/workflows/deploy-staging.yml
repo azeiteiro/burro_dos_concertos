@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Deploy to Digital Ocean
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.4
         with:
           host: ${{ secrets.DO_STAGING_HOST }}
           username: ${{ secrets.DO_STAGING_USER }}
