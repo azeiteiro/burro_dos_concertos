@@ -19,22 +19,22 @@ export const registerCommands = (bot: Bot) => {
 
   // Users (restricted)
   bot.command("list_users", async (ctx: BotContext) => {
-    if (!isAdmin(ctx)) return ctx.reply("❌ Not authorized.");
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await listUsersCommand(ctx);
   });
 
   bot.command("promote_user", async (ctx: BotContext) => {
-    if (!isAdmin(ctx)) return ctx.reply("❌ Not authorized.");
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await promoteUserCommand(ctx);
   });
 
   bot.command("demote_user", async (ctx: BotContext) => {
-    if (!isAdmin(ctx)) return ctx.reply("❌ Not authorized.");
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await demoteUserCommand(ctx);
   });
 
   bot.command("user_info", async (ctx: BotContext) => {
-    if (!isAdmin(ctx)) return ctx.reply("❌ Not authorized.");
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await userInfoCommand(ctx);
   });
 };
