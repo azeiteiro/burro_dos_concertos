@@ -4,7 +4,10 @@ import { BotContext } from "@/types/global";
 
 jest.mock("@/config/db", () => ({
   prisma: {
-    user: { upsert: jest.fn() },
+    user: {
+      upsert: jest.fn(),
+      findUnique: jest.fn(),
+    },
   },
 }));
 
@@ -70,6 +73,7 @@ describe("isAdmin", () => {
 
   beforeEach(() => {
     jest.resetModules();
+    jest.clearAllMocks();
     process.env = { ...OLD_ENV };
   });
 
@@ -77,31 +81,66 @@ describe("isAdmin", () => {
     process.env = OLD_ENV;
   });
 
-  it("returns true if ctx.from.id matches SUPER_ADMIN_ID", () => {
+  it("returns true if ctx.from.id matches SUPER_ADMIN_ID (emergency fallback)", async () => {
     process.env.SUPER_ADMIN_ID = "12345";
     const ctx = { from: { id: 12345 } } as BotContext;
 
-    expect(isAdmin(ctx)).toBe(true);
+    const result = await isAdmin(ctx);
+
+    expect(result).toBe(true);
+    // Should not query database when SUPER_ADMIN_ID matches
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
   });
 
-  it("returns false if ctx.from.id does not match SUPER_ADMIN_ID", () => {
-    process.env.SUPER_ADMIN_ID = "12345";
+  it("returns true if user role is Admin", async () => {
+    delete process.env.SUPER_ADMIN_ID;
     const ctx = { from: { id: 67890 } } as BotContext;
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: "Admin" });
 
-    expect(isAdmin(ctx)).toBe(false);
+    const result = await isAdmin(ctx);
+
+    expect(result).toBe(true);
+    expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      where: { telegramId: BigInt(67890) },
+    });
   });
 
-  it("returns false if ctx.from is undefined", () => {
+  it("returns true if user role is Moderator", async () => {
+    delete process.env.SUPER_ADMIN_ID;
+    const ctx = { from: { id: 11111 } } as BotContext;
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: "Moderator" });
+
+    const result = await isAdmin(ctx);
+
+    expect(result).toBe(true);
+  });
+
+  it("returns false if user role is User", async () => {
+    delete process.env.SUPER_ADMIN_ID;
+    const ctx = { from: { id: 22222 } } as BotContext;
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({ role: "User" });
+
+    const result = await isAdmin(ctx);
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false if user is not found in database", async () => {
+    delete process.env.SUPER_ADMIN_ID;
+    const ctx = { from: { id: 99999 } } as BotContext;
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+    const result = await isAdmin(ctx);
+
+    expect(result).toBe(false);
+  });
+
+  it("returns false if ctx.from is undefined", async () => {
     process.env.SUPER_ADMIN_ID = "12345";
     const ctx = {} as BotContext;
 
-    expect(isAdmin(ctx)).toBe(false);
-  });
+    const result = await isAdmin(ctx);
 
-  it("returns false if SUPER_ADMIN_ID is undefined", () => {
-    delete process.env.SUPER_ADMIN_ID;
-    const ctx = { from: { id: 12345 } } as BotContext;
-
-    expect(isAdmin(ctx)).toBe(false);
+    expect(result).toBe(false);
   });
 });

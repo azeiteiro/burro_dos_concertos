@@ -53,6 +53,21 @@ describe("demoteUserCommand", () => {
     expect(ctx.reply).toHaveBeenCalledWith("⚠️ Already at lowest role.");
   });
 
+  it("should prevent self-demotion", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 456,
+      username: "adminUser",
+      telegramId: BigInt(999), // same as ctx.from.id
+      role: roles[2], // Admin
+    });
+
+    const ctx = createCtx("/demote 456");
+    await demoteUserCommand(ctx as any);
+
+    expect(ctx.reply).toHaveBeenCalledWith("❌ You cannot demote yourself.");
+    expect(prisma.user.update).not.toHaveBeenCalled();
+  });
+
   it("should demote user and log action", async () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({
       id: 123,

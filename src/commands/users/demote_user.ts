@@ -19,6 +19,12 @@ export const demoteUserCommand = async (ctx: BotContext) => {
     return;
   }
 
+  // Prevent self-demotion
+  if (user.telegramId === BigInt(actorId ?? 0)) {
+    await ctx.reply("❌ You cannot demote yourself.");
+    return;
+  }
+
   const currentIndex = roles.indexOf(user.role || "User");
   if (currentIndex <= 0) {
     await ctx.reply("⚠️ Already at lowest role.");

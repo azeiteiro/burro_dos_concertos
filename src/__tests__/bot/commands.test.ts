@@ -29,7 +29,7 @@ describe("registerCommands", () => {
       command: jest.fn(),
     };
 
-    (isAdmin as jest.Mock).mockReturnValue(true); // default admin
+    (isAdmin as jest.Mock).mockResolvedValue(true); // default admin
     ctx = { reply: jest.fn() };
     jest.clearAllMocks();
   });
@@ -68,7 +68,7 @@ describe("registerCommands", () => {
   });
 
   it("blocks non-admin user for user commands", async () => {
-    (isAdmin as jest.Mock).mockReturnValue(false);
+    (isAdmin as jest.Mock).mockResolvedValue(false);
     registerCommands(bot as unknown as Bot);
 
     const listUsersCallback = bot.command.mock.calls.find(
