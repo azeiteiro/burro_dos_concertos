@@ -47,15 +47,15 @@
     "chrono-node": "^2.9.0",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "grammy": "^1.39.2",
+    "grammy": "^1.39.3",
     "node-cron": "^4.2.1",
-    "pino": "^10.2.0",
+    "pino": "^10.2.1",
     "prisma": "7.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.8",
+    "@types/node": "^25.0.9",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.0.0",
@@ -70,6 +70,6 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.0"
+    "typescript-eslint": "^8.53.1"
   }
 }
