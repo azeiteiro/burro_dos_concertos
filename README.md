@@ -22,7 +22,7 @@ Telegram bot to manage concert listings for private groups.
 - Node.js 22 + TypeScript
 - [grammY](https://grammy.dev/) - Telegram Bot framework
 - PostgreSQL + Prisma 7
-- Jest (82%+ test coverage)
+- Jest (80%+ test coverage)
 - Deployed on Fly.io
 
 ## Quick Start
