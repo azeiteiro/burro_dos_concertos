@@ -36,9 +36,9 @@ describe("aboutCommand", () => {
     expect(options).toEqual({ parse_mode: "MarkdownV2" });
 
     // Check escaped MarkdownV2 special characters in text
-    expect(sentText).toContain("*About This Bot*".replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1"));
-    expect(sentText).toContain("*Developed by*".replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1"));
-    expect(sentText).toContain("/help".replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1"));
+    expect(sentText).toContain("🎵 *About Burro dos Concertos*");
+    expect(sentText).toContain("*Developed by*");
+    expect(sentText).toContain("/help");
 
     // Ensure emojis are present (not escaped)
     expect(sentText).toContain("🧑‍💻");

@@ -6,18 +6,23 @@ export const aboutCommand = async (ctx: BotContext) => {
   }
 
   const message = [
-    "🎵 *About This Bot*",
+    "🎵 *About Burro dos Concertos*",
     "",
-    "This bot helps manage concerts — add, edit, or view upcoming shows easily.",
+    "A bot to help your group track and never miss concerts\\!",
+    "",
+    "✨ *Features*:",
+    "• Add and manage concerts",
+    "• Automated reminders",
+    "• Group notifications",
+    "• Admin controls",
     "",
     "🧑‍💻 *Developed by*: Daniel Azeiteiro",
-    "🌍 *Powered by*: Node\\.js, Grammy, and PostgreSQL",
+    "🌍 *Tech Stack*: Node\\.js, grammY, PostgreSQL, Prisma",
+    "💻 *Open Source*: [GitHub](https://github\\.com/azeiteiro/burro_dos_concertos)",
     "",
-    "You can use `/help` to see all available commands.",
+    "📖 Use /help to see all commands",
+    "🐛 Found a bug? [Report it](https://github\\.com/azeiteiro/burro_dos_concertos/issues)",
   ].join("\n");
 
-  // Escape MarkdownV2 special characters
-  const escapeMarkdown = (text: string) => text.replace(/([_*[\]()~`>#+\-=|{}.!\\])/g, "\\$1");
-
-  await ctx.reply(escapeMarkdown(message), { parse_mode: "MarkdownV2" });
+  await ctx.reply(message, { parse_mode: "MarkdownV2" });
 };
