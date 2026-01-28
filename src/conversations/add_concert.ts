@@ -98,7 +98,20 @@ export const addConcertConversation = async (
       previewMessage += `🏟️ <b>Venue:</b> ${prefillData.venue}\n`;
     }
     if (prefillData?.date) {
-      previewMessage += `📅 <b>Date:</b> ${prefillData.date}\n`;
+      // Parse the date to show it nicely
+      const date = new Date(prefillData.date);
+      const dateStr = format(date, "yyyy-MM-dd");
+
+      // Check if there's time information
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      if (hours !== 0 || minutes !== 0) {
+        const timeStr = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+        previewMessage += `📅 <b>Date:</b> ${dateStr}\n`;
+        previewMessage += `⏰ <b>Time:</b> ${timeStr}\n`;
+      } else {
+        previewMessage += `📅 <b>Date:</b> ${dateStr}\n`;
+      }
     }
     if (prefillData?.url) {
       previewMessage += `🔗 <b>Link:</b> <a href="${prefillData.url}">View</a>\n`;
@@ -124,11 +137,20 @@ export const addConcertConversation = async (
       venue = prefillData?.venue || null;
       url = prefillData?.url || null;
 
-      // Parse date if available
+      // Parse date and time if available
       if (prefillData?.date) {
         const dateResult = validateConcertInput.date(prefillData.date);
         if (dateResult instanceof Date) {
           concertDate = dateResult;
+
+          // Check if the date string includes time (ISO format with time component)
+          // If time is not 00:00, extract it
+          const hours = dateResult.getHours();
+          const minutes = dateResult.getMinutes();
+          if (hours !== 0 || minutes !== 0) {
+            // Format as HH:mm
+            concertTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+          }
         }
       }
 
@@ -177,20 +199,26 @@ export const addConcertConversation = async (
         await ctx.reply(`✅ Date: ${format(concertDate as Date, "yyyy-MM-dd")}`);
       }
 
-      // Optional fields
-      concertTime = await ask(
-        conversation,
-        ctx,
-        "⏰ Enter concert time (HH:mm) or skip:",
-        validateConcertInput.time,
-        { optional: true, showFinish: true, showCancel: true }
-      );
+      // Optional fields - time
+      if (concertTime) {
+        // Time was already extracted from the date
+        await ctx.reply(`✅ Time: ${concertTime}`);
+      } else {
+        concertTime = await ask(
+          conversation,
+          ctx,
+          "⏰ Enter concert time (HH:mm) or skip:",
+          validateConcertInput.time,
+          { optional: true, showFinish: true, showCancel: true }
+        );
 
-      if (concertTime === "CANCEL") {
-        // Prefill data cleared (passed as parameter, no session cleanup needed)
-        return;
+        if (concertTime === "CANCEL") {
+          // Prefill data cleared (passed as parameter, no session cleanup needed)
+          return;
+        }
       }
 
+      // Ask for notes
       if (concertTime !== "FINISH") {
         notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
           optional: true,

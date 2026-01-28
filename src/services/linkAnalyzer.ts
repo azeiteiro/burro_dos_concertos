@@ -261,7 +261,20 @@ export function formatConcertPreview(metadata: ConcertMetadata): string {
   }
 
   if (parsedInfo.date) {
-    preview += `📅 <b>Date:</b> ${parsedInfo.date}\n`;
+    // Parse the date to format it nicely
+    const date = new Date(parsedInfo.date);
+    const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD
+
+    // Check if there's time information
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    if (hours !== 0 || minutes !== 0) {
+      const timeStr = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      preview += `📅 <b>Date:</b> ${dateStr}\n`;
+      preview += `⏰ <b>Time:</b> ${timeStr}\n`;
+    } else {
+      preview += `📅 <b>Date:</b> ${dateStr}\n`;
+    }
   }
 
   if (metadata.description) {
