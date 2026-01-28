@@ -1,5 +1,5 @@
 import { BotContext } from "@/types/global";
-import { isAdmin } from "@/utils/user";
+import { isAdmin, findOrCreateUser } from "@/utils/user";
 import { extractMetadata, formatConcertPreview, parseConcertInfo } from "@/services/linkAnalyzer";
 import { InlineKeyboard } from "grammy";
 
@@ -99,6 +99,15 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     return;
   }
 
+  const tgUser = ctx.from;
+  if (!tgUser) {
+    await ctx.answerCallbackQuery({
+      text: "❌ Could not identify user.",
+      show_alert: true,
+    });
+    return;
+  }
+
   const cacheKey = callbackData.replace("quick_add:", "");
   const cached = metadataCache.get(cacheKey);
 
@@ -127,20 +136,35 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     text: "✅ Starting conversation with prefilled data...",
   });
 
+  // Find or create user in database
+  const user = await findOrCreateUser(tgUser);
+
   // Start the add concert conversation
-  await ctx.conversation.enter("addConcertConversation");
+  await ctx.conversation.enter("addConcertConversation", { dbUserId: user.id });
 }
 
 /**
  * Handles the "Add Manually" button click
  */
 export async function handleManualAddCallback(ctx: BotContext) {
+  const tgUser = ctx.from;
+  if (!tgUser) {
+    await ctx.answerCallbackQuery({
+      text: "❌ Could not identify user.",
+      show_alert: true,
+    });
+    return;
+  }
+
   await ctx.answerCallbackQuery({
     text: "✅ Starting manual concert entry...",
   });
 
+  // Find or create user in database
+  const user = await findOrCreateUser(tgUser);
+
   // Start the add concert conversation
-  await ctx.conversation.enter("addConcertConversation");
+  await ctx.conversation.enter("addConcertConversation", { dbUserId: user.id });
 }
 
 /**
