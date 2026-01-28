@@ -7,7 +7,6 @@ export interface SessionData {
     venue?: string;
     date?: string;
     url?: string;
-    description?: string;
   };
 }
 

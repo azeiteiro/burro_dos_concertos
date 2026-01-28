@@ -70,7 +70,6 @@ export const addConcertConversation = async (
       venue?: string;
       date?: string;
       url?: string;
-      description?: string;
     };
   }
 ) => {
@@ -504,64 +503,31 @@ export const addConcertConversation = async (
   }
 
   // --- Notes (optional) ---
-  if (prefillData?.description && hasPrefill) {
-    const shortDesc =
-      prefillData.description.length > 200
-        ? prefillData.description.substring(0, 200) + "..."
-        : prefillData.description;
+  // We skip offering the description as notes since it's usually marketing text
+  // and we already have the URL stored
+  notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
+    optional: true,
+    showFinish: true,
+    showCancel: true,
+  });
 
-    await ctx.reply(
-      `📝 <b>Extracted description:</b>\n${shortDesc}\n\nType 'keep' to use this as notes, 'skip' to not add notes, or enter your own notes:`,
-      { parse_mode: "HTML" }
+  if (notes === "CANCEL") {
+    return;
+  }
+  if (notes === "FINISH") {
+    // Save with all fields except notes
+    await saveConcert(
+      conversation,
+      ctx,
+      dbUserId,
+      artistName as string,
+      venue as string,
+      concertDate as Date,
+      concertTime as string | null,
+      url as string | null,
+      null
     );
-    const notesResponse = await conversation.wait();
-    const notesInput = notesResponse.message?.text?.trim().toLowerCase();
-
-    if (notesInput === "cancel") {
-      await ctx.reply("❌ Cancelled.");
-      return;
-    }
-
-    if (notesInput === "keep") {
-      notes = prefillData.description;
-      await ctx.reply("✅ Using description as notes");
-    } else if (notesInput === "skip") {
-      notes = null;
-      await ctx.reply("⏭️ Notes skipped.");
-    } else {
-      const validated = validateConcertInput.notes(notesResponse.message?.text || "");
-      if (validated === null || (typeof validated === "string" && !validated.startsWith("❌"))) {
-        notes = validated;
-      } else {
-        await ctx.reply(validated as string);
-        return;
-      }
-    }
-  } else {
-    notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
-      optional: true,
-      showFinish: true,
-      showCancel: true,
-    });
-
-    if (notes === "CANCEL") {
-      return;
-    }
-    if (notes === "FINISH") {
-      // Save with all fields except notes
-      await saveConcert(
-        conversation,
-        ctx,
-        dbUserId,
-        artistName as string,
-        venue as string,
-        concertDate as Date,
-        concertTime as string | null,
-        url as string | null,
-        null
-      );
-      return;
-    }
+    return;
   }
 
   // --- Save concert with all fields ---

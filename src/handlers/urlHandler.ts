@@ -119,13 +119,12 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     return;
   }
 
-  // Prepare prefill data
+  // Prepare prefill data (skip description as it's usually marketing text)
   const prefillData = {
     artist: cached.concertInfo.artist,
     venue: cached.concertInfo.venue,
     date: cached.concertInfo.date,
     url: cached.metadata.url,
-    description: cached.metadata.description || undefined,
   };
 
   console.log("Prefill data prepared:", prefillData);
