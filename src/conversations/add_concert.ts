@@ -66,53 +66,167 @@ export const addConcertConversation = async (
   const prefillData = ctx.session?.prefillData;
   const hasPrefill = prefillData && Object.keys(prefillData).length > 0;
 
+  let artistName: string | Date | "CANCEL" | "FINISH" | null = null;
+  let venue: string | Date | "CANCEL" | "FINISH" | null = null;
+  let concertDate: string | Date | "CANCEL" | "FINISH" | null = null;
+  let concertTime: string | Date | "CANCEL" | "FINISH" | null = null;
+  let url: string | Date | "CANCEL" | "FINISH" | null = null;
+  let notes: string | Date | "CANCEL" | "FINISH" | null = null;
+
   if (hasPrefill) {
-    await ctx.reply(
-      "📝 I've pre-filled some information from the link. You can edit or confirm each field."
-    );
+    // Show all extracted information at once
+    let previewMessage = "🎵 <b>Concert Information Detected:</b>\n\n";
+
+    if (prefillData?.artist) {
+      previewMessage += `🎤 <b>Artist:</b> ${prefillData.artist}\n`;
+    }
+    if (prefillData?.venue) {
+      previewMessage += `🏟️ <b>Venue:</b> ${prefillData.venue}\n`;
+    }
+    if (prefillData?.date) {
+      previewMessage += `📅 <b>Date:</b> ${prefillData.date}\n`;
+    }
+    if (prefillData?.url) {
+      previewMessage += `🔗 <b>Link:</b> <a href="${prefillData.url}">View</a>\n`;
+    }
+
+    previewMessage += "\n<i>Reply 'yes' to confirm or 'edit' to modify the information.</i>";
+
+    await ctx.reply(previewMessage, { parse_mode: "HTML", disable_web_page_preview: true });
+
+    // Wait for confirmation
+    const confirmCtx = await conversation.wait();
+    const response = confirmCtx.message?.text?.toLowerCase().trim();
+
+    if (response === "cancel") {
+      ctx.session.prefillData = undefined;
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (response === "yes") {
+      // Use prefilled data
+      artistName = prefillData?.artist || null;
+      venue = prefillData?.venue || null;
+      url = prefillData?.url || null;
+
+      // Parse date if available
+      if (prefillData?.date) {
+        const dateResult = validateConcertInput.date(prefillData.date);
+        if (dateResult instanceof Date) {
+          concertDate = dateResult;
+        }
+      }
+
+      // Ask only for missing required fields
+      if (!artistName) {
+        artistName = await ask(
+          conversation,
+          ctx,
+          "🎤 Who is the artist?",
+          validateConcertInput.name,
+          { showCancel: true }
+        );
+        if (artistName === "CANCEL") {
+          ctx.session.prefillData = undefined;
+          return;
+        }
+      }
+
+      if (!venue) {
+        venue = await ask(
+          conversation,
+          ctx,
+          "🏟️ Where is the concert?",
+          validateConcertInput.location,
+          { showCancel: true }
+        );
+        if (venue === "CANCEL") {
+          ctx.session.prefillData = undefined;
+          return;
+        }
+      }
+
+      if (!concertDate) {
+        concertDate = await ask(
+          conversation,
+          ctx,
+          "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
+          validateConcertInput.date,
+          { showCancel: true }
+        );
+        if (concertDate === "CANCEL") {
+          ctx.session.prefillData = undefined;
+          return;
+        }
+      } else {
+        await ctx.reply(`✅ Date: ${format(concertDate as Date, "yyyy-MM-dd")}`);
+      }
+
+      // Optional fields
+      concertTime = await ask(
+        conversation,
+        ctx,
+        "⏰ Enter concert time (HH:mm) or skip:",
+        validateConcertInput.time,
+        { optional: true, showFinish: true, showCancel: true }
+      );
+
+      if (concertTime === "CANCEL") {
+        ctx.session.prefillData = undefined;
+        return;
+      }
+
+      if (concertTime !== "FINISH") {
+        notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
+          optional: true,
+          showFinish: true,
+          showCancel: true,
+        });
+
+        if (notes === "CANCEL") {
+          ctx.session.prefillData = undefined;
+          return;
+        }
+      }
+
+      // Save concert
+      await saveConcert(
+        conversation,
+        ctx,
+        dbUserId,
+        artistName as string,
+        venue as string,
+        concertDate as Date,
+        concertTime === "FINISH" ? null : (concertTime as string | null),
+        url as string | null,
+        notes === "FINISH" ? null : (notes as string | null)
+      );
+
+      ctx.session.prefillData = undefined;
+      return;
+    }
+
+    // If user said "edit" or anything else, continue with normal flow
+    await ctx.reply("✏️ Let's go through the information step by step.");
   }
+
+  // --- Normal flow (no prefill or user wants to edit) ---
 
   // --- Artist ---
-  let artistName: string | Date | "CANCEL" | "FINISH" | null = null;
-
-  if (prefillData?.artist) {
-    await ctx.reply(
-      `🎤 Detected artist: <b>${prefillData.artist}</b>\n\nConfirm or type a different artist name:`,
-      { parse_mode: "HTML" }
-    );
-  }
-
-  artistName = await ask(
-    conversation,
-    ctx,
-    prefillData?.artist ? "🎤 Artist:" : "🎤 Who is the artist?",
-    validateConcertInput.name,
-    { showCancel: true }
-  );
+  artistName = await ask(conversation, ctx, "🎤 Who is the artist?", validateConcertInput.name, {
+    showCancel: true,
+  });
 
   if (artistName === "CANCEL") {
-    // Clear prefill data on cancel
     ctx.session.prefillData = undefined;
     return;
   }
 
   // --- Venue ---
-  let venue: string | Date | "CANCEL" | "FINISH" | null = null;
-
-  if (prefillData?.venue) {
-    await ctx.reply(
-      `🏟️ Detected venue: <b>${prefillData.venue}</b>\n\nConfirm or type a different venue:`,
-      { parse_mode: "HTML" }
-    );
-  }
-
-  venue = await ask(
-    conversation,
-    ctx,
-    prefillData?.venue ? "🏟️ Venue:" : "🏟️ Where is the concert?",
-    validateConcertInput.location,
-    { showCancel: true }
-  );
+  venue = await ask(conversation, ctx, "🏟️ Where is the concert?", validateConcertInput.location, {
+    showCancel: true,
+  });
 
   if (venue === "CANCEL") {
     ctx.session.prefillData = undefined;
@@ -120,21 +234,10 @@ export const addConcertConversation = async (
   }
 
   // --- Date ---
-  let concertDate: string | Date | "CANCEL" | "FINISH" | null = null;
-
-  if (prefillData?.date) {
-    await ctx.reply(
-      `📅 Detected date: <b>${prefillData.date}</b>\n\nConfirm or type a different date:`,
-      { parse_mode: "HTML" }
-    );
-  }
-
   concertDate = await ask(
     conversation,
     ctx,
-    prefillData?.date
-      ? "📅 Date (YYYY-MM-DD or natural language):"
-      : "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
+    "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
     validateConcertInput.date,
     { showCancel: true }
   );
@@ -147,7 +250,7 @@ export const addConcertConversation = async (
   await ctx.reply(`✅ Date accepted: ${format(concertDate as Date, "yyyy-MM-dd")}`);
 
   // --- Time (optional) ---
-  const concertTime = await ask(
+  concertTime = await ask(
     conversation,
     ctx,
     "⏰ Enter concert time (HH:mm) or skip:",
@@ -172,28 +275,22 @@ export const addConcertConversation = async (
       null,
       null
     );
+    ctx.session.prefillData = undefined;
     return;
   }
 
   // --- URL (optional) ---
-  let url: string | Date | "CANCEL" | "FINISH" | null = null;
+  url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
+    optional: true,
+    showFinish: true,
+    showCancel: true,
+  });
 
-  // If we have a prefilled URL, skip asking and use it
-  if (prefillData?.url) {
-    await ctx.reply(`🔗 Using URL from link: ${prefillData.url}`);
-    url = prefillData.url;
-  } else {
-    url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
-      optional: true,
-      showFinish: true,
-      showCancel: true,
-    });
-
-    if (url === "CANCEL") {
-      ctx.session.prefillData = undefined;
-      return;
-    }
+  if (url === "CANCEL") {
+    ctx.session.prefillData = undefined;
+    return;
   }
+
   if (url === "FINISH") {
     // Save with fields collected so far
     await saveConcert(
@@ -207,11 +304,12 @@ export const addConcertConversation = async (
       null,
       null
     );
+    ctx.session.prefillData = undefined;
     return;
   }
 
   // --- Notes (optional) ---
-  const notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
+  notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
     optional: true,
     showFinish: true,
     showCancel: true,
@@ -234,6 +332,7 @@ export const addConcertConversation = async (
       url as string | null,
       null
     );
+    ctx.session.prefillData = undefined;
     return;
   }
 
