@@ -38,3 +38,16 @@ export const isAdmin = async (ctx: BotContext) => {
   // Admin and Moderator roles have admin privileges
   return user?.role === "Admin" || user?.role === "Moderator";
 };
+
+/**
+ * Gets all admin users from the database
+ */
+export const getAllAdmins = async () => {
+  const admins = await prisma.user.findMany({
+    where: {
+      OR: [{ role: "Admin" }, { role: "Moderator" }],
+    },
+  });
+
+  return admins;
+};
