@@ -119,14 +119,16 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     return;
   }
 
-  // Store prefill data in session
-  ctx.session.prefillData = {
+  // Prepare prefill data
+  const prefillData = {
     artist: cached.concertInfo.artist,
     venue: cached.concertInfo.venue,
     date: cached.concertInfo.date,
     url: cached.metadata.url,
     description: cached.metadata.description || undefined,
   };
+
+  console.log("Prefill data prepared:", prefillData);
 
   // Clean up cache
   metadataCache.delete(cacheKey);
@@ -139,8 +141,11 @@ export async function handleQuickAddCallback(ctx: BotContext) {
   // Find or create user in database
   const user = await findOrCreateUser(tgUser);
 
-  // Start the add concert conversation
-  await ctx.conversation.enter("addConcertConversation", { dbUserId: user.id });
+  // Start the add concert conversation with prefill data
+  await ctx.conversation.enter("addConcertConversation", {
+    dbUserId: user.id,
+    prefillData,
+  });
 }
 
 /**
@@ -163,8 +168,11 @@ export async function handleManualAddCallback(ctx: BotContext) {
   // Find or create user in database
   const user = await findOrCreateUser(tgUser);
 
-  // Start the add concert conversation
-  await ctx.conversation.enter("addConcertConversation", { dbUserId: user.id });
+  // Start the add concert conversation without prefill data
+  await ctx.conversation.enter("addConcertConversation", {
+    dbUserId: user.id,
+    prefillData: undefined,
+  });
 }
 
 /**

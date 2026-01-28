@@ -60,11 +60,25 @@ async function saveConcert(
 export const addConcertConversation = async (
   conversation: Conversation<BotContext>,
   ctx: BotContext,
-  { dbUserId }: { dbUserId: number }
+  {
+    dbUserId,
+    prefillData,
+  }: {
+    dbUserId: number;
+    prefillData?: {
+      artist?: string;
+      venue?: string;
+      date?: string;
+      url?: string;
+      description?: string;
+    };
+  }
 ) => {
-  // Check if we have prefilled data from a URL
-  const prefillData = ctx.session?.prefillData;
+  // Check if we have prefilled data from URL
   const hasPrefill = prefillData && Object.keys(prefillData).length > 0;
+
+  console.log("Conversation started with prefill data:", prefillData);
+  console.log("Has prefill:", hasPrefill);
 
   let artistName: string | Date | "CANCEL" | "FINISH" | null = null;
   let venue: string | Date | "CANCEL" | "FINISH" | null = null;
@@ -99,7 +113,7 @@ export const addConcertConversation = async (
     const response = confirmCtx.message?.text?.toLowerCase().trim();
 
     if (response === "cancel") {
-      ctx.session.prefillData = undefined;
+      // Prefill data cleared (passed as parameter, no session cleanup needed)
       await ctx.reply("❌ Cancelled.");
       return;
     }
@@ -128,7 +142,7 @@ export const addConcertConversation = async (
           { showCancel: true }
         );
         if (artistName === "CANCEL") {
-          ctx.session.prefillData = undefined;
+          // Prefill data cleared (passed as parameter, no session cleanup needed)
           return;
         }
       }
@@ -142,7 +156,7 @@ export const addConcertConversation = async (
           { showCancel: true }
         );
         if (venue === "CANCEL") {
-          ctx.session.prefillData = undefined;
+          // Prefill data cleared (passed as parameter, no session cleanup needed)
           return;
         }
       }
@@ -156,7 +170,7 @@ export const addConcertConversation = async (
           { showCancel: true }
         );
         if (concertDate === "CANCEL") {
-          ctx.session.prefillData = undefined;
+          // Prefill data cleared (passed as parameter, no session cleanup needed)
           return;
         }
       } else {
@@ -173,7 +187,7 @@ export const addConcertConversation = async (
       );
 
       if (concertTime === "CANCEL") {
-        ctx.session.prefillData = undefined;
+        // Prefill data cleared (passed as parameter, no session cleanup needed)
         return;
       }
 
@@ -185,7 +199,7 @@ export const addConcertConversation = async (
         });
 
         if (notes === "CANCEL") {
-          ctx.session.prefillData = undefined;
+          // Prefill data cleared (passed as parameter, no session cleanup needed)
           return;
         }
       }
@@ -203,7 +217,7 @@ export const addConcertConversation = async (
         notes === "FINISH" ? null : (notes as string | null)
       );
 
-      ctx.session.prefillData = undefined;
+      // Prefill data cleared (passed as parameter, no session cleanup needed)
       return;
     }
 
@@ -219,7 +233,7 @@ export const addConcertConversation = async (
   });
 
   if (artistName === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -229,7 +243,7 @@ export const addConcertConversation = async (
   });
 
   if (venue === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -243,7 +257,7 @@ export const addConcertConversation = async (
   );
 
   if (concertDate === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -259,7 +273,7 @@ export const addConcertConversation = async (
   );
 
   if (concertTime === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
   if (concertTime === "FINISH") {
@@ -275,7 +289,7 @@ export const addConcertConversation = async (
       null,
       null
     );
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -287,7 +301,7 @@ export const addConcertConversation = async (
   });
 
   if (url === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -304,7 +318,7 @@ export const addConcertConversation = async (
       null,
       null
     );
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -316,7 +330,7 @@ export const addConcertConversation = async (
   });
 
   if (notes === "CANCEL") {
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
   if (notes === "FINISH") {
@@ -332,7 +346,7 @@ export const addConcertConversation = async (
       url as string | null,
       null
     );
-    ctx.session.prefillData = undefined;
+    // Prefill data cleared (passed as parameter, no session cleanup needed)
     return;
   }
 
@@ -350,5 +364,5 @@ export const addConcertConversation = async (
   );
 
   // Clear prefill data after successful save
-  ctx.session.prefillData = undefined;
+  // Prefill data cleared (passed as parameter, no session cleanup needed)
 };
