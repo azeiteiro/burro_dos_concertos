@@ -1,4 +1,3 @@
-import { Context } from "grammy";
 import { Conversation } from "@grammyjs/conversations";
 import { validateConcertInput } from "@/utils/validators";
 import { ask } from "@/utils/helpers";
@@ -6,11 +5,12 @@ import { format, parseISO } from "date-fns";
 import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 import { notifyNewConcert } from "@/notifications/helpers";
+import { BotContext } from "@/types/global";
 
 // Helper function to save concert
 async function saveConcert(
-  conversation: Conversation,
-  ctx: Context,
+  conversation: Conversation<BotContext>,
+  ctx: BotContext,
   dbUserId: number,
   artistName: string,
   venue: string,
@@ -58,42 +58,91 @@ async function saveConcert(
 }
 
 export const addConcertConversation = async (
-  conversation: Conversation,
-  ctx: Context,
+  conversation: Conversation<BotContext>,
+  ctx: BotContext,
   { dbUserId }: { dbUserId: number }
 ) => {
+  // Check if we have prefilled data from a URL
+  const prefillData = ctx.session?.prefillData;
+  const hasPrefill = prefillData && Object.keys(prefillData).length > 0;
+
+  if (hasPrefill) {
+    await ctx.reply(
+      "📝 I've pre-filled some information from the link. You can edit or confirm each field."
+    );
+  }
+
   // --- Artist ---
-  const artistName = await ask(
+  let artistName: string | Date | "CANCEL" | "FINISH" | null = null;
+
+  if (prefillData?.artist) {
+    await ctx.reply(
+      `🎤 Detected artist: <b>${prefillData.artist}</b>\n\nConfirm or type a different artist name:`,
+      { parse_mode: "HTML" }
+    );
+  }
+
+  artistName = await ask(
     conversation,
     ctx,
-    "🎤 Who is the artist?",
+    prefillData?.artist ? "🎤 Artist:" : "🎤 Who is the artist?",
     validateConcertInput.name,
     { showCancel: true }
   );
 
-  if (artistName === "CANCEL") return;
+  if (artistName === "CANCEL") {
+    // Clear prefill data on cancel
+    ctx.session.prefillData = undefined;
+    return;
+  }
 
   // --- Venue ---
-  const venue = await ask(
+  let venue: string | Date | "CANCEL" | "FINISH" | null = null;
+
+  if (prefillData?.venue) {
+    await ctx.reply(
+      `🏟️ Detected venue: <b>${prefillData.venue}</b>\n\nConfirm or type a different venue:`,
+      { parse_mode: "HTML" }
+    );
+  }
+
+  venue = await ask(
     conversation,
     ctx,
-    "🏟️ Where is the concert?",
+    prefillData?.venue ? "🏟️ Venue:" : "🏟️ Where is the concert?",
     validateConcertInput.location,
     { showCancel: true }
   );
 
-  if (venue === "CANCEL") return;
+  if (venue === "CANCEL") {
+    ctx.session.prefillData = undefined;
+    return;
+  }
 
   // --- Date ---
-  const concertDate = await ask(
+  let concertDate: string | Date | "CANCEL" | "FINISH" | null = null;
+
+  if (prefillData?.date) {
+    await ctx.reply(
+      `📅 Detected date: <b>${prefillData.date}</b>\n\nConfirm or type a different date:`,
+      { parse_mode: "HTML" }
+    );
+  }
+
+  concertDate = await ask(
     conversation,
     ctx,
-    "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
+    prefillData?.date
+      ? "📅 Date (YYYY-MM-DD or natural language):"
+      : "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
     validateConcertInput.date,
     { showCancel: true }
   );
 
-  if (concertDate === "CANCEL") return;
+  if (concertDate === "CANCEL") {
+    ctx.session.prefillData = undefined;
+    return;
+  }
 
   await ctx.reply(`✅ Date accepted: ${format(concertDate as Date, "yyyy-MM-dd")}`);
 
@@ -106,7 +155,10 @@ export const addConcertConversation = async (
     { optional: true, showFinish: true, showCancel: true }
   );
 
-  if (concertTime === "CANCEL") return;
+  if (concertTime === "CANCEL") {
+    ctx.session.prefillData = undefined;
+    return;
+  }
   if (concertTime === "FINISH") {
     // Save with mandatory fields only
     await saveConcert(
@@ -124,13 +176,24 @@ export const addConcertConversation = async (
   }
 
   // --- URL (optional) ---
-  const url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
-    optional: true,
-    showFinish: true,
-    showCancel: true,
-  });
+  let url: string | Date | "CANCEL" | "FINISH" | null = null;
 
-  if (url === "CANCEL") return;
+  // If we have a prefilled URL, skip asking and use it
+  if (prefillData?.url) {
+    await ctx.reply(`🔗 Using URL from link: ${prefillData.url}`);
+    url = prefillData.url;
+  } else {
+    url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
+      optional: true,
+      showFinish: true,
+      showCancel: true,
+    });
+
+    if (url === "CANCEL") {
+      ctx.session.prefillData = undefined;
+      return;
+    }
+  }
   if (url === "FINISH") {
     // Save with fields collected so far
     await saveConcert(
@@ -154,7 +217,10 @@ export const addConcertConversation = async (
     showCancel: true,
   });
 
-  if (notes === "CANCEL") return;
+  if (notes === "CANCEL") {
+    ctx.session.prefillData = undefined;
+    return;
+  }
   if (notes === "FINISH") {
     // Save with all fields except notes
     await saveConcert(
@@ -183,4 +249,7 @@ export const addConcertConversation = async (
     url as string | null,
     notes as string | null
   );
+
+  // Clear prefill data after successful save
+  ctx.session.prefillData = undefined;
 };
