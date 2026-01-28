@@ -21,7 +21,10 @@ describe("bot.ts", () => {
           use: useMock,
           command: commandMock,
           start: startMock,
+          on: jest.fn(),
+          callbackQuery: jest.fn(),
         })),
+        session: jest.fn(() => "session-middleware"),
       };
     });
 
@@ -41,6 +44,12 @@ describe("bot.ts", () => {
     jest.mock("@/commands/start", () => jest.fn());
     jest.mock("@/commands/help", () => ({ helpCommand: jest.fn() }));
     jest.mock("@/commands/about", () => ({ aboutCommand: jest.fn() }));
+
+    jest.mock("@/handlers/urlHandler", () => ({
+      handleUrlMessage: jest.fn(),
+      handleQuickAddCallback: jest.fn(),
+      handleManualAddCallback: jest.fn(),
+    }));
 
     jest.mock("@grammyjs/conversations", () => ({
       conversations: jest.fn(() => "conversations-middleware"),
