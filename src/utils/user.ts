@@ -40,13 +40,11 @@ export const isAdmin = async (ctx: BotContext) => {
 };
 
 /**
- * Gets all admin users from the database
+ * Gets all admin users from the database (excludes moderators)
  */
 export const getAllAdmins = async () => {
   const admins = await prisma.user.findMany({
-    where: {
-      OR: [{ role: "Admin" }, { role: "Moderator" }],
-    },
+    where: { role: "Admin" },
   });
 
   return admins;
