@@ -96,4 +96,37 @@ describe("demoteUserCommand", () => {
       `✅ User testUser demoted to ${newRole} by admin with Telegram ID 999`
     );
   });
+
+  it("should demote user without username and use ID", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 123,
+      username: null,
+      telegramId: BigInt(456), // different from actor
+      role: roles[2],
+    });
+
+    (prisma.user.update as jest.Mock).mockResolvedValue({});
+
+    const ctx = createCtx("/demote 123");
+    await demoteUserCommand(ctx as any);
+
+    const newRole = roles[1];
+
+    expect(logAction).toHaveBeenCalledWith(999, expect.stringContaining("Demoted user 123"));
+
+    expect(ctx.reply).toHaveBeenCalledWith(
+      `✅ User 123 demoted to ${newRole} by admin with Telegram ID 999`
+    );
+  });
+
+  it("should handle undefined message text", async () => {
+    const ctx = {
+      message: undefined,
+      reply: jest.fn(),
+      from: { id: 999 },
+    };
+
+    await demoteUserCommand(ctx as any);
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Usage: /demote <userId>");
+  });
 });

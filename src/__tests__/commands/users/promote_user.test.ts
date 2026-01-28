@@ -80,4 +80,36 @@ describe("promoteUserCommand", () => {
       `✅ User testUser promoted to ${newRole} by admin with Telegram ID 999`
     );
   });
+
+  it("should promote user without username and use ID", async () => {
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      id: 123,
+      username: null,
+      role: "User",
+    });
+
+    (prisma.user.update as jest.Mock).mockResolvedValue({});
+
+    const ctx = createCtx("/promote 123");
+    await promoteUserCommand(ctx as any);
+
+    const newRole = roles[roles.indexOf("User") + 1];
+
+    expect(logAction).toHaveBeenCalledWith(999, expect.stringContaining("Promoted user 123"));
+
+    expect(ctx.reply).toHaveBeenCalledWith(
+      `✅ User 123 promoted to ${newRole} by admin with Telegram ID 999`
+    );
+  });
+
+  it("should handle undefined message text", async () => {
+    const ctx = {
+      message: undefined,
+      reply: jest.fn(),
+      from: { id: 999 },
+    };
+
+    await promoteUserCommand(ctx as any);
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Usage: /promote <userId>");
+  });
 });

@@ -154,4 +154,128 @@ describe("editConcertConversation", () => {
       editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "Admin" })
     ).rejects.toThrow("DB fail");
   });
+
+  it("handles cancel button press during selection", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({
+      callbackQuery: { id: "123", data: "cancel_edit" },
+    });
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(ctx.reply).toHaveBeenCalledWith("🚫 Edit canceled.");
+    expect(prisma.concert.update).not.toHaveBeenCalled();
+  });
+
+  it("handles invalid input (not a message)", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({
+      callbackQuery: { data: "some_other_action" },
+    });
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Invalid input. Edit canceled.");
+    expect(prisma.concert.update).not.toHaveBeenCalled();
+  });
+
+  it("handles invalid number input", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "999" } });
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Invalid number. Edit canceled.");
+    expect(prisma.concert.update).not.toHaveBeenCalled();
+  });
+
+  it("handles non-numeric input", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "abc" } });
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Invalid number. Edit canceled.");
+    expect(prisma.concert.update).not.toHaveBeenCalled();
+  });
+
+  it("handles cancel during field selection", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } });
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      update: { callback_query: { data: "cancel" } },
+    });
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(ctx.reply).toHaveBeenCalledWith("🚫 Edit canceled.");
+    expect(prisma.concert.update).not.toHaveBeenCalled();
+  });
+
+  it("edits artist correctly", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } });
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      update: { callback_query: { data: "artist" } },
+    });
+    (ask as jest.Mock).mockResolvedValueOnce("New Artist");
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(prisma.concert.update).toHaveBeenCalledWith({
+      where: { id: concert.id },
+      data: { artistName: "New Artist" },
+    });
+    expect(ctx.reply).toHaveBeenCalledWith("✅ Artist updated successfully!");
+  });
+
+  it("edits url correctly", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } });
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      update: { callback_query: { data: "url" } },
+    });
+    (ask as jest.Mock).mockResolvedValueOnce("https://newurl.com");
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(prisma.concert.update).toHaveBeenCalledWith({
+      where: { id: concert.id },
+      data: { url: "https://newurl.com" },
+    });
+    expect(ctx.reply).toHaveBeenCalledWith("✅ Url updated successfully!");
+  });
+
+  it("edits notes correctly", async () => {
+    const concert = mockConcert();
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    conversation.wait.mockResolvedValueOnce({ message: { text: "1" } });
+    conversation.waitForCallbackQuery.mockResolvedValueOnce({
+      update: { callback_query: { data: "notes" } },
+    });
+    (ask as jest.Mock).mockResolvedValueOnce("New notes");
+
+    await editConcertConversation(conversation, ctx, { dbUserId: 123, userRole: "User" });
+
+    expect(prisma.concert.update).toHaveBeenCalledWith({
+      where: { id: concert.id },
+      data: { notes: "New notes" },
+    });
+    expect(ctx.reply).toHaveBeenCalledWith("✅ Notes updated successfully!");
+  });
 });

@@ -6,6 +6,7 @@ const config: Config = {
   roots: ["<rootDir>/src"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   clearMocks: true,
+  setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.ts"],
 
   // Coverage settings
   collectCoverage: true,
