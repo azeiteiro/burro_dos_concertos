@@ -12,7 +12,11 @@ import { startNotifications } from "./notifications/notifications";
 import { setupCommands } from "./setupCommands";
 import { helpCommand } from "./commands/help";
 import { aboutCommand } from "./commands/about";
-import { handleUrlMessage, handleQuickAddCallback } from "./handlers/urlHandler";
+import {
+  handleUrlMessage,
+  handleQuickAddCallback,
+  handleManualAddCallback,
+} from "./handlers/urlHandler";
 
 // Load environment-specific .env file
 const envFile =
@@ -68,6 +72,9 @@ bot.on("message:text", handleUrlMessage);
 
 // 🎫 Quick add callback handler
 bot.callbackQuery(/^quick_add:/, handleQuickAddCallback);
+
+// ➕ Manual add callback handler
+bot.callbackQuery("add_manual", handleManualAddCallback);
 
 // 🏁 Run the bot
 if (process.env.JEST_WORKER_ID === undefined) {

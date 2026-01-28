@@ -45,7 +45,16 @@ export async function handleUrlMessage(ctx: BotContext) {
       const metadata = await extractMetadata(url);
 
       if (!metadata) {
-        continue; // Skip URLs that don't have valid metadata
+        // Show a subtle message that metadata couldn't be extracted
+        await ctx.reply(
+          `⚠️ Couldn't analyze this link automatically. You can still add the concert manually with /add_concert\n\n🔗 ${url}`,
+          {
+            reply_markup: {
+              inline_keyboard: [[{ text: "➕ Add Manually", callback_data: "add_manual" }]],
+            },
+          }
+        );
+        continue;
       }
 
       // Parse concert info
@@ -73,7 +82,10 @@ export async function handleUrlMessage(ctx: BotContext) {
       });
     } catch (error) {
       console.error("Error processing URL:", url, error);
-      // Continue processing other URLs
+      // Show error to user but continue processing other URLs
+      await ctx.reply(
+        `❌ Error analyzing link. You can add the concert manually with /add_concert\n\n🔗 ${url}`
+      );
     }
   }
 }
@@ -90,7 +102,7 @@ export async function handleQuickAddCallback(ctx: BotContext) {
   const cacheKey = callbackData.replace("quick_add:", "");
   const cached = metadataCache.get(cacheKey);
 
-  if (!cached) {
+  if (!cached || !cached.metadata) {
     await ctx.answerCallbackQuery({
       text: "⏰ This link preview has expired. Please share the link again.",
       show_alert: true,
@@ -104,7 +116,7 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     venue: cached.concertInfo.venue,
     date: cached.concertInfo.date,
     url: cached.metadata.url,
-    description: cached.metadata.description,
+    description: cached.metadata.description || undefined,
   };
 
   // Clean up cache
@@ -113,6 +125,18 @@ export async function handleQuickAddCallback(ctx: BotContext) {
   // Answer callback query
   await ctx.answerCallbackQuery({
     text: "✅ Starting conversation with prefilled data...",
+  });
+
+  // Start the add concert conversation
+  await ctx.conversation.enter("addConcertConversation");
+}
+
+/**
+ * Handles the "Add Manually" button click
+ */
+export async function handleManualAddCallback(ctx: BotContext) {
+  await ctx.answerCallbackQuery({
+    text: "✅ Starting manual concert entry...",
   });
 
   // Start the add concert conversation
