@@ -1,4 +1,13 @@
-import { Context } from "grammy";
+import { Context, SessionFlavor } from "grammy";
 import { ConversationFlavor } from "@grammyjs/conversations";
 
-export type BotContext = Context & ConversationFlavor;
+export interface SessionData {
+  prefillData?: {
+    artist?: string;
+    venue?: string;
+    date?: string;
+    url?: string;
+  };
+}
+
+export type BotContext = Context & ConversationFlavor & SessionFlavor<SessionData>;

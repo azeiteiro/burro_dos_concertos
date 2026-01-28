@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import path from "path";
-import { Bot } from "grammy";
+import { Bot, session } from "grammy";
 import { conversations, createConversation } from "@grammyjs/conversations";
 import startCommand from "./commands/start";
 import { addConcertConversation } from "./conversations/add_concert";
@@ -12,6 +12,11 @@ import { startNotifications } from "./notifications/notifications";
 import { setupCommands } from "./setupCommands";
 import { helpCommand } from "./commands/help";
 import { aboutCommand } from "./commands/about";
+import {
+  handleUrlMessage,
+  handleQuickAddCallback,
+  handleManualAddCallback,
+} from "./handlers/urlHandler";
 
 // Load environment-specific .env file
 const envFile =
@@ -32,6 +37,13 @@ if (!process.env.BOT_TOKEN) {
 const bot = new Bot<BotContext>(process.env.BOT_TOKEN!);
 
 console.log(`🤖 Bot initialized in ${process.env.NODE_ENV || "development"} mode.`);
+
+// 💾 Session storage (for prefilling concert data)
+bot.use(
+  session({
+    initial: () => ({}),
+  })
+);
 
 // 🗣️ Conversations
 bot.use(conversations());
@@ -54,6 +66,15 @@ console.log("🔔 Notifications system initialized.");
 bot.command("start", startCommand);
 bot.command("help", helpCommand);
 bot.command("about", aboutCommand);
+
+// 🔗 URL detection for concert links (admin only)
+bot.on("message:text", handleUrlMessage);
+
+// 🎫 Quick add callback handler
+bot.callbackQuery(/^quick_add:/, handleQuickAddCallback);
+
+// ➕ Manual add callback handler
+bot.callbackQuery("add_manual", handleManualAddCallback);
 
 // 🏁 Run the bot
 if (process.env.JEST_WORKER_ID === undefined) {

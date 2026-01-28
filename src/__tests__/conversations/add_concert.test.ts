@@ -28,10 +28,13 @@ describe("addConcertConversation", () => {
 
     mockConversation = {
       external: jest.fn((fn: any) => fn()),
+      waitForCallbackQuery: jest.fn(),
+      wait: jest.fn(),
     };
 
     mockCtx = {
       reply: jest.fn(),
+      answerCallbackQuery: jest.fn(),
     };
   });
 
@@ -208,5 +211,224 @@ describe("addConcertConversation", () => {
       })
     );
     expect(mockCtx.reply).toHaveBeenCalledWith(expect.stringContaining("✅ Concert added"));
+  });
+
+  it("handles prefilled data with edit action", async () => {
+    const prefillData = {
+      artist: "Prefilled Artist",
+      venue: "Prefilled Venue",
+      date: "2025-12-25",
+      url: "https://prefilled.com",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "edit_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+
+    // Mock the edit flow responses
+    const mockResponses = [
+      { message: { text: "keep" } }, // artist
+      { message: { text: "keep" } }, // venue
+      { message: { text: "keep" } }, // date
+      { message: { text: "keep" } }, // time
+      { message: { text: "keep" } }, // url
+      { message: { text: "keep" } }, // notes
+    ];
+
+    let callCount = 0;
+    mockConversation.wait.mockImplementation(() => {
+      return Promise.resolve(mockResponses[callCount++]);
+    });
+
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    const replyCalls = mockCtx.reply.mock.calls.map((call: any[]) => call[0]);
+    const hasPreviewMessage = replyCalls.some(
+      (call: string) => typeof call === "string" && call.includes("Concert Information Detected")
+    );
+    expect(hasPreviewMessage).toBe(true);
+    expect(prisma.concert.create).toHaveBeenCalled();
+  });
+
+  it("handles prefilled data with confirm action", async () => {
+    const prefillData = {
+      artist: "Prefilled Artist",
+      venue: "Prefilled Venue",
+      date: "2025-12-25T00:00:00Z",
+      url: "https://prefilled.com",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "confirm_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+    (ask as jest.Mock).mockResolvedValueOnce(null); // notes (only missing field)
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    const replyCalls = mockCtx.reply.mock.calls.map((call: any[]) => call[0]);
+    const hasPreviewMessage = replyCalls.some(
+      (call: string) => typeof call === "string" && call.includes("Concert Information Detected")
+    );
+    expect(hasPreviewMessage).toBe(true);
+
+    expect(prisma.concert.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          artistName: "Prefilled Artist",
+          venue: "Prefilled Venue",
+        }),
+      })
+    );
+  });
+
+  it("handles prefilled data missing required fields", async () => {
+    const prefillData = {
+      artist: "Partial Artist",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "confirm_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+
+    (ask as jest.Mock)
+      .mockResolvedValueOnce("Venue Name") // missing venue
+      .mockResolvedValueOnce(new Date("2025-10-15")) // missing date
+      .mockResolvedValueOnce(null) // time
+      .mockResolvedValueOnce(null); // notes
+
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    expect(prisma.concert.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          artistName: "Partial Artist",
+          venue: "Venue Name",
+        }),
+      })
+    );
+  });
+
+  it("handles cancellation with prefilled data", async () => {
+    const prefillData = {
+      artist: "Artist",
+      venue: "Venue",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "cancel_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    expect(prisma.concert.create).not.toHaveBeenCalled();
+    expect(mockCtx.reply).toHaveBeenCalledWith("❌ Cancelled.");
+  });
+
+  it("handles database error gracefully", async () => {
+    (ask as jest.Mock)
+      .mockResolvedValueOnce("Artist Name")
+      .mockResolvedValueOnce("Venue Name")
+      .mockResolvedValueOnce(new Date("2025-10-15"))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+
+    const dbError = new Error("Database connection failed");
+    (prisma.concert.create as jest.Mock).mockRejectedValue(dbError);
+
+    await expect(
+      addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 })
+    ).rejects.toThrow("Database connection failed");
+  });
+
+  it("handles empty prefillData object", async () => {
+    const prefillData = {};
+
+    (ask as jest.Mock)
+      .mockResolvedValueOnce("Artist Name")
+      .mockResolvedValueOnce("Venue Name")
+      .mockResolvedValueOnce(new Date("2025-10-15"))
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(null);
+
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    expect(prisma.concert.create).toHaveBeenCalled();
+  });
+
+  it("handles prefilled data with date containing time", async () => {
+    const prefillData = {
+      artist: "Artist",
+      venue: "Venue",
+      date: "2025-12-25T20:30:00Z",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "confirm_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+    (ask as jest.Mock).mockResolvedValueOnce(null); // notes
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    // Should show time in the confirmation message
+    const replyCalls = mockCtx.reply.mock.calls;
+    const hasTimeMessage = replyCalls.some(
+      (call: any) => call[0] && typeof call[0] === "string" && call[0].includes("⏰")
+    );
+    expect(hasTimeMessage).toBe(true);
+  });
+
+  it("handles confirm with missing artist field", async () => {
+    const prefillData = {
+      venue: "Venue",
+      date: "2025-12-25T00:00:00Z",
+    };
+
+    const confirmCtx = {
+      answerCallbackQuery: jest.fn(),
+      callbackQuery: { data: "confirm_prefill" },
+    };
+
+    mockConversation.waitForCallbackQuery.mockResolvedValue(confirmCtx);
+    (ask as jest.Mock)
+      .mockResolvedValueOnce("Artist Name") // missing artist - first ask
+      .mockResolvedValueOnce("FINISH"); // skip remaining optional fields
+
+    (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 1 });
+
+    await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42, prefillData });
+
+    expect(prisma.concert.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          artistName: "Artist Name",
+          venue: "Venue",
+        }),
+      })
+    );
   });
 });
