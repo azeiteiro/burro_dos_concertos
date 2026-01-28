@@ -53,4 +53,46 @@ describe("listConcertsCommand", () => {
     expect(ctx.reply.mock.calls[0][0]).toContain("Arctic Monkeys");
     expect(ctx.reply.mock.calls[0][0]).toContain("Altice Arena, Lisbon");
   });
+
+  it("includes user name with last name initial", async () => {
+    const user = createMockUser({ firstName: "John", lastName: "Doe" });
+    const concert = createMockConcert({ userId: user.id, user });
+
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    await listConcertsCommand(ctx);
+
+    // MarkdownV2 escapes periods with backslash
+    expect(ctx.reply.mock.calls[0][0]).toContain("John D\\.");
+  });
+
+  it("includes optional fields when present", async () => {
+    const user = createMockUser();
+    const concert = createMockConcert({
+      userId: user.id,
+      url: "https://example.com",
+      notes: "VIP section",
+      concertTime: new Date("2025-10-15T20:00:00Z"),
+    });
+
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    await listConcertsCommand(ctx);
+
+    const reply = ctx.reply.mock.calls[0][0];
+    // MarkdownV2 escapes dots and other special characters
+    expect(reply).toContain("example");
+    expect(reply).toContain("VIP section");
+  });
+
+  it("handles error gracefully", async () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+
+    (prisma.concert.findMany as jest.Mock).mockRejectedValue(new Error("DB error"));
+
+    await listConcertsCommand(ctx);
+
+    expect(ctx.reply).toHaveBeenCalledWith("❌ Something went wrong while listing concerts.");
+    consoleErrorSpy.mockRestore();
+  });
 });
