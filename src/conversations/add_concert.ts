@@ -6,6 +6,7 @@ import { prisma } from "@/config/db";
 import { logAction } from "@/utils/logger";
 import { notifyNewConcert } from "@/notifications/helpers";
 import { BotContext } from "@/types/global";
+import { InlineKeyboard } from "grammy";
 
 // Helper function to save concert
 async function saveConcert(
@@ -113,21 +114,37 @@ export const addConcertConversation = async (
       previewMessage += `🔗 <b>Link:</b> <a href="${prefillData.url}">View</a>\n`;
     }
 
-    previewMessage += "\n<i>Reply 'yes' to confirm or 'edit' to modify the information.</i>";
+    // Create inline keyboard with confirmation buttons
+    const keyboard = new InlineKeyboard()
+      .text("✅ Confirm", "confirm_prefill")
+      .text("✏️ Edit", "edit_prefill")
+      .row()
+      .text("❌ Cancel", "cancel_prefill");
 
-    await ctx.reply(previewMessage, { parse_mode: "HTML", disable_web_page_preview: true });
+    await ctx.reply(previewMessage, {
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+      reply_markup: keyboard,
+    });
 
-    // Wait for confirmation
-    const confirmCtx = await conversation.wait();
-    const response = confirmCtx.message?.text?.toLowerCase().trim();
+    // Wait for button press
+    const confirmCtx = await conversation.waitForCallbackQuery(
+      ["confirm_prefill", "edit_prefill", "cancel_prefill"],
+      {
+        otherwise: (ctx) => ctx.reply("Please use the buttons below to confirm, edit, or cancel."),
+      }
+    );
 
-    if (response === "cancel") {
+    await confirmCtx.answerCallbackQuery();
+    const response = confirmCtx.callbackQuery.data;
+
+    if (response === "cancel_prefill") {
       // Prefill data cleared (passed as parameter, no session cleanup needed)
       await ctx.reply("❌ Cancelled.");
       return;
     }
 
-    if (response === "yes") {
+    if (response === "confirm_prefill") {
       // Use prefilled data
       artistName = prefillData?.artist || null;
       venue = prefillData?.venue || null;
@@ -245,10 +262,12 @@ export const addConcertConversation = async (
       return;
     }
 
-    // If user said "edit" or anything else, let them modify the fields
-    await ctx.reply(
-      "✏️ Let's review each field. Type 'keep' to use the current value or enter a new one."
-    );
+    // If user clicked "edit", let them modify the fields
+    if (response === "edit_prefill") {
+      await ctx.reply(
+        "✏️ Let's review each field. Type 'keep' to use the current value or enter a new one."
+      );
+    }
   }
 
   // --- Normal flow (no prefill or user wants to edit) ---
