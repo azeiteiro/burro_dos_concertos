@@ -5,5 +5,3 @@ onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
   - prisma
-  - re2
-  - unrs-resolver
