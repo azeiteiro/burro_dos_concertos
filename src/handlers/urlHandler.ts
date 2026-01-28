@@ -25,19 +25,17 @@ function extractUrls(text: string): string[] {
 
 /**
  * Handles messages containing URLs
- * Detects concert links and shows preview to admins
+ * Detects concert links and shows preview for admins to add
  */
 export async function handleUrlMessage(ctx: BotContext) {
-  // Only process for admins
-  if (!(await isAdmin(ctx))) {
-    return;
-  }
-
   const text = ctx.message?.text;
   if (!text) return;
 
   const urls = extractUrls(text);
   if (urls.length === 0) return;
+
+  // Check if user is admin for button visibility
+  const userIsAdmin = await isAdmin(ctx);
 
   // Process each URL
   for (const url of urls) {
@@ -45,15 +43,17 @@ export async function handleUrlMessage(ctx: BotContext) {
       const metadata = await extractMetadata(url);
 
       if (!metadata) {
-        // Show a subtle message that metadata couldn't be extracted
-        await ctx.reply(
-          `⚠️ Couldn't analyze this link automatically. You can still add the concert manually with /add_concert\n\n🔗 ${url}`,
-          {
-            reply_markup: {
-              inline_keyboard: [[{ text: "➕ Add Manually", callback_data: "add_manual" }]],
-            },
-          }
-        );
+        // Only show manual add option to admins
+        if (userIsAdmin) {
+          await ctx.reply(
+            `⚠️ Couldn't analyze this link automatically. You can still add the concert manually with /add_concert\n\n🔗 ${url}`,
+            {
+              reply_markup: {
+                inline_keyboard: [[{ text: "➕ Add Manually", callback_data: "add_manual" }]],
+              },
+            }
+          );
+        }
         continue;
       }
 
@@ -71,21 +71,37 @@ export async function handleUrlMessage(ctx: BotContext) {
       // Clean old cache entries (older than 1 hour)
       cleanCache();
 
-      // Create inline keyboard with "Add Concert" button
-      const keyboard = new InlineKeyboard().text("✅ Add Concert", `quick_add:${cacheKey}`);
+      // Create preview with button only for admins
+      const replyOptions: {
+        parse_mode: "HTML";
+        disable_web_page_preview: boolean;
+        reply_markup?: InlineKeyboard;
+      } = {
+        parse_mode: "HTML",
+        disable_web_page_preview: false,
+      };
+
+      if (userIsAdmin) {
+        // Admin sees the "Add Concert" button
+        const keyboard = new InlineKeyboard().text("✅ Add Concert", `quick_add:${cacheKey}`);
+        replyOptions.reply_markup = keyboard;
+      }
 
       // Send preview message
-      await ctx.reply(formatConcertPreview(metadata), {
-        parse_mode: "HTML",
-        reply_markup: keyboard,
-        disable_web_page_preview: false,
-      });
+      let previewText = formatConcertPreview(metadata);
+      if (!userIsAdmin) {
+        previewText += "\n\n<i>💡 Admins can add this concert to the list.</i>";
+      }
+
+      await ctx.reply(previewText, replyOptions);
     } catch (error) {
       console.error("Error processing URL:", url, error);
-      // Show error to user but continue processing other URLs
-      await ctx.reply(
-        `❌ Error analyzing link. You can add the concert manually with /add_concert\n\n🔗 ${url}`
-      );
+      // Show error only to admins
+      if (userIsAdmin) {
+        await ctx.reply(
+          `❌ Error analyzing link. You can add the concert manually with /add_concert\n\n🔗 ${url}`
+        );
+      }
     }
   }
 }
@@ -96,6 +112,15 @@ export async function handleUrlMessage(ctx: BotContext) {
 export async function handleQuickAddCallback(ctx: BotContext) {
   const callbackData = ctx.callbackQuery?.data;
   if (!callbackData || !callbackData.startsWith("quick_add:")) {
+    return;
+  }
+
+  // Only admins can add concerts
+  if (!(await isAdmin(ctx))) {
+    await ctx.answerCallbackQuery({
+      text: "❌ Only admins can add concerts.",
+      show_alert: true,
+    });
     return;
   }
 
@@ -149,6 +174,15 @@ export async function handleQuickAddCallback(ctx: BotContext) {
  * Handles the "Add Manually" button click
  */
 export async function handleManualAddCallback(ctx: BotContext) {
+  // Only admins can add concerts
+  if (!(await isAdmin(ctx))) {
+    await ctx.answerCallbackQuery({
+      text: "❌ Only admins can add concerts.",
+      show_alert: true,
+    });
+    return;
+  }
+
   const tgUser = ctx.from;
   if (!tgUser) {
     await ctx.answerCallbackQuery({
