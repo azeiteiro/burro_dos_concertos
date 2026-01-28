@@ -74,6 +74,16 @@ export async function handleUrlMessage(ctx: BotContext) {
               },
             }
           );
+        } else {
+          // In private chat, show to everyone
+          await ctx.reply(
+            `⚠️ Couldn't analyze this link automatically. You can still add the concert manually with /add_concert\n\n🔗 ${url}`,
+            {
+              reply_markup: {
+                inline_keyboard: [[{ text: "➕ Add Manually", callback_data: "add_manual" }]],
+              },
+            }
+          );
         }
         continue;
       }
@@ -128,27 +138,15 @@ export async function handleUrlMessage(ctx: BotContext) {
           });
         }
       } else {
-        // In private chat: show preview directly with button if admin
-        const replyOptions: {
-          parse_mode: "HTML";
-          disable_web_page_preview: boolean;
-          reply_markup?: InlineKeyboard;
-        } = {
+        // In private chat: show preview directly with button for everyone
+        const keyboard = new InlineKeyboard().text("✅ Add Concert", `quick_add:${cacheKey}`);
+        const previewText = formatConcertPreview(metadata);
+
+        await ctx.reply(previewText, {
           parse_mode: "HTML",
           disable_web_page_preview: false,
-        };
-
-        if (userIsAdmin) {
-          const keyboard = new InlineKeyboard().text("✅ Add Concert", `quick_add:${cacheKey}`);
-          replyOptions.reply_markup = keyboard;
-        }
-
-        let previewText = formatConcertPreview(metadata);
-        if (!userIsAdmin) {
-          previewText += "\n\n<i>💡 Admins can add concerts to the list.</i>";
-        }
-
-        await ctx.reply(previewText, replyOptions);
+          reply_markup: keyboard,
+        });
       }
     } catch (error) {
       console.error("Error processing URL:", url, error);
@@ -167,7 +165,8 @@ export async function handleUrlMessage(ctx: BotContext) {
             console.error(`Failed to notify admin ${admin.telegramId}:`, err);
           }
         }
-      } else if (userIsAdmin) {
+      } else {
+        // In private chat, show error to everyone
         await ctx.reply(
           `❌ Error analyzing link. You can add the concert manually with /add_concert\n\n🔗 ${url}`
         );
@@ -185,10 +184,15 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     return;
   }
 
-  // Only admins can add concerts
-  if (!(await isAdmin(ctx))) {
+  // In groups, only admins can add concerts
+  // In private chats, anyone can add for themselves
+  const isGroupChat =
+    ctx.callbackQuery?.message?.chat.type === "group" ||
+    ctx.callbackQuery?.message?.chat.type === "supergroup";
+
+  if (isGroupChat && !(await isAdmin(ctx))) {
     await ctx.answerCallbackQuery({
-      text: "❌ Only admins can add concerts.",
+      text: "❌ Only admins can add concerts in groups.",
       show_alert: true,
     });
     return;
@@ -244,10 +248,15 @@ export async function handleQuickAddCallback(ctx: BotContext) {
  * Handles the "Add Manually" button click
  */
 export async function handleManualAddCallback(ctx: BotContext) {
-  // Only admins can add concerts
-  if (!(await isAdmin(ctx))) {
+  // In groups, only admins can add concerts
+  // In private chats, anyone can add for themselves
+  const isGroupChat =
+    ctx.callbackQuery?.message?.chat.type === "group" ||
+    ctx.callbackQuery?.message?.chat.type === "supergroup";
+
+  if (isGroupChat && !(await isAdmin(ctx))) {
     await ctx.answerCallbackQuery({
-      text: "❌ Only admins can add concerts.",
+      text: "❌ Only admins can add concerts in groups.",
       show_alert: true,
     });
     return;
