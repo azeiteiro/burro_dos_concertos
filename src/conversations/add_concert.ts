@@ -249,133 +249,319 @@ export const addConcertConversation = async (
       return;
     }
 
-    // If user said "edit" or anything else, continue with normal flow
-    await ctx.reply("✏️ Let's go through the information step by step.");
+    // If user said "edit" or anything else, let them modify the fields
+    await ctx.reply(
+      "✏️ Let's review each field. Type 'keep' to use the current value or enter a new one."
+    );
   }
 
   // --- Normal flow (no prefill or user wants to edit) ---
 
   // --- Artist ---
-  artistName = await ask(conversation, ctx, "🎤 Who is the artist?", validateConcertInput.name, {
-    showCancel: true,
-  });
+  if (prefillData?.artist && hasPrefill) {
+    await ctx.reply(
+      `🎤 <b>Current artist:</b> ${prefillData.artist}\n\nType 'keep' to use this, or enter a new artist name:`,
+      { parse_mode: "HTML" }
+    );
+    const artistResponse = await conversation.wait();
+    const artistInput = artistResponse.message?.text?.trim().toLowerCase();
 
-  if (artistName === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+    if (artistInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (artistInput === "keep") {
+      artistName = prefillData.artist;
+      await ctx.reply(`✅ Keeping: ${prefillData.artist}`);
+    } else {
+      const validated = validateConcertInput.name(artistResponse.message?.text || "");
+      if (typeof validated === "string" && !validated.startsWith("❌")) {
+        artistName = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    artistName = await ask(conversation, ctx, "🎤 Who is the artist?", validateConcertInput.name, {
+      showCancel: true,
+    });
+
+    if (artistName === "CANCEL") {
+      return;
+    }
   }
 
   // --- Venue ---
-  venue = await ask(conversation, ctx, "🏟️ Where is the concert?", validateConcertInput.location, {
-    showCancel: true,
-  });
+  if (prefillData?.venue && hasPrefill) {
+    await ctx.reply(
+      `🏟️ <b>Current venue:</b> ${prefillData.venue}\n\nType 'keep' to use this, or enter a new venue:`,
+      { parse_mode: "HTML" }
+    );
+    const venueResponse = await conversation.wait();
+    const venueInput = venueResponse.message?.text?.trim().toLowerCase();
 
-  if (venue === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+    if (venueInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (venueInput === "keep") {
+      venue = prefillData.venue;
+      await ctx.reply(`✅ Keeping: ${prefillData.venue}`);
+    } else {
+      const validated = validateConcertInput.location(venueResponse.message?.text || "");
+      if (typeof validated === "string" && !validated.startsWith("❌")) {
+        venue = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    venue = await ask(
+      conversation,
+      ctx,
+      "🏟️ Where is the concert?",
+      validateConcertInput.location,
+      {
+        showCancel: true,
+      }
+    );
+
+    if (venue === "CANCEL") {
+      return;
+    }
   }
 
   // --- Date ---
-  concertDate = await ask(
-    conversation,
-    ctx,
-    "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
-    validateConcertInput.date,
-    { showCancel: true }
-  );
+  if (prefillData?.date && hasPrefill) {
+    const date = new Date(prefillData.date);
+    const dateStr = format(date, "yyyy-MM-dd");
 
-  if (concertDate === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+    await ctx.reply(
+      `📅 <b>Current date:</b> ${dateStr}\n\nType 'keep' to use this, or enter a new date:`,
+      { parse_mode: "HTML" }
+    );
+    const dateResponse = await conversation.wait();
+    const dateInput = dateResponse.message?.text?.trim().toLowerCase();
+
+    if (dateInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (dateInput === "keep") {
+      concertDate = date;
+      await ctx.reply(`✅ Keeping: ${dateStr}`);
+
+      // Also extract time if present
+      const hours = date.getHours();
+      const minutes = date.getMinutes();
+      if (hours !== 0 || minutes !== 0) {
+        concertTime = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      }
+    } else {
+      const validated = validateConcertInput.date(dateResponse.message?.text || "");
+      if (validated instanceof Date) {
+        concertDate = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    concertDate = await ask(
+      conversation,
+      ctx,
+      "📅 Enter concert date (YYYY-MM-DD or natural language like 'next Friday'):",
+      validateConcertInput.date,
+      { showCancel: true }
+    );
+
+    if (concertDate === "CANCEL") {
+      return;
+    }
   }
 
   await ctx.reply(`✅ Date accepted: ${format(concertDate as Date, "yyyy-MM-dd")}`);
 
   // --- Time (optional) ---
-  concertTime = await ask(
-    conversation,
-    ctx,
-    "⏰ Enter concert time (HH:mm) or skip:",
-    validateConcertInput.time,
-    { optional: true, showFinish: true, showCancel: true }
-  );
+  // Check if time was already extracted or if we're in edit mode with prefilled time
+  if (concertTime && hasPrefill) {
+    await ctx.reply(
+      `⏰ <b>Current time:</b> ${concertTime}\n\nType 'keep' to use this, 'skip' to remove, or enter a new time:`,
+      { parse_mode: "HTML" }
+    );
+    const timeResponse = await conversation.wait();
+    const timeInput = timeResponse.message?.text?.trim().toLowerCase();
 
-  if (concertTime === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
-  }
-  if (concertTime === "FINISH") {
-    // Save with mandatory fields only
-    await saveConcert(
+    if (timeInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (timeInput === "keep") {
+      await ctx.reply(`✅ Keeping: ${concertTime}`);
+      // concertTime already set
+    } else if (timeInput === "skip") {
+      concertTime = null;
+      await ctx.reply("⏭️ Time skipped.");
+    } else {
+      const validated = validateConcertInput.time(timeResponse.message?.text || "");
+      if (validated === null || (typeof validated === "string" && !validated.startsWith("❌"))) {
+        concertTime = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    concertTime = await ask(
       conversation,
       ctx,
-      dbUserId,
-      artistName as string,
-      venue as string,
-      concertDate as Date,
-      null,
-      null,
-      null
+      "⏰ Enter concert time (HH:mm) or skip:",
+      validateConcertInput.time,
+      { optional: true, showFinish: true, showCancel: true }
     );
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+
+    if (concertTime === "CANCEL") {
+      return;
+    }
+    if (concertTime === "FINISH") {
+      // Save with mandatory fields only
+      await saveConcert(
+        conversation,
+        ctx,
+        dbUserId,
+        artistName as string,
+        venue as string,
+        concertDate as Date,
+        null,
+        null,
+        null
+      );
+      return;
+    }
   }
 
   // --- URL (optional) ---
-  url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
-    optional: true,
-    showFinish: true,
-    showCancel: true,
-  });
-
-  if (url === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
-  }
-
-  if (url === "FINISH") {
-    // Save with fields collected so far
-    await saveConcert(
-      conversation,
-      ctx,
-      dbUserId,
-      artistName as string,
-      venue as string,
-      concertDate as Date,
-      concertTime as string | null,
-      null,
-      null
+  if (prefillData?.url && hasPrefill) {
+    await ctx.reply(
+      `🔗 <b>Current URL:</b> <a href="${prefillData.url}">${prefillData.url}</a>\n\nType 'keep' to use this, 'skip' to remove, or enter a new URL:`,
+      { parse_mode: "HTML", disable_web_page_preview: true }
     );
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+    const urlResponse = await conversation.wait();
+    const urlInput = urlResponse.message?.text?.trim().toLowerCase();
+
+    if (urlInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (urlInput === "keep") {
+      url = prefillData.url;
+      await ctx.reply("✅ Keeping URL");
+    } else if (urlInput === "skip") {
+      url = null;
+      await ctx.reply("⏭️ URL skipped.");
+    } else {
+      const validated = validateConcertInput.url(urlResponse.message?.text || "");
+      if (validated === null || (typeof validated === "string" && !validated.startsWith("❌"))) {
+        url = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    url = await ask(conversation, ctx, "🔗 Add a URL:", validateConcertInput.url, {
+      optional: true,
+      showFinish: true,
+      showCancel: true,
+    });
+
+    if (url === "CANCEL") {
+      return;
+    }
+
+    if (url === "FINISH") {
+      // Save with fields collected so far
+      await saveConcert(
+        conversation,
+        ctx,
+        dbUserId,
+        artistName as string,
+        venue as string,
+        concertDate as Date,
+        concertTime as string | null,
+        null,
+        null
+      );
+      return;
+    }
   }
 
   // --- Notes (optional) ---
-  notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
-    optional: true,
-    showFinish: true,
-    showCancel: true,
-  });
+  if (prefillData?.description && hasPrefill) {
+    const shortDesc =
+      prefillData.description.length > 200
+        ? prefillData.description.substring(0, 200) + "..."
+        : prefillData.description;
 
-  if (notes === "CANCEL") {
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
-  }
-  if (notes === "FINISH") {
-    // Save with all fields except notes
-    await saveConcert(
-      conversation,
-      ctx,
-      dbUserId,
-      artistName as string,
-      venue as string,
-      concertDate as Date,
-      concertTime as string | null,
-      url as string | null,
-      null
+    await ctx.reply(
+      `📝 <b>Extracted description:</b>\n${shortDesc}\n\nType 'keep' to use this as notes, 'skip' to not add notes, or enter your own notes:`,
+      { parse_mode: "HTML" }
     );
-    // Prefill data cleared (passed as parameter, no session cleanup needed)
-    return;
+    const notesResponse = await conversation.wait();
+    const notesInput = notesResponse.message?.text?.trim().toLowerCase();
+
+    if (notesInput === "cancel") {
+      await ctx.reply("❌ Cancelled.");
+      return;
+    }
+
+    if (notesInput === "keep") {
+      notes = prefillData.description;
+      await ctx.reply("✅ Using description as notes");
+    } else if (notesInput === "skip") {
+      notes = null;
+      await ctx.reply("⏭️ Notes skipped.");
+    } else {
+      const validated = validateConcertInput.notes(notesResponse.message?.text || "");
+      if (validated === null || (typeof validated === "string" && !validated.startsWith("❌"))) {
+        notes = validated;
+      } else {
+        await ctx.reply(validated as string);
+        return;
+      }
+    }
+  } else {
+    notes = await ask(conversation, ctx, "📝 Any notes?", validateConcertInput.notes, {
+      optional: true,
+      showFinish: true,
+      showCancel: true,
+    });
+
+    if (notes === "CANCEL") {
+      return;
+    }
+    if (notes === "FINISH") {
+      // Save with all fields except notes
+      await saveConcert(
+        conversation,
+        ctx,
+        dbUserId,
+        artistName as string,
+        venue as string,
+        concertDate as Date,
+        concertTime as string | null,
+        url as string | null,
+        null
+      );
+      return;
+    }
   }
 
   // --- Save concert with all fields ---
