@@ -14,6 +14,7 @@ export interface ConcertMetadata {
   image: string | null;
   url: string;
   date: string | null;
+  html?: string; // Store HTML for additional parsing
   // Parsed fields (we'll try to extract these from title/description)
   artist?: string;
   venue?: string;
@@ -152,6 +153,7 @@ export async function extractMetadata(url: string): Promise<ConcertMetadata | nu
       image: metadata.image || null,
       url: finalUrl,
       date: metadata.date || null,
+      html: html, // Preserve HTML for additional parsing
     };
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -161,10 +163,40 @@ export async function extractMetadata(url: string): Promise<ConcertMetadata | nu
 }
 
 /**
+ * Extracts venue from HTML (for sites like Ticketline that don't use Open Graph)
+ */
+function extractVenueFromHtml(html: string): string | null {
+  // Try to find schema.org venue markup
+  const schemaMatch = html.match(
+    /<[^>]*class=["'][^"']*venue[^"']*["'][^>]*itemprop=["']name["'][^>]*>([^<]+)<\/[^>]+>/i
+  );
+  if (schemaMatch) {
+    return schemaMatch[1].trim();
+  }
+
+  // Try Portuguese-specific patterns
+  const portugueseVenueMatch = html.match(/<p[^>]*class=["']venue["'][^>]*>([^<]+)<\/p>/i);
+  if (portugueseVenueMatch) {
+    return portugueseVenueMatch[1].trim();
+  }
+
+  // Try itemprop="location" with schema.org
+  const locationMatch = html.match(/<[^>]*itemprop=["']location["'][^>]*>([^<]+)<\/[^>]+>/i);
+  if (locationMatch) {
+    return locationMatch[1].trim();
+  }
+
+  return null;
+}
+
+/**
  * Attempts to parse concert-specific information from metadata
  * This is a simple heuristic-based approach
  */
-export function parseConcertInfo(metadata: ConcertMetadata): {
+export function parseConcertInfo(
+  metadata: ConcertMetadata,
+  html?: string
+): {
   artist?: string;
   venue?: string;
   date?: string;
@@ -201,6 +233,14 @@ export function parseConcertInfo(metadata: ConcertMetadata): {
     info.artist = title;
   }
 
+  // Try to extract venue from HTML if not found in title
+  if (!info.venue && html) {
+    const venueFromHtml = extractVenueFromHtml(html);
+    if (venueFromHtml) {
+      info.venue = venueFromHtml;
+    }
+  }
+
   return info;
 }
 
@@ -208,7 +248,7 @@ export function parseConcertInfo(metadata: ConcertMetadata): {
  * Formats concert metadata for display
  */
 export function formatConcertPreview(metadata: ConcertMetadata): string {
-  const parsedInfo = parseConcertInfo(metadata);
+  const parsedInfo = parseConcertInfo(metadata, metadata.html);
 
   let preview = "🎵 <b>Concert Link Detected</b>\n\n";
 

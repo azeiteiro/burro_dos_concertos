@@ -57,8 +57,8 @@ export async function handleUrlMessage(ctx: BotContext) {
         continue;
       }
 
-      // Parse concert info
-      const concertInfo = parseConcertInfo(metadata);
+      // Parse concert info with HTML for better venue extraction
+      const concertInfo = parseConcertInfo(metadata, metadata.html);
 
       // Store metadata for later use
       const cacheKey = `concert_${ctx.from?.id}_${Date.now()}`;
