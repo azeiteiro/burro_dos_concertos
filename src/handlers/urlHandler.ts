@@ -127,8 +127,6 @@ export async function handleQuickAddCallback(ctx: BotContext) {
     url: cached.metadata.url,
   };
 
-  console.log("Prefill data prepared:", prefillData);
-
   // Clean up cache
   metadataCache.delete(cacheKey);
 

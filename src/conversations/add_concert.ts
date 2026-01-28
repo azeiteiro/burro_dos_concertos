@@ -76,9 +76,6 @@ export const addConcertConversation = async (
   // Check if we have prefilled data from URL
   const hasPrefill = prefillData && Object.keys(prefillData).length > 0;
 
-  console.log("Conversation started with prefill data:", prefillData);
-  console.log("Has prefill:", hasPrefill);
-
   let artistName: string | Date | "CANCEL" | "FINISH" | null = null;
   let venue: string | Date | "CANCEL" | "FINISH" | null = null;
   let concertDate: string | Date | "CANCEL" | "FINISH" | null = null;
