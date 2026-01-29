@@ -82,4 +82,20 @@ if (process.env.JEST_WORKER_ID === undefined) {
   console.log("🚀 Bot started!");
 }
 
+// 🧹 Cleanup on shutdown
+const cleanup = async () => {
+  console.log("🛑 Shutting down...");
+  try {
+    await bot.stop();
+    console.log("✅ Cleanup complete");
+    process.exit(0);
+  } catch (error) {
+    console.error("❌ Error during cleanup:", error);
+    process.exit(1);
+  }
+};
+
+process.on("SIGINT", cleanup);
+process.on("SIGTERM", cleanup);
+
 export { bot };

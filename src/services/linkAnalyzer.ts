@@ -51,6 +51,8 @@ async function fallbackFetch(url: string): Promise<{ body: string; url: string }
       timeout: 15000,
       // Allow malformed headers
       insecureHTTPParser: true,
+      // Allow invalid/self-signed SSL certificates
+      rejectUnauthorized: false,
     };
 
     const req = client.request(options, (res) => {
@@ -105,6 +107,9 @@ export async function extractMetadata(url: string): Promise<ConcertMetadata | nu
         "accept-language": "en-US,en;q=0.9,pt;q=0.8",
       },
       http2: false, // Disable HTTP/2 for better compatibility
+      https: {
+        rejectUnauthorized: false, // Allow invalid/self-signed SSL certificates
+      },
       retry: {
         limit: 1,
         methods: ["GET"],
