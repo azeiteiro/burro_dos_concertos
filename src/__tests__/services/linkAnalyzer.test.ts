@@ -1,5 +1,46 @@
-// Mock got before importing anything that uses it
+// Mock got, puppeteer-core, and http/https before importing anything that uses them
 jest.mock("got", () => jest.fn());
+jest.mock("puppeteer-core", () => ({
+  default: {
+    connect: jest.fn(),
+  },
+}));
+jest.mock("http", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  request: jest.fn((_options, _callback) => {
+    const req = {
+      on: jest.fn(),
+      end: jest.fn(),
+      destroy: jest.fn(),
+    };
+    // Simulate immediate error
+    setTimeout(() => {
+      const errorHandler = req.on.mock.calls.find((call) => call[0] === "error");
+      if (errorHandler) {
+        errorHandler[1](new Error("Mocked network error"));
+      }
+    }, 0);
+    return req;
+  }),
+}));
+jest.mock("https", () => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  request: jest.fn((_options, _callback) => {
+    const req = {
+      on: jest.fn(),
+      end: jest.fn(),
+      destroy: jest.fn(),
+    };
+    // Simulate immediate error
+    setTimeout(() => {
+      const errorHandler = req.on.mock.calls.find((call) => call[0] === "error");
+      if (errorHandler) {
+        errorHandler[1](new Error("Mocked network error"));
+      }
+    }, 0);
+    return req;
+  }),
+}));
 
 import { extractMetadata, parseConcertInfo, formatConcertPreview } from "@/services/linkAnalyzer";
 
@@ -74,6 +115,35 @@ describe("linkAnalyzer", () => {
 
       expect(result).not.toBeNull();
       expect(result?.html).toBe(html);
+    });
+
+    it("should detect JavaScript requirement and skip Browserless when API key not set", async () => {
+      const originalApiKey = process.env.BROWSERLESS_API_KEY;
+      delete process.env.BROWSERLESS_API_KEY;
+
+      const htmlWithJS = `
+        <html>
+          <head>
+            <script>document.location.href = 'redirect';</script>
+            <meta property="og:title" content="JS Required" />
+          </head>
+          <body><noscript>JavaScript required</noscript></body>
+        </html>
+      `;
+
+      mockedGot.mockResolvedValueOnce({
+        body: htmlWithJS,
+        url: "https://example.com",
+      } as any);
+
+      const result = await extractMetadata("https://example.com");
+
+      expect(result).toBeDefined();
+      expect(result?.title).toBe("JS Required");
+
+      if (originalApiKey) {
+        process.env.BROWSERLESS_API_KEY = originalApiKey;
+      }
     });
   });
 

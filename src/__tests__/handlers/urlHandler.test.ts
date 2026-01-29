@@ -131,7 +131,12 @@ describe("urlHandler", () => {
 
       await handleUrlMessage(mockCtx as BotContext);
 
-      expect(mockCtx.reply).not.toHaveBeenCalled();
+      // Should send feedback message but NOT the acknowledgment
+      expect(mockCtx.reply).toHaveBeenCalledWith("⏳ Analyzing concert link...");
+      expect(mockCtx.reply).not.toHaveBeenCalledWith(
+        "✅ Concert link detected! Admins have been notified.",
+        expect.any(Object)
+      );
     });
 
     it("should show preview directly in private chat", async () => {
