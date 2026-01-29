@@ -36,7 +36,6 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
-          BROWSERLESS_API_KEY: 2TseuBCBs1Z8dO08a58692d909bb6aceb10627c6daac18fcb
 
   deploy:
     needs: test
