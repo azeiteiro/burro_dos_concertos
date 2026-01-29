@@ -50,8 +50,14 @@ jobs:
           username: ${{ secrets.DO_STAGING_USER }}
           key: ${{ secrets.DO_STAGING_SSH_KEY }}
           port: ${{ secrets.DO_STAGING_PORT || 22 }}
+          envs: BROWSERLESS_API_KEY
           script: |
             cd ${{ secrets.DO_STAGING_APP_PATH }}
+
+            # Update BROWSERLESS_API_KEY in .env file
+            sed -i '/^BROWSERLESS_API_KEY=/d' .env 2>/dev/null || true
+            echo "BROWSERLESS_API_KEY=$BROWSERLESS_API_KEY" >> .env
+
             git fetch origin
             git reset --hard origin/master
             pnpm install --frozen-lockfile
@@ -59,3 +65,5 @@ jobs:
             pnpm exec prisma migrate deploy
             pnpm build
             pm2 restart burro_dos_concertos_staging || pm2 start ecosystem.config.js --only burro_dos_concertos_staging
+        env:
+          BROWSERLESS_API_KEY: ${{ secrets.BROWSERLESS_API_KEY }}

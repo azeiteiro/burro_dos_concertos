@@ -7,6 +7,7 @@ import metascraperDate from "metascraper-date";
 import got from "got";
 import https from "https";
 import http from "http";
+import puppeteer from "puppeteer-core";
 
 export interface ConcertMetadata {
   title: string | null;
@@ -88,9 +89,88 @@ async function fallbackFetch(url: string): Promise<{ body: string; url: string }
 }
 
 /**
+ * Checks if HTML contains indicators that JavaScript is required
+ */
+function requiresJavaScript(html: string): boolean {
+  // Check for common queue/JavaScript-required patterns
+  const indicators = [
+    /requires? (the )?activation (of )?javascript/i,
+    /javascript.{0,20}(disabled|required|enabled)/i,
+    /enable.{0,20}javascript/i,
+    /document\.location\.href/i,
+    /window\.location/i,
+    /<noscript>/i,
+  ];
+
+  return indicators.some((pattern) => pattern.test(html));
+}
+
+/**
+ * Fetches a page using Browserless.io (for JavaScript-rendered sites)
+ * Requires BROWSERLESS_API_KEY environment variable
+ */
+async function browserlessFetch(url: string): Promise<{ body: string; url: string } | null> {
+  const apiKey = process.env.BROWSERLESS_API_KEY;
+
+  if (!apiKey) {
+    console.warn("BROWSERLESS_API_KEY not set, skipping JavaScript rendering");
+    return null;
+  }
+
+  try {
+    console.log(`Using Browserless.io to fetch ${url}`);
+
+    // Connect to Browserless.io
+    const browser = await puppeteer.connect({
+      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${apiKey}`,
+    });
+
+    const page = await browser.newPage();
+
+    // Set a realistic user agent
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    );
+
+    // Navigate and wait for network to settle
+    await page.goto(url, {
+      waitUntil: "networkidle2",
+      timeout: 30000,
+    });
+
+    // Wait a bit for any dynamic content to load
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Get the final URL (after redirects)
+    const finalUrl = page.url();
+
+    // Get the HTML content
+    const html = await page.content();
+
+    await page.close();
+    await browser.disconnect();
+
+    console.log(`✅ Browserless.io successfully fetched ${url} -> ${finalUrl}`);
+    return { body: html, url: finalUrl };
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error(`❌ Browserless.io fetch failed for ${url}: ${errorMessage}`);
+    return null;
+  }
+}
+
+/**
+ * Progress callback for long-running operations
+ */
+export type ProgressCallback = (message: string) => void | Promise<void>;
+
+/**
  * Extracts metadata from a URL
  */
-export async function extractMetadata(url: string): Promise<ConcertMetadata | null> {
+export async function extractMetadata(
+  url: string,
+  onProgress?: ProgressCallback
+): Promise<ConcertMetadata | null> {
   let html: string;
   let finalUrl: string;
 
@@ -119,6 +199,25 @@ export async function extractMetadata(url: string): Promise<ConcertMetadata | nu
 
     html = response.body;
     finalUrl = response.url;
+
+    // Check if the page requires JavaScript
+    if (requiresJavaScript(html)) {
+      console.log(`⚠️ Page requires JavaScript for ${url}`);
+
+      // Notify user about longer wait time
+      if (onProgress) {
+        await onProgress("🌐 This site requires JavaScript rendering, please wait...");
+      }
+
+      const browserlessResult = await browserlessFetch(url);
+
+      if (browserlessResult) {
+        html = browserlessResult.body;
+        finalUrl = browserlessResult.url;
+      } else {
+        console.warn(`Continuing with static HTML (may be incomplete)`);
+      }
+    }
   } catch (error: unknown) {
     // Log the error
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -136,6 +235,25 @@ export async function extractMetadata(url: string): Promise<ConcertMetadata | nu
 
     html = fallbackResult.body;
     finalUrl = fallbackResult.url;
+
+    // Check if this HTML requires JavaScript
+    if (requiresJavaScript(html)) {
+      console.log(`⚠️ Fallback HTML requires JavaScript for ${url}`);
+
+      // Notify user about longer wait time
+      if (onProgress) {
+        await onProgress("🌐 This site requires JavaScript rendering, please wait...");
+      }
+
+      const browserlessResult = await browserlessFetch(url);
+
+      if (browserlessResult) {
+        html = browserlessResult.body;
+        finalUrl = browserlessResult.url;
+      } else {
+        console.warn(`Continuing with static HTML (may be incomplete)`);
+      }
+    }
   }
 
   try {

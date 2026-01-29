@@ -41,8 +41,36 @@ export async function handleUrlMessage(ctx: BotContext) {
 
   // Process each URL
   for (const url of urls) {
+    // Send initial feedback message
+    let feedbackMessage: { message_id: number } | undefined;
     try {
-      const metadata = await extractMetadata(url);
+      feedbackMessage = await ctx.reply("⏳ Analyzing concert link...");
+    } catch (error) {
+      console.error("Failed to send feedback message:", error);
+    }
+
+    try {
+      // Progress callback to update the feedback message
+      const onProgress = async (message: string) => {
+        if (feedbackMessage) {
+          try {
+            await ctx.api.editMessageText(ctx.chat!.id, feedbackMessage.message_id, message);
+          } catch (error) {
+            console.error("Failed to update feedback message:", error);
+          }
+        }
+      };
+
+      const metadata = await extractMetadata(url, onProgress);
+
+      // Delete feedback message if it was sent
+      if (feedbackMessage) {
+        try {
+          await ctx.api.deleteMessage(ctx.chat!.id, feedbackMessage.message_id);
+        } catch (error) {
+          console.error("Failed to delete feedback message:", error);
+        }
+      }
 
       if (!metadata) {
         // If in group, notify admins about failed extraction

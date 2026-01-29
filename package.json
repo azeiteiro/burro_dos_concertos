@@ -57,7 +57,8 @@
     "metascraper-url": "^5.49.21",
     "node-cron": "^4.2.1",
     "pino": "^10.3.0",
-    "prisma": "7.3.0"
+    "prisma": "7.3.0",
+    "puppeteer-core": "^24.36.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
