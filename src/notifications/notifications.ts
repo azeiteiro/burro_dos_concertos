@@ -7,9 +7,9 @@ const logger = pino({ name: "notifications-scheduler" });
 
 export const startNotifications = (bot: Bot) => {
   const schedules = [
-    { name: "Daily", expression: "0 8 * * *", handler: sendTodayConcerts },
-    { name: "Weekly", expression: "0 8 * * 1", handler: sendWeekConcerts },
-    { name: "Monthly", expression: "0 8 1 * *", handler: sendMonthConcerts },
+    { name: "Daily", expression: "0 9 * * *", handler: sendTodayConcerts },
+    { name: "Weekly", expression: "0 9 * * 1", handler: sendWeekConcerts },
+    { name: "Monthly", expression: "0 9 1 * *", handler: sendMonthConcerts },
   ];
 
   schedules.forEach(({ name, expression, handler }) => {

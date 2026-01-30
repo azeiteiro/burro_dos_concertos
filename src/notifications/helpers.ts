@@ -91,9 +91,26 @@ export const sendWeekConcerts = async (bot: Bot) => {
       return;
     }
 
-    await bot.api.sendMessage(groupId, formatConcertList("This Week's concerts", concerts), {
-      parse_mode: "Markdown",
-    });
+    const message = await bot.api.sendMessage(
+      groupId,
+      formatConcertList("This Week's concerts", concerts),
+      {
+        parse_mode: "Markdown",
+      }
+    );
+
+    // Unpin all old messages and pin the new weekly message
+    try {
+      await bot.api.unpinAllChatMessages(groupId);
+      logger.info(`Unpinned all previous messages`);
+
+      await bot.api.pinChatMessage(groupId, message.message_id, {
+        disable_notification: true, // Don't notify users about the pin
+      });
+      logger.info(`Pinned weekly notification message`);
+    } catch (pinError) {
+      logger.warn({ error: pinError }, "Failed to pin weekly message (might lack permissions)");
+    }
 
     logger.info(`Sent weekly notification for ${concerts.length} concerts`);
   } catch (error) {
