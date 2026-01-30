@@ -206,7 +206,9 @@ export async function extractMetadata(
 
       // Notify user about longer wait time
       if (onProgress) {
-        await onProgress("🌐 This site requires JavaScript rendering, please wait...");
+        await onProgress(
+          "🌐 This site requires JavaScript rendering, calling an external service, please wait..."
+        );
       }
 
       const browserlessResult = await browserlessFetch(url);
