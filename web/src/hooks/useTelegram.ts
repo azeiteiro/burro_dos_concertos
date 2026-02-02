@@ -5,6 +5,9 @@ export function useTelegram() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    console.log("useTelegram initializing");
+    console.log("WebApp object:", WebApp);
+
     // Initialize Telegram Mini App
     WebApp.ready();
     WebApp.expand();
@@ -12,6 +15,8 @@ export function useTelegram() {
 
     // Set header color to match Telegram theme
     WebApp.setHeaderColor(WebApp.themeParams.bg_color || "#ffffff");
+
+    console.log("Telegram initialized, isReady set to true");
   }, []);
 
   return {

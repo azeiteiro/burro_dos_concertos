@@ -11,7 +11,12 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Debug logging
+  console.log("App rendering, isReady:", isReady);
+  console.log("Telegram WebApp:", webApp);
+
   useEffect(() => {
+    console.log("Effect running, isReady:", isReady);
     if (!isReady) return;
 
     const loadConcerts = async () => {
