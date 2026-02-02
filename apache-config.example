@@ -1,10 +1,12 @@
 <VirtualHost *:443>
     ServerName yourdomain.com
+    ServerAdmin webmaster@localhost
 
-    # SSL Configuration (your existing SSL setup)
+    # SSL Configuration (use your existing SSL certificate paths)
     SSLEngine on
-    SSLCertificateFile /path/to/your/cert.pem
-    SSLCertificateKeyFile /path/to/your/key.pem
+    SSLCertificateFile /path/to/your/cert.crt
+    SSLCertificateKeyFile /path/to/your/key.key
+    SSLCertificateChainFile /path/to/your/ca-bundle
 
     # Enable modules
     <IfModule !proxy_module>

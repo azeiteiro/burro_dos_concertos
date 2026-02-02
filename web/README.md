@@ -2,12 +2,37 @@
 
 Telegram Mini App for viewing and searching upcoming concerts.
 
-## Development
+## Local Development
+
+The Mini App is pre-configured for local development and connects to `http://localhost:3001` by default.
+
+### Quick Start
+
+You need **two terminals** running:
+
+**Terminal 1 - Bot API Server:**
+```bash
+# From project root
+pnpm dev
+```
+This starts the bot with API server on http://localhost:3001
+
+**Terminal 2 - Mini App Dev Server:**
+```bash
+# From project root
+cd web
+pnpm dev
+```
+This starts the Mini App on http://localhost:3000
+
+### Testing
+
+- **In Browser**: Open http://localhost:3000 (quick testing, no Telegram features)
+- **In Telegram**: Use ngrok to expose localhost:3000 and set the URL in BotFather (full features)
+
+### Build Commands
 
 ```bash
-# Install dependencies
-pnpm install
-
 # Start dev server
 pnpm dev
 

@@ -69,7 +69,8 @@ API_PORT=3001
 ### 5. Add GitHub Secrets
 
 Add the following secret to your GitHub repository:
-- `DO_STAGING_DOMAIN`: Your domain with protocol (e.g., `https://yourdomain.com`)
+- **Name:** `DO_STAGING_DOMAIN`
+- **Value:** Your domain with protocol (e.g., `https://yourdomain.com`)
 
 Go to: Repository → Settings → Secrets and variables → Actions → New repository secret
 
@@ -136,20 +137,49 @@ curl https://yourdomain.com/api/concerts/upcoming
 - Telegram Mini Apps run in Telegram's WebView, CORS should not be an issue
 - If testing locally, make sure API server has CORS enabled (already configured)
 
-## Development
+## Local Development
 
-### Run locally
+### Setup
+
+1. Make sure you have a local `.env.local` with your bot credentials
+2. The Mini App is already configured for local development (uses `http://localhost:3001`)
+
+### Run
+
+You need **two terminals**:
 
 ```bash
 # Terminal 1: Start bot with API server
 pnpm dev
+```
 
+```bash
 # Terminal 2: Start Mini App dev server
 cd web
 pnpm dev
 ```
 
-Access Mini App at: http://localhost:5173
+- **Bot API**: http://localhost:3001/api/concerts/upcoming
+- **Mini App**: http://localhost:3000
+
+### Testing the Mini App locally
+
+Since Telegram Mini Apps need to run inside Telegram, you have two options:
+
+**Option 1: Test in browser (Quick)**
+- Open http://localhost:3000 in your browser
+- You'll see the Mini App interface
+- Limited: No Telegram SDK features (theme, user info, openLink)
+
+**Option 2: Test in Telegram (Full features)**
+1. Use ngrok to expose your local server:
+   ```bash
+   ngrok http 3000
+   ```
+2. Copy the ngrok HTTPS URL (e.g., `https://abc123.ngrok.io`)
+3. In BotFather, temporarily set this as your Mini App URL
+4. Open your bot in Telegram and click the menu button
+5. The Mini App will load from your local dev server through ngrok
 
 ### Build Mini App
 

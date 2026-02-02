@@ -12,6 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: true, // Allow external access (needed for ngrok)
   },
   build: {
     outDir: "dist",
