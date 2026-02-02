@@ -63,7 +63,21 @@ jobs:
             pnpm install --frozen-lockfile
             pnpm exec prisma generate
             pnpm exec prisma migrate deploy
+
+            # Build bot backend
             pnpm build
+
+            # Build Mini App
+            cd web
+            echo "VITE_API_URL=${{ secrets.DO_STAGING_DOMAIN }}" > .env
+            pnpm run build
+
+            # Deploy Mini App to web directory
+            sudo mkdir -p /var/www/miniapp
+            sudo cp -r dist/* /var/www/miniapp/
+            cd ..
+
+            # Restart bot with API server
             pm2 restart burro_dos_concertos_staging || pm2 start ecosystem.config.js --only burro_dos_concertos_staging
         env:
           BROWSERLESS_API_KEY: ${{ secrets.BROWSERLESS_API_KEY }}

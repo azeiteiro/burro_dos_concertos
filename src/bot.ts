@@ -17,6 +17,7 @@ import {
   handleQuickAddCallback,
   handleManualAddCallback,
 } from "./handlers/urlHandler";
+import { startServer } from "./api/server";
 
 // Load environment-specific .env file
 const envFile =
@@ -77,16 +78,27 @@ bot.callbackQuery(/^quick_add:/, handleQuickAddCallback);
 bot.callbackQuery("add_manual", handleManualAddCallback);
 
 // 🏁 Run the bot
+let apiServer: ReturnType<typeof startServer> | undefined;
+
 if (process.env.JEST_WORKER_ID === undefined) {
+  // Start Express API server
+  apiServer = startServer();
+
+  // Start Telegram bot
   bot.start();
   console.log("🚀 Bot started!");
 }
 
 // 🧹 Cleanup on shutdown
+
 const cleanup = async () => {
   console.log("🛑 Shutting down...");
   try {
     await bot.stop();
+    if (apiServer) {
+      apiServer.close();
+      console.log("🌐 API server stopped");
+    }
     console.log("✅ Cleanup complete");
     process.exit(0);
   } catch (error) {

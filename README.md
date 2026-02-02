@@ -13,6 +13,7 @@ Telegram bot to manage concert listings for private groups.
 
 - 🎸 Add, edit, and delete concerts
 - 📋 List upcoming concerts
+- 📱 **Telegram Mini App** - Beautiful web interface for browsing concerts
 - 🔔 Automated daily/weekly/monthly notifications
 - 👥 Role-based permissions (User, Moderator, Admin, SuperAdmin)
 - 🔗 Smart concert link detection with automatic metadata extraction
@@ -21,11 +22,22 @@ Telegram bot to manage concert listings for private groups.
 
 ## Tech Stack
 
+**Bot Backend:**
 - Node.js 22 + TypeScript
 - [grammY](https://grammy.dev/) - Telegram Bot framework
+- Express.js - API server for Mini App
 - PostgreSQL + Prisma 7
 - Jest (80%+ test coverage)
-- Deployed on Fly.io
+
+**Mini App:**
+- React 18 + TypeScript
+- Vite - Build tool
+- Telegram Web App SDK
+- date-fns - Date formatting
+
+**Deployment:**
+- Production: Fly.io
+- Staging: Digital Ocean with Apache
 
 ## Quick Start
 
@@ -54,6 +66,11 @@ BROWSERLESS_API_KEY=your_api_key_here
 - Free tier: 1,000 units/month (~1,000 pages)
 - Browser runs remotely (no memory overhead on your server)
 - Without it: Most concert sites still work, JS-heavy sites show manual add button
+
+**API Server (Optional for Mini App):**
+```bash
+API_PORT=3001  # Port for Express API server (default: 3001)
+```
 
 ### 3. Setup database
 
@@ -84,14 +101,25 @@ pnpm dev
 - `/demote_user` - Demote admin to user
 - `/user_info` - Get user information
 
+## Telegram Mini App
+
+The bot includes a beautiful web interface accessible from Telegram:
+
+- 🎵 Browse all upcoming concerts
+- 🔍 Search by artist, venue, or notes
+- 🌓 Dark/light mode (follows Telegram theme)
+- 📱 Mobile-optimized responsive design
+- 🔗 One-click to concert URLs
+
+**Setup:** See [MINIAPP_SETUP.md](./MINIAPP_SETUP.md) for deployment instructions.
+
 ## Concert Link Detection
 
-The bot automatically detects and extracts concert information when users share links:
+The bot automatically detects and extracts concert information when users share links in private chats:
 
-1. **In Groups**: Admins receive private messages with concert preview and quick-add button
-2. **In Private Chats**: Everyone sees preview with quick-add button
-3. **Supported Sites**: Most concert ticket sites (Ticketline, See Tickets, Eventim, Dice.fm, etc.)
-4. **JavaScript Sites**: Queue-protected sites like Blueticket work with Browserless.io API key
+1. **Private Chats**: Users see preview with quick-add button
+2. **Supported Sites**: Most concert ticket sites (Ticketline, See Tickets, Eventim, Dice.fm, etc.)
+3. **JavaScript Sites**: Queue-protected sites like Blueticket work with Browserless.io API key
 
 **How it works:**
 - Extracts artist, venue, date from Open Graph metadata and HTML

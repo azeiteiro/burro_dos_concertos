@@ -1,0 +1,65 @@
+<VirtualHost *:443>
+    ServerName yourdomain.com
+
+    # SSL Configuration (your existing SSL setup)
+    SSLEngine on
+    SSLCertificateFile /path/to/your/cert.pem
+    SSLCertificateKeyFile /path/to/your/key.pem
+
+    # Enable modules
+    <IfModule !proxy_module>
+        LoadModule proxy_module modules/mod_proxy.so
+    </IfModule>
+    <IfModule !proxy_http_module>
+        LoadModule proxy_http_module modules/mod_proxy_http.so
+    </IfModule>
+
+    # API Endpoints - Reverse proxy to Node.js bot
+    ProxyPreserveHost On
+    ProxyPass /api http://localhost:3001/api
+    ProxyPassReverse /api http://localhost:3001/api
+
+    # Health check endpoint
+    ProxyPass /health http://localhost:3001/health
+    ProxyPassReverse /health http://localhost:3001/health
+
+    # Mini App - Serve static files
+    DocumentRoot /var/www/miniapp/dist
+
+    <Directory /var/www/miniapp/dist>
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+
+        # Handle client-side routing (SPA)
+        RewriteEngine On
+        RewriteBase /
+        RewriteRule ^index\.html$ - [L]
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_URI} !^/api
+        RewriteCond %{REQUEST_URI} !^/health
+        RewriteRule . /index.html [L]
+    </Directory>
+
+    # Compression
+    <IfModule mod_deflate.c>
+        AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+    </IfModule>
+
+    # Caching for static assets
+    <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresByType image/jpg "access plus 1 year"
+        ExpiresByType image/jpeg "access plus 1 year"
+        ExpiresByType image/gif "access plus 1 year"
+        ExpiresByType image/png "access plus 1 year"
+        ExpiresByType image/svg+xml "access plus 1 year"
+        ExpiresByType text/css "access plus 1 month"
+        ExpiresByType application/javascript "access plus 1 month"
+        ExpiresByType application/woff2 "access plus 1 year"
+    </IfModule>
+
+    ErrorLog ${APACHE_LOG_DIR}/miniapp-error.log
+    CustomLog ${APACHE_LOG_DIR}/miniapp-access.log combined
+</VirtualHost>
