@@ -65,6 +65,10 @@ describe("bot.ts", () => {
       createConversation: jest.fn(() => "conversation-middleware"),
     }));
 
+    jest.mock("@/api/server", () => ({
+      startServer: jest.fn(() => ({ close: jest.fn() })),
+    }));
+
     // Now load bot.ts inside isolateModules
     jest.isolateModules(() => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -135,6 +139,10 @@ describe("bot.ts", () => {
     jest.mock("@grammyjs/conversations", () => ({
       conversations: jest.fn(() => "conversations-middleware"),
       createConversation: jest.fn(() => "conversation-middleware"),
+    }));
+
+    jest.mock("@/api/server", () => ({
+      startServer: jest.fn(() => ({ close: jest.fn() })),
     }));
 
     jest.isolateModules(() => {
