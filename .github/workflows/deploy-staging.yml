@@ -67,14 +67,14 @@ jobs:
             # Build bot backend
             pnpm build
 
-            # Build Mini App
+            # Build Mini App with production base path
             cd web
             echo "VITE_API_URL=${{ secrets.DO_STAGING_DOMAIN }}" > .env
-            pnpm run build
+            NODE_ENV=production pnpm run build
 
-            # Deploy Mini App to web directory
-            sudo mkdir -p /var/www/miniapp
-            sudo cp -r dist/* /var/www/miniapp/
+            # Deploy Mini App to html/miniapp directory
+            sudo mkdir -p /var/www/html/miniapp
+            sudo cp -r dist/* /var/www/html/miniapp/
             cd ..
 
             # Restart bot with API server

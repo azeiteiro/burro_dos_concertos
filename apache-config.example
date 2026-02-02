@@ -16,6 +16,9 @@
         LoadModule proxy_http_module modules/mod_proxy_http.so
     </IfModule>
 
+    # Keep your existing site
+    DocumentRoot /var/www/html
+
     # API Endpoints - Reverse proxy to Node.js bot
     ProxyPreserveHost On
     ProxyPass /api http://localhost:3001/api
@@ -25,8 +28,8 @@
     ProxyPass /health http://localhost:3001/health
     ProxyPassReverse /health http://localhost:3001/health
 
-    # Mini App - Serve static files
-    DocumentRoot /var/www/miniapp/dist
+    # Mini App - Serve at /miniapp path
+    Alias /miniapp /var/www/miniapp/dist
 
     <Directory /var/www/miniapp/dist>
         Options -Indexes +FollowSymLinks
@@ -35,13 +38,18 @@
 
         # Handle client-side routing (SPA)
         RewriteEngine On
-        RewriteBase /
+        RewriteBase /miniapp
         RewriteRule ^index\.html$ - [L]
         RewriteCond %{REQUEST_FILENAME} !-f
         RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_URI} !^/api
-        RewriteCond %{REQUEST_URI} !^/health
-        RewriteRule . /index.html [L]
+        RewriteRule . /miniapp/index.html [L]
+    </Directory>
+
+    # Main site
+    <Directory /var/www/html>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
     </Directory>
 
     # Compression

@@ -204,3 +204,50 @@ Built files will be in `web/dist/`
 - 📅 Sorted by date
 - 🔗 Click concert to open URL (if available)
 - 🌓 Dark/light mode (follows Telegram theme)
+
+## Production Deployment (Fly.io)
+
+The Mini App is served from the same Fly.io app as the bot.
+
+### Architecture
+
+```
+https://burro-dos-concertos.fly.dev
+├── / → Mini App (static files)
+├── /api/* → API endpoints
+└── /health → Health check
+```
+
+### Setup (One-time)
+
+Make sure you have these secrets set in Fly.io:
+
+```bash
+fly secrets set BOT_TOKEN=your_production_token
+fly secrets set DATABASE_URL=your_production_db_url
+fly secrets set BROWSERLESS_API_KEY=your_browserless_key  # Optional
+```
+
+### Deploy
+
+Create a version tag to trigger deployment:
+
+```bash
+git tag v1.0.0 -m "Release with Mini App"
+git push origin v1.0.0
+```
+
+The GitHub Actions workflow will:
+1. ✅ Run tests
+2. 🔨 Build bot backend
+3. 🔨 Build Mini App with production API URL
+4. 🚀 Deploy to Fly.io
+
+### Configure BotFather for Production
+
+1. Open [@BotFather](https://t.me/BotFather)
+2. `/mybots` → Select your bot
+3. Bot Settings → Menu Button → Configure menu button
+4. Set URL to: `https://burro-dos-concertos.fly.dev`
+
+Done! The Mini App will be live at your Fly.io domain. 🎉
