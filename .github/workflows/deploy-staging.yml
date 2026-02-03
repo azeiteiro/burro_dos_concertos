@@ -74,8 +74,8 @@ jobs:
             pnpm run build
 
             # Deploy Mini App to html/miniapp directory
-            sudo mkdir -p /var/www/html/miniapp
-            sudo cp -r dist/* /var/www/html/miniapp/
+            mkdir -p /var/www/html/miniapp
+            cp -r dist/* /var/www/html/miniapp/
             cd ..
 
             # Restart bot with API server
