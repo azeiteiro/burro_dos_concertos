@@ -10,5 +10,34 @@ primary_region = "lhr"
   NODE_ENV = "production"
   GROUP_ID = "-1002961152861"
   SUPER_ADMIN_ID = "144133589"
+  API_PORT = "3001"
 
 # BOT_TOKEN set via: fly secrets set BOT_TOKEN=xxx
+
+# Expose HTTP port for Mini App and API
+[[services]]
+  internal_port = 3001
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  # Health check
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    restart_limit = 0
+
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"

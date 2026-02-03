@@ -12,9 +12,15 @@ RUN apt-get update -y && \
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy dependency files
-COPY package.json pnpm-lock.yaml tsconfig.json ./
+# Copy dependency files (root and workspace)
+COPY package.json pnpm-lock.yaml tsconfig.json pnpm-workspace.yaml ./
 COPY prisma ./prisma
+
+# Copy web app files
+COPY web/package.json web/tsconfig.json web/tsconfig.node.json web/vite.config.ts ./web/
+COPY web/src ./web/src
+COPY web/index.html ./web/
+COPY web/public ./web/public
 
 # Install ALL dependencies (needed for build)
 RUN pnpm install --frozen-lockfile
@@ -22,7 +28,12 @@ RUN pnpm install --frozen-lockfile
 # Generate Prisma client with the new schema
 RUN pnpm exec prisma generate
 
-# Copy source and build
+# Build Mini App with production API URL
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+RUN cd web && pnpm run build
+
+# Copy source and build bot
 COPY src ./src
 RUN pnpm build
 
@@ -55,6 +66,9 @@ RUN pnpm exec prisma generate
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
+
+# Copy built Mini App from builder
+COPY --from=builder /app/web/dist ./web/dist
 
 # Aggressive cleanup - remove pnpm and all caches
 RUN rm -rf \
