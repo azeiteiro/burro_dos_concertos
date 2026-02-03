@@ -20,14 +20,17 @@ export function createServer() {
     res.json({ status: "ok" });
   });
 
-  // Serve Mini App static files (must be after API routes)
-  const miniAppPath = path.join(__dirname, "../web/dist");
-  app.use(express.static(miniAppPath));
+  // Serve Mini App static files only in production (Fly.io)
+  // In staging, Apache handles static files
+  if (process.env.SERVE_STATIC === "true") {
+    const miniAppPath = path.join(__dirname, "../web/dist");
+    app.use(express.static(miniAppPath));
 
-  // SPA fallback - serve index.html for all non-API routes
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(miniAppPath, "index.html"));
-  });
+    // SPA fallback - serve index.html for all non-API routes
+    app.use((req, res) => {
+      res.sendFile(path.join(miniAppPath, "index.html"));
+    });
+  }
 
   return app;
 }

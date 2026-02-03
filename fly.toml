@@ -11,6 +11,7 @@ primary_region = "lhr"
   GROUP_ID = "-1002961152861"
   SUPER_ADMIN_ID = "144133589"
   API_PORT = "3001"
+  SERVE_STATIC = "true"
 
 # BOT_TOKEN set via: fly secrets set BOT_TOKEN=xxx
 
