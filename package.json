@@ -47,11 +47,11 @@
     "chrono-node": "^2.9.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "got": "^14.6.6",
-    "grammy": "^1.39.3",
+    "grammy": "^1.40.0",
     "metascraper": "^5.49.21",
     "metascraper-date": "^5.49.21",
     "metascraper-description": "^5.49.21",
@@ -59,16 +59,16 @@
     "metascraper-title": "^5.49.21",
     "metascraper-url": "^5.49.21",
     "node-cron": "^4.2.1",
-    "pino": "^10.3.0",
+    "pino": "^10.3.1",
     "prisma": "7.3.0",
-    "puppeteer-core": "^24.36.1"
+    "puppeteer-core": "^24.37.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.2.0",
+    "@types/node": "^25.2.2",
     "@types/supertest": "^6.0.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
@@ -85,6 +85,6 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.54.0"
+    "typescript-eslint": "^8.55.0"
   }
 }
