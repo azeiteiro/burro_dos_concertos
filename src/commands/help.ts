@@ -9,7 +9,7 @@ export const helpCommand = async (ctx: BotContext) => {
   const userId = ctx.from?.id;
   if (!userId) return;
 
-  let role = "User";
+  let role: string;
 
   try {
     const user = await getUserByTelegramId(userId);
