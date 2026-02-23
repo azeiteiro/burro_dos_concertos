@@ -20,6 +20,7 @@ COPY prisma ./prisma
 COPY web/package.json web/tsconfig.json web/tsconfig.node.json web/vite.config.ts ./web/
 COPY web/src ./web/src
 COPY web/index.html ./web/
+# Copy public directory (may be empty, .gitkeep ensures it exists)
 COPY web/public ./web/public
 
 # Install ALL dependencies (needed for build)
