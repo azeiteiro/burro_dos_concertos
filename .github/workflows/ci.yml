@@ -22,13 +22,17 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          # Temporarily disable cache to fix minimatch issue
-          # cache: "pnpm"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Clear pnpm cache
+        run: |
+          pnpm store path
+          rm -rf $(pnpm store path)
+          rm -rf node_modules
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
         run: pnpm exec prisma generate
