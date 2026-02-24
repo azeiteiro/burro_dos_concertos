@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import apiRoutes from "./routes";
 
 const PORT = process.env.API_PORT || 3001;
@@ -25,12 +26,34 @@ export function createServer() {
   if (process.env.SERVE_STATIC === "true") {
     // Use absolute path from project root to avoid path resolution issues
     const miniAppPath = path.join("/app", "web", "dist");
+    console.log(`📱 Serving Mini App from: ${miniAppPath}`);
+    console.log(`📁 __dirname: ${__dirname}`);
+
+    // Check if directory exists
+    if (fs.existsSync(miniAppPath)) {
+      console.log(`✅ Mini App directory exists`);
+      const files = fs.readdirSync(miniAppPath);
+      console.log(`📄 Files in Mini App directory:`, files);
+    } else {
+      console.log(`❌ Mini App directory NOT found at ${miniAppPath}`);
+      // Try alternative path
+      const altPath = path.join(__dirname, "../web/dist");
+      console.log(`🔍 Checking alternative path: ${altPath}`);
+      if (fs.existsSync(altPath)) {
+        console.log(`✅ Found at alternative path!`);
+      }
+    }
+
     app.use(express.static(miniAppPath));
 
     // SPA fallback - serve index.html for all non-API routes
     app.use((req, res) => {
-      res.sendFile(path.join(miniAppPath, "index.html"));
+      const indexPath = path.join(miniAppPath, "index.html");
+      console.log(`📄 Attempting to serve: ${indexPath}`);
+      res.sendFile(indexPath);
     });
+  } else {
+    console.log(`⚠️ SERVE_STATIC is not "true", it is: "${process.env.SERVE_STATIC}"`);
   }
 
   return app;
