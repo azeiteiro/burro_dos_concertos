@@ -10,6 +10,7 @@ onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
   - prisma
+  - unrs-resolver
 
 overrides:
   hono@<4.11.10: '>=4.11.10'
