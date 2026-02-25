@@ -3,6 +3,7 @@ import { Concert } from "@prisma/client";
 import { Bot, Context } from "grammy";
 import { format, startOfDay, endOfDay } from "date-fns";
 import pino from "pino";
+import { linkPollToConcert } from "@/services/pollService";
 
 const logger = pino({ name: "notifications" });
 
@@ -177,6 +178,30 @@ export async function notifyNewConcert(ctx: Context, concert: Concert) {
     });
 
     logger.info(`Sent new concert notification for "${concert.artistName}" at ${concert.venue}`);
+
+    // Send poll for concert attendance
+    try {
+      const pollQuestion = `Are you going to ${concert.artistName} at ${concert.venue}?`;
+      const pollMessage = await ctx.api.sendPoll(
+        groupId,
+        pollQuestion,
+        ["🎉 Going", "🤔 Interested", "❌ Not Going"],
+        {
+          is_anonymous: false,
+          allows_multiple_answers: false,
+        }
+      );
+
+      // Link the poll to the concert in the database
+      await linkPollToConcert(concert.id, pollMessage.poll.id, pollMessage.message_id);
+
+      logger.info(
+        { concertId: concert.id, pollId: pollMessage.poll.id },
+        "Poll sent and linked to concert"
+      );
+    } catch (pollError) {
+      logger.error({ error: pollError, concertId: concert.id }, "Failed to send or link poll");
+    }
   } catch (error) {
     logger.error({ error, concertId: concert.id }, "Failed to send new concert notification");
   }
