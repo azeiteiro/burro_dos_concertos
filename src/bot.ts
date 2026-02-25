@@ -17,6 +17,7 @@ import {
   handleQuickAddCallback,
   handleManualAddCallback,
 } from "./handlers/urlHandler";
+import { handlePollAnswer } from "./handlers/pollHandler";
 import { startServer } from "./api/server";
 
 // Load environment-specific .env file
@@ -70,6 +71,9 @@ bot.command("about", aboutCommand);
 
 // 🔗 URL detection for concert links (admin only)
 bot.on("message:text", handleUrlMessage);
+
+// 🗳️ Poll answer handler
+bot.on("poll_answer", handlePollAnswer);
 
 // 🎫 Quick add callback handler
 bot.callbackQuery(/^quick_add:/, handleQuickAddCallback);

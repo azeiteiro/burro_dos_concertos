@@ -21,32 +21,35 @@ model User {
 }
 
 model Concert {
-  id          Int               @id @default(autoincrement())
-  userId      Int
-  artistName  String
-  venue       String
-  concertDate DateTime
-  concertTime DateTime?
-  url         String?
-  notes       String?
-  notified    Boolean           @default(false)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  responses   ConcertResponse[]
+  id            Int               @id @default(autoincrement())
+  userId        Int
+  artistName    String
+  venue         String
+  concertDate   DateTime
+  concertTime   DateTime?
+  url           String?
+  notes         String?
+  notified      Boolean           @default(false)
+  pollId        String?           @unique
+  pollMessageId BigInt?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses     ConcertResponse[]
 
   @@index([concertDate])
   @@index([userId])
 }
 
 model ConcertResponse {
-  id           Int      @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   concertId    Int
   userId       Int
-  responseType String
-  createdAt    DateTime @default(now())
-  concert      Concert  @relation(fields: [concertId], references: [id], onDelete: Cascade)
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responseType ResponseType
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  concert      Concert      @relation(fields: [concertId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([concertId, userId])
 }
