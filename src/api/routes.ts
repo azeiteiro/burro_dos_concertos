@@ -2,6 +2,7 @@ import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import { prisma } from "@/config/db";
 import { startOfDay } from "date-fns";
+import { Concert } from "@prisma/client";
 
 const router = Router();
 
@@ -17,13 +18,19 @@ const limiter = rateLimit({
 // Apply rate limiting to all routes
 router.use(limiter);
 
+// Helper to serialize concerts for JSON response
+const serializeConcert = (concert: Concert) => ({
+  ...concert,
+  pollMessageId: concert.pollMessageId ? concert.pollMessageId.toString() : null,
+});
+
 // Get all concerts
 router.get("/concerts", async (req, res) => {
   try {
     const concerts = await prisma.concert.findMany({
       orderBy: { concertDate: "asc" },
     });
-    res.json(concerts);
+    res.json(concerts.map(serializeConcert));
   } catch (error) {
     console.error("Error fetching concerts:", error);
     res.status(500).json({ error: "Failed to fetch concerts" });
@@ -40,7 +47,7 @@ router.get("/concerts/upcoming", async (req, res) => {
       },
       orderBy: { concertDate: "asc" },
     });
-    res.json(concerts);
+    res.json(concerts.map(serializeConcert));
   } catch (error) {
     console.error("Error fetching upcoming concerts:", error);
     res.status(500).json({ error: "Failed to fetch upcoming concerts" });
