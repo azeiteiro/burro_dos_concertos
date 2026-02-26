@@ -4,6 +4,8 @@ import { fetchUpcomingConcerts, getUserByTelegramId, submitConcertResponse } fro
 import { Concert } from "./types/concert";
 import { ConcertCard } from "./components/ConcertCard";
 
+type TabType = "all" | "my";
+
 export function App() {
   const { webApp, isReady, user: telegramUser } = useTelegram();
   const [concerts, setConcerts] = useState<Concert[]>([]);
@@ -11,6 +13,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [userId, setUserId] = useState<number | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<TabType>("all");
 
   useEffect(() => {
     if (!isReady) return;
@@ -53,7 +56,17 @@ export function App() {
     loadUserAndConcerts();
   }, [isReady, telegramUser]);
 
+  // Filter concerts based on active tab and search query
   const filteredConcerts = concerts.filter((concert) => {
+    // Tab filter
+    if (activeTab === "my") {
+      const userResponse = concert.responses?.userResponse;
+      if (!userResponse || userResponse === "not_going") {
+        return false;
+      }
+    }
+
+    // Search filter
     const query = searchQuery.toLowerCase();
     return (
       concert.artistName.toLowerCase().includes(query) ||
@@ -61,6 +74,12 @@ export function App() {
       (concert.notes && concert.notes.toLowerCase().includes(query))
     );
   });
+
+  // Count of user's concerts (going or interested)
+  const myConcertsCount = concerts.filter((concert) => {
+    const userResponse = concert.responses?.userResponse;
+    return userResponse && userResponse !== "not_going";
+  }).length;
 
   const handleConcertClick = (concert: Concert) => {
     if (concert.url) {
@@ -94,18 +113,18 @@ export function App() {
 
   return (
     <div
-      className="min-h-screen p-4"
+      className="min-h-screen pb-20"
       style={{
         backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
         color: "var(--tg-theme-text-color, #000000)",
       }}
     >
-      <div className="mb-4">
+      <div className="p-4">
         <h1
           className="text-2xl font-bold mb-4"
           style={{ color: "var(--tg-theme-text-color, #000000)" }}
         >
-          Upcoming Concerts
+          {activeTab === "all" ? "All Concerts" : "My Concerts"}
         </h1>
 
         <input
@@ -120,41 +139,105 @@ export function App() {
             color: "var(--tg-theme-text-color, #000000)",
           }}
         />
+
+        {loading && (
+          <div className="text-center p-5">
+            <p>Loading concerts...</p>
+          </div>
+        )}
+
+        {error && (
+          <div
+            className="p-4 rounded-lg text-white mb-4"
+            style={{ backgroundColor: "var(--tg-theme-destructive-text-color, #ff3b30)" }}
+          >
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && filteredConcerts.length === 0 && (
+          <div className="text-center p-5">
+            <p style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
+              {activeTab === "my"
+                ? "You haven't marked any concerts as going or interested yet"
+                : searchQuery
+                  ? "No concerts found matching your search"
+                  : "No upcoming concerts"}
+            </p>
+          </div>
+        )}
+
+        <div>
+          {filteredConcerts.map((concert) => (
+            <ConcertCard
+              key={concert.id}
+              concert={concert}
+              onClick={() => handleConcertClick(concert)}
+              onVote={(responseType) => handleVote(concert.id, responseType)}
+              userId={userId}
+            />
+          ))}
+        </div>
       </div>
 
-      {loading && (
-        <div className="text-center p-5">
-          <p>Loading concerts...</p>
-        </div>
-      )}
+      {/* Bottom Tab Navigation */}
+      <div
+        className="fixed bottom-0 left-0 right-0 border-t"
+        style={{
+          backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
+          borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
+        }}
+      >
+        <div className="flex">
+          <button
+            onClick={() => setActiveTab("all")}
+            className={`flex-1 px-4 py-3 text-center transition-colors ${
+              activeTab === "all" ? "font-semibold" : "font-normal"
+            }`}
+            style={{
+              color:
+                activeTab === "all"
+                  ? "var(--tg-theme-button-color, #3390ec)"
+                  : "var(--tg-theme-hint-color, #999999)",
+            }}
+          >
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xl">🎵</span>
+              <span className="text-sm">All Concerts</span>
+            </div>
+          </button>
 
-      {error && (
-        <div
-          className="p-4 rounded-lg text-white mb-4"
-          style={{ backgroundColor: "var(--tg-theme-destructive-text-color, #ff3b30)" }}
-        >
-          {error}
+          <button
+            onClick={() => setActiveTab("my")}
+            className={`flex-1 px-4 py-3 text-center transition-colors ${
+              activeTab === "my" ? "font-semibold" : "font-normal"
+            }`}
+            style={{
+              color:
+                activeTab === "my"
+                  ? "var(--tg-theme-button-color, #3390ec)"
+                  : "var(--tg-theme-hint-color, #999999)",
+            }}
+          >
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative">
+                <span className="text-xl">🎤</span>
+                {myConcertsCount > 0 && (
+                  <span
+                    className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] rounded-full px-1"
+                    style={{
+                      backgroundColor: "var(--tg-theme-button-color, #3390ec)",
+                      color: "var(--tg-theme-button-text-color, #ffffff)",
+                    }}
+                  >
+                    {myConcertsCount}
+                  </span>
+                )}
+              </div>
+              <span className="text-sm">My Concerts</span>
+            </div>
+          </button>
         </div>
-      )}
-
-      {!loading && !error && filteredConcerts.length === 0 && (
-        <div className="text-center p-5">
-          <p style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
-            {searchQuery ? "No concerts found matching your search" : "No upcoming concerts"}
-          </p>
-        </div>
-      )}
-
-      <div>
-        {filteredConcerts.map((concert) => (
-          <ConcertCard
-            key={concert.id}
-            concert={concert}
-            onClick={() => handleConcertClick(concert)}
-            onVote={(responseType) => handleVote(concert.id, responseType)}
-            userId={userId}
-          />
-        ))}
       </div>
     </div>
   );
