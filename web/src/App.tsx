@@ -105,9 +105,9 @@ export function App() {
     const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
 
     if (type === "apple") {
-      // For Apple Calendar, use webcal:// protocol
-      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
-      webApp.openLink(webcalUrl);
+      // For Apple Calendar, use HTTPS directly
+      // iOS/macOS will recognize the .ics file and offer to subscribe
+      webApp.openLink(calendarUrl);
     } else {
       // For Google Calendar, use their subscribe URL
       const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(calendarUrl)}`;
