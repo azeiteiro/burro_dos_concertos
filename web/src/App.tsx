@@ -1,23 +1,29 @@
 import { useEffect, useState } from "react";
 import { useTelegram } from "./hooks/useTelegram";
-import { fetchUpcomingConcerts } from "./lib/api";
+import { fetchUpcomingConcerts, getUserByTelegramId, submitConcertResponse } from "./lib/api";
 import { Concert } from "./types/concert";
 import { ConcertCard } from "./components/ConcertCard";
 
 export function App() {
-  const { webApp, isReady } = useTelegram();
+  const { webApp, isReady, user: telegramUser } = useTelegram();
   const [concerts, setConcerts] = useState<Concert[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userId, setUserId] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    if (!isReady) return;
+    if (!isReady || !telegramUser) return;
 
-    const loadConcerts = async () => {
+    const loadUserAndConcerts = async () => {
       try {
         setLoading(true);
-        const data = await fetchUpcomingConcerts();
+        // Get internal user ID from Telegram ID
+        const userData = await getUserByTelegramId(telegramUser.id);
+        setUserId(userData.id);
+
+        // Fetch concerts with user's responses
+        const data = await fetchUpcomingConcerts(userData.id);
         setConcerts(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load concerts");
@@ -26,8 +32,8 @@ export function App() {
       }
     };
 
-    loadConcerts();
-  }, [isReady]);
+    loadUserAndConcerts();
+  }, [isReady, telegramUser]);
 
   const filteredConcerts = concerts.filter((concert) => {
     const query = searchQuery.toLowerCase();
@@ -41,6 +47,22 @@ export function App() {
   const handleConcertClick = (concert: Concert) => {
     if (concert.url) {
       webApp.openLink(concert.url);
+    }
+  };
+
+  const handleVote = async (
+    concertId: number,
+    responseType: "going" | "interested" | "not_going"
+  ) => {
+    if (!userId) return;
+
+    try {
+      await submitConcertResponse(concertId, userId, responseType);
+      // Refetch concerts to update response counts
+      const data = await fetchUpcomingConcerts(userId);
+      setConcerts(data);
+    } catch (err) {
+      webApp.showAlert(err instanceof Error ? err.message : "Failed to submit response");
     }
   };
 
@@ -125,6 +147,8 @@ export function App() {
             key={concert.id}
             concert={concert}
             onClick={() => handleConcertClick(concert)}
+            onVote={(responseType) => handleVote(concert.id, responseType)}
+            userId={userId}
           />
         ))}
       </div>

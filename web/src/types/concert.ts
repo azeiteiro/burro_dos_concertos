@@ -11,6 +11,12 @@ export interface Concert {
   notified: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
+  responses?: {
+    going: number;
+    interested: number;
+    not_going: number;
+    userResponse: "going" | "interested" | "not_going" | null;
+  };
 }
 
 export interface ConcertFilters {
