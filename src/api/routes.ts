@@ -4,6 +4,7 @@ import { prisma } from "@/config/db";
 import { startOfDay } from "date-fns";
 import { Concert, ResponseType, ConcertResponse } from "@prisma/client";
 import { getPollResponses } from "@/services/pollService";
+import ical, { ICalCalendarMethod, ICalAlarmType } from "ical-generator";
 
 type ConcertWithResponses = Concert & {
   responses: Pick<ConcertResponse, "userId" | "responseType">[];
@@ -293,6 +294,106 @@ router.post("/concerts/:id/responses", async (req, res) => {
   } catch (error) {
     console.error("Error saving concert response:", error);
     res.status(500).json({ error: "Failed to save concert response" });
+  }
+});
+
+// Get user's calendar feed (iCal format)
+router.get("/users/:userId/calendar.ics", async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId);
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+
+    // Get user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Get user's concerts (going or interested)
+    const concerts = await prisma.concert.findMany({
+      where: {
+        responses: {
+          some: {
+            userId,
+            responseType: {
+              in: [ResponseType.going, ResponseType.interested],
+            },
+          },
+        },
+        concertDate: {
+          gte: startOfDay(new Date()), // Only upcoming concerts
+        },
+      },
+      include: {
+        responses: {
+          where: { userId },
+          select: { responseType: true },
+        },
+      },
+      orderBy: { concertDate: "asc" },
+    });
+
+    // Create calendar
+    const calendar = ical({
+      name: "My Concerts",
+      description: "Your upcoming concerts",
+      timezone: "Europe/Lisbon",
+      ttl: 3600, // Refresh every hour
+      method: ICalCalendarMethod.PUBLISH,
+    });
+
+    // Add concerts as events
+    concerts.forEach((concert) => {
+      const responseType = concert.responses[0]?.responseType;
+      const status = responseType === ResponseType.going ? "🎉 Going" : "🤔 Interested";
+
+      const start = new Date(concert.concertDate);
+      let end = new Date(concert.concertDate);
+
+      // If concert has a time, use it
+      if (concert.concertTime) {
+        const concertTime = new Date(concert.concertTime);
+        start.setHours(concertTime.getHours(), concertTime.getMinutes(), 0, 0);
+        // End time: 3 hours after start (default concert duration)
+        end = new Date(start);
+        end.setHours(start.getHours() + 3);
+      } else {
+        // All-day event
+        end.setDate(end.getDate() + 1);
+      }
+
+      const event = calendar.createEvent({
+        start,
+        end,
+        summary: `${status} - ${concert.artistName}`,
+        description: concert.notes || undefined,
+        location: concert.venue,
+        url: concert.url || undefined,
+        allDay: !concert.concertTime,
+      });
+
+      // Add alarm (1 day before)
+      event.createAlarm({
+        type: ICalAlarmType.display,
+        trigger: 60 * 60 * 24, // 24 hours before
+      });
+    });
+
+    // Set headers
+    res.setHeader("Content-Type", "text/calendar; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="concerts-${userId}.ics"`);
+
+    // Send calendar
+    res.send(calendar.toString());
+  } catch (error) {
+    console.error("Error generating calendar:", error);
+    res.status(500).json({ error: "Failed to generate calendar" });
   }
 });
 

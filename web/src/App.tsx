@@ -26,22 +26,17 @@ export function App() {
 
         // For local development: use mock user ID from env variable
         const mockUserId = import.meta.env.VITE_MOCK_USER_ID;
-        console.log("Telegram User from WebApp:", import.meta.env);
 
         let internalUserId: number | undefined;
 
         if (telegramUser) {
-          console.log("Telegram User:", telegramUser);
           // Production: Get internal user ID from Telegram ID
           const userData = await getUserByTelegramId(telegramUser.id);
           internalUserId = userData.id;
         } else if (mockUserId) {
           // Local development with mock user
-          console.log("Using mock user ID from environment variable:", mockUserId);
           internalUserId = parseInt(mockUserId);
         }
-
-        console.log("Internal User ID:", internalUserId);
 
         setUserId(internalUserId);
 
@@ -126,6 +121,54 @@ export function App() {
         >
           {activeTab === "all" ? "All Concerts" : "My Concerts"}
         </h1>
+
+        {/* Calendar Subscription - Only show in My Concerts tab */}
+        {activeTab === "my" && userId && (
+          <div
+            className="mb-4 p-4 rounded-lg border"
+            style={{
+              borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
+              backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg">📅</span>
+              <h3
+                className="font-semibold"
+                style={{ color: "var(--tg-theme-text-color, #000000)" }}
+              >
+                Subscribe to Calendar
+              </h3>
+            </div>
+            <p className="text-sm mb-3" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
+              Get automatic updates for all your concerts
+            </p>
+            <div className="flex gap-2">
+              <a
+                href={`webcal://${window.location.host}/api/users/${userId}/calendar.ics`}
+                className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+                style={{
+                  backgroundColor: "var(--tg-theme-button-color, #3390ec)",
+                  color: "var(--tg-theme-button-text-color, #ffffff)",
+                }}
+              >
+                📱 Apple Calendar
+              </a>
+              <a
+                href={`https://calendar.google.com/calendar/r?cid=http://${window.location.host}/api/users/${userId}/calendar.ics`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+                style={{
+                  backgroundColor: "var(--tg-theme-button-color, #3390ec)",
+                  color: "var(--tg-theme-button-text-color, #ffffff)",
+                }}
+              >
+                📆 Google Calendar
+              </a>
+            </div>
+          </div>
+        )}
 
         <input
           type="text"
