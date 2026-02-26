@@ -3,6 +3,7 @@ import { useTelegram } from "./hooks/useTelegram";
 import { fetchUpcomingConcerts, getUserByTelegramId, submitConcertResponse } from "./lib/api";
 import { Concert } from "./types/concert";
 import { ConcertCard } from "./components/ConcertCard";
+import { ConcertDetail } from "./components/ConcertDetail";
 
 type TabType = "all" | "my";
 
@@ -14,6 +15,7 @@ export function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [userId, setUserId] = useState<number | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [selectedConcert, setSelectedConcert] = useState<Concert | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
@@ -82,9 +84,7 @@ export function App() {
   }).length;
 
   const handleConcertClick = (concert: Concert) => {
-    if (concert.url) {
-      webApp.openLink(concert.url);
-    }
+    setSelectedConcert(concert);
   };
 
   const handleVote = async (
@@ -239,6 +239,11 @@ export function App() {
           </button>
         </div>
       </div>
+
+      {/* Concert Detail Modal */}
+      {selectedConcert && (
+        <ConcertDetail concert={selectedConcert} onClose={() => setSelectedConcert(null)} />
+      )}
     </div>
   );
 }
