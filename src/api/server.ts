@@ -9,8 +9,9 @@ export function createServer() {
   const app = express();
 
   // Trust proxy - required when behind nginx/Apache reverse proxy
+  // Trust only the first proxy (1 hop) to prevent IP spoofing
   // This allows express-rate-limit to correctly identify client IPs
-  app.set("trust proxy", true);
+  app.set("trust proxy", 1);
 
   // Middleware
   app.use(cors());
