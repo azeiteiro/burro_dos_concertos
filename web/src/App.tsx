@@ -98,6 +98,23 @@ export function App() {
     }
   };
 
+  const handleCalendarSubscribe = (type: "apple" | "google") => {
+    if (!userId) return;
+
+    const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
+
+    if (type === "apple") {
+      // For Apple Calendar, use webcal:// protocol
+      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+      webApp.openLink(webcalUrl);
+    } else {
+      // For Google Calendar, use their subscribe URL
+      const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(calendarUrl)}`;
+      webApp.openLink(googleUrl);
+    }
+  };
+
   if (!isReady) {
     return (
       <div style={{ padding: "20px", textAlign: "center" }}>
@@ -144,8 +161,8 @@ export function App() {
               Get automatic updates for all your concerts
             </p>
             <div className="flex gap-2">
-              <a
-                href={`webcal://${window.location.host}/api/users/${userId}/calendar.ics`}
+              <button
+                onClick={() => handleCalendarSubscribe("apple")}
                 className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
                 style={{
                   backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -153,11 +170,9 @@ export function App() {
                 }}
               >
                 📱 Apple Calendar
-              </a>
-              <a
-                href={`https://calendar.google.com/calendar/r?cid=http://${window.location.host}/api/users/${userId}/calendar.ics`}
-                target="_blank"
-                rel="noopener noreferrer"
+              </button>
+              <button
+                onClick={() => handleCalendarSubscribe("google")}
                 className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
                 style={{
                   backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -165,7 +180,7 @@ export function App() {
                 }}
               >
                 📆 Google Calendar
-              </a>
+              </button>
             </div>
           </div>
         )}
