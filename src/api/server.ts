@@ -8,6 +8,10 @@ const PORT = process.env.API_PORT || 3001;
 export function createServer() {
   const app = express();
 
+  // Trust proxy - required when behind nginx/Apache reverse proxy
+  // This allows express-rate-limit to correctly identify client IPs
+  app.set("trust proxy", true);
+
   // Middleware
   app.use(cors());
   app.use(express.json());
