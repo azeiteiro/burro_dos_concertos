@@ -109,8 +109,8 @@ export function App() {
       // iOS/macOS will recognize the .ics file and offer to subscribe
       webApp.openLink(calendarUrl);
     } else {
-      // For Google Calendar, use their subscribe URL
-      const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(calendarUrl)}`;
+      // For Google Calendar, use their "add by URL" settings page
+      const googleUrl = `https://calendar.google.com/calendar/u/0/r/settings/addbyurl?url=${encodeURIComponent(calendarUrl)}`;
       webApp.openLink(googleUrl);
     }
   };
