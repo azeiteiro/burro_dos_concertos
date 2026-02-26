@@ -30,54 +30,55 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     }
   };
 
+  const getButtonClasses = (responseType: "going" | "interested" | "not_going") => {
+    const isSelected = concert.responses?.userResponse === responseType;
+    return `
+      flex-1 px-3 py-2 rounded-lg border text-sm transition-all
+      ${isVoting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
+      ${isSelected ? "font-semibold" : "font-normal"}
+    `.trim();
+  };
+
+  const getButtonStyle = (responseType: "going" | "interested" | "not_going") => {
+    const isSelected = concert.responses?.userResponse === responseType;
+    return {
+      borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
+      backgroundColor: isSelected ? "var(--tg-theme-button-color, #3390ec)" : "transparent",
+      color: isSelected
+        ? "var(--tg-theme-button-text-color, #ffffff)"
+        : "var(--tg-theme-text-color, #000000)",
+    };
+  };
+
   return (
     <div
       onClick={onClick}
-      className="concert-card"
+      className={`p-4 mb-3 rounded-xl border ${onClick ? "cursor-pointer" : ""}`}
       style={{
-        padding: "16px",
-        marginBottom: "12px",
-        borderRadius: "12px",
         backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
-        border: "1px solid var(--tg-theme-hint-color, #e0e0e0)",
-        cursor: onClick ? "pointer" : "default",
+        borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
       }}
     >
-      <div style={{ marginBottom: "8px" }}>
+      <div className="mb-2">
         <h3
-          style={{
-            margin: 0,
-            fontSize: "18px",
-            fontWeight: "600",
-            color: "var(--tg-theme-text-color, #000000)",
-          }}
+          className="text-lg font-semibold"
+          style={{ color: "var(--tg-theme-text-color, #000000)" }}
         >
           {concert.artistName}
         </h3>
       </div>
 
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          marginBottom: "4px",
-          color: "var(--tg-theme-hint-color, #999999)",
-          fontSize: "14px",
-        }}
+        className="flex items-center gap-2 mb-1 text-sm"
+        style={{ color: "var(--tg-theme-hint-color, #999999)" }}
       >
         <span>📍</span>
         <span>{concert.venue}</span>
       </div>
 
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          color: "var(--tg-theme-hint-color, #999999)",
-          fontSize: "14px",
-        }}
+        className="flex items-center gap-2 text-sm"
+        style={{ color: "var(--tg-theme-hint-color, #999999)" }}
       >
         <span>📅</span>
         <span>
@@ -87,53 +88,22 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
       </div>
 
       {concert.notes && (
-        <div
-          style={{
-            marginTop: "8px",
-            fontSize: "13px",
-            color: "var(--tg-theme-hint-color, #999999)",
-          }}
-        >
+        <div className="mt-2 text-xs" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
           {concert.notes}
         </div>
       )}
 
       {concert.responses && userId && onVote && (
         <div
-          style={{
-            marginTop: "12px",
-            paddingTop: "12px",
-            borderTop: "1px solid var(--tg-theme-hint-color, #e0e0e0)",
-          }}
+          className="mt-3 pt-3 border-t"
+          style={{ borderColor: "var(--tg-theme-hint-color, #e0e0e0)" }}
         >
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              justifyContent: "space-between",
-            }}
-          >
+          <div className="flex gap-2">
             <button
               onClick={(e) => handleVote(e, "going")}
               disabled={isVoting}
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--tg-theme-hint-color, #e0e0e0)",
-                backgroundColor:
-                  concert.responses.userResponse === "going"
-                    ? "var(--tg-theme-button-color, #3390ec)"
-                    : "transparent",
-                color:
-                  concert.responses.userResponse === "going"
-                    ? "var(--tg-theme-button-text-color, #ffffff)"
-                    : "var(--tg-theme-text-color, #000000)",
-                fontSize: "14px",
-                fontWeight: concert.responses.userResponse === "going" ? "600" : "400",
-                cursor: isVoting ? "not-allowed" : "pointer",
-                opacity: isVoting ? 0.6 : 1,
-              }}
+              className={getButtonClasses("going")}
+              style={getButtonStyle("going")}
             >
               🎉 Going ({concert.responses.going})
             </button>
@@ -141,24 +111,8 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
             <button
               onClick={(e) => handleVote(e, "interested")}
               disabled={isVoting}
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--tg-theme-hint-color, #e0e0e0)",
-                backgroundColor:
-                  concert.responses.userResponse === "interested"
-                    ? "var(--tg-theme-button-color, #3390ec)"
-                    : "transparent",
-                color:
-                  concert.responses.userResponse === "interested"
-                    ? "var(--tg-theme-button-text-color, #ffffff)"
-                    : "var(--tg-theme-text-color, #000000)",
-                fontSize: "14px",
-                fontWeight: concert.responses.userResponse === "interested" ? "600" : "400",
-                cursor: isVoting ? "not-allowed" : "pointer",
-                opacity: isVoting ? 0.6 : 1,
-              }}
+              className={getButtonClasses("interested")}
+              style={getButtonStyle("interested")}
             >
               🤔 Interested ({concert.responses.interested})
             </button>
@@ -166,24 +120,8 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
             <button
               onClick={(e) => handleVote(e, "not_going")}
               disabled={isVoting}
-              style={{
-                flex: 1,
-                padding: "8px 12px",
-                borderRadius: "8px",
-                border: "1px solid var(--tg-theme-hint-color, #e0e0e0)",
-                backgroundColor:
-                  concert.responses.userResponse === "not_going"
-                    ? "var(--tg-theme-button-color, #3390ec)"
-                    : "transparent",
-                color:
-                  concert.responses.userResponse === "not_going"
-                    ? "var(--tg-theme-button-text-color, #ffffff)"
-                    : "var(--tg-theme-text-color, #000000)",
-                fontSize: "14px",
-                fontWeight: concert.responses.userResponse === "not_going" ? "600" : "400",
-                cursor: isVoting ? "not-allowed" : "pointer",
-                opacity: isVoting ? 0.6 : 1,
-              }}
+              className={getButtonClasses("not_going")}
+              style={getButtonStyle("not_going")}
             >
               ❌ Not Going ({concert.responses.not_going})
             </button>
