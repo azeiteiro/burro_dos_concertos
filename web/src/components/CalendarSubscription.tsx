@@ -1,5 +1,5 @@
 interface CalendarSubscriptionProps {
-  onSubscribe: () => void;
+  onSubscribe: (type: "apple" | "google") => void;
 }
 
 export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps) {
@@ -22,7 +22,7 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
       </p>
       <div className="flex gap-2">
         <button
-          onClick={onSubscribe}
+          onClick={() => onSubscribe("apple")}
           className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -32,7 +32,7 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
           📱 Apple Calendar
         </button>
         <button
-          onClick={onSubscribe}
+          onClick={() => onSubscribe("google")}
           className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
