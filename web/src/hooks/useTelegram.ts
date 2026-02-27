@@ -8,6 +8,7 @@ export function useTelegram() {
     // Initialize Telegram Mini App
     WebApp.ready();
     WebApp.expand();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsReady(true);
 
     // Set header color to match Telegram theme
