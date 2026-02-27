@@ -67,6 +67,11 @@ const serializeConcert = (concert: ConcertWithResponses | Concert) => {
 
 // Get all concerts with response counts
 router.get("/concerts", async (req, res) => {
+  // Prevent caching of dynamic concert data
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
   try {
     const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
 
@@ -115,6 +120,11 @@ router.get("/concerts", async (req, res) => {
 
 // Get upcoming concerts (from today onwards) with response counts
 router.get("/concerts/upcoming", async (req, res) => {
+  // Prevent caching of dynamic concert data
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
   try {
     const today = startOfDay(new Date());
     const userId = req.query.userId ? parseInt(req.query.userId as string) : undefined;
@@ -167,6 +177,11 @@ router.get("/concerts/upcoming", async (req, res) => {
 
 // Get poll responses for a concert
 router.get("/concerts/:id/responses", async (req, res) => {
+  // Prevent caching of dynamic response data
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+
   try {
     const concertId = parseInt(req.params.id);
 

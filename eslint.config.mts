@@ -9,7 +9,14 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     plugins: { js },
     extends: ["js/recommended"],
-    languageOptions: { ecmaVersion: "latest", globals: globals.node },
+    languageOptions: {
+      ecmaVersion: "latest",
+      globals: globals.node,
+      parserOptions: {
+        project: "./tsconfig.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       "no-unused-vars": "warn",
       "no-console": "off",
@@ -21,7 +28,7 @@ export default defineConfig([
       "no-var": "error",
     },
   },
-  globalIgnores(["src/generated/**"]),
+  globalIgnores(["src/generated/**", "web/**"]),
   tseslint.configs.recommended,
   // optional: tests
   {
