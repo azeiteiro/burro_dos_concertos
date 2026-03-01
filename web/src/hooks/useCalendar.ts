@@ -12,10 +12,8 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
       webApp.openLink(calendarUrl);
     } else {
       // Google Calendar: Use Google Calendar render URL with webcal://
-      // const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
-      // const googleCalendarUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl)}`;
-      const googleCalendarUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(calendarUrl)}`;
-
+      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+      const googleCalendarUrl = `https://www.google.com/calendar/render?cid=${encodeURIComponent(webcalUrl)}`;
       webApp.openLink(googleCalendarUrl);
     }
   };

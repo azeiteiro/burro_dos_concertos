@@ -366,7 +366,7 @@ router.get("/users/:userId/calendar.ics", async (req, res) => {
     // Add concerts as events
     concerts.forEach((concert) => {
       const responseType = concert.responses[0]?.responseType;
-      const status = responseType === ResponseType.going ? "🎉 Going" : "🤔 Interested";
+      const status = responseType === ResponseType.going ? "Going" : "Interested";
 
       const start = new Date(concert.concertDate);
       let end = new Date(concert.concertDate);
@@ -386,7 +386,7 @@ router.get("/users/:userId/calendar.ics", async (req, res) => {
       const event = calendar.createEvent({
         start,
         end,
-        summary: `${status} - ${concert.artistName}`,
+        summary: `[${status}] ${concert.artistName}`,
         description: concert.notes || undefined,
         location: concert.venue,
         url: concert.url || undefined,
@@ -466,7 +466,7 @@ router.get("/users/:userId/calendar-debug", async (req, res) => {
     // Add concerts as events
     concerts.forEach((concert) => {
       const responseType = concert.responses[0]?.responseType;
-      const status = responseType === ResponseType.going ? "🎉 Going" : "🤔 Interested";
+      const status = responseType === ResponseType.going ? "Going" : "Interested";
 
       const start = new Date(concert.concertDate);
       let end = new Date(concert.concertDate);
@@ -483,7 +483,7 @@ router.get("/users/:userId/calendar-debug", async (req, res) => {
       calendar.createEvent({
         start,
         end,
-        summary: `${status} - ${concert.artistName}`,
+        summary: `[${status}] ${concert.artistName}`,
         description: concert.notes || undefined,
         location: concert.venue,
         url: concert.url || undefined,
