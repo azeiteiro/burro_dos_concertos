@@ -11,10 +11,10 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
       // iOS/macOS: Opens in Calendar app with subscribe prompt
       webApp.openLink(calendarUrl);
     } else {
-      // Google Calendar: Use Google's calendar subscription URL
-      // This will open in the Google Calendar app if installed, or web if not
-      const googleCalendarUrl = `https://calendar.google.com/calendar/render?cid=${encodeURIComponent(calendarUrl)}`;
-      webApp.openLink(googleCalendarUrl);
+      // Android: Try webcal:// protocol which opens in default calendar app
+      // Replace https:// or http:// with webcal://
+      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+      webApp.openLink(webcalUrl);
     }
   };
 
