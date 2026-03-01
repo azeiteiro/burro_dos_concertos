@@ -1,5 +1,5 @@
 interface CalendarSubscriptionProps {
-  onSubscribe: (type: "apple" | "google") => void;
+  onSubscribe: (type: "apple" | "google-webcal" | "google-render" | "google-direct" | "google-intent") => void;
 }
 
 export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps) {
@@ -20,26 +20,63 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
       <p className="text-sm mb-3" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
         Get automatic updates for all your concerts
       </p>
-      <div className="flex gap-2">
+
+      {/* Apple Calendar */}
+      <button
+        onClick={() => onSubscribe("apple")}
+        className="w-full px-4 py-2 rounded-lg text-center text-sm font-medium mb-3"
+        style={{
+          backgroundColor: "var(--tg-theme-button-color, #3390ec)",
+          color: "var(--tg-theme-button-text-color, #ffffff)",
+        }}
+      >
+        📱 Apple Calendar
+      </button>
+
+      {/* Google Calendar Options - For Testing */}
+      <div className="space-y-2">
+        <p className="text-xs font-semibold" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
+          📆 Google Calendar (test which works):
+        </p>
         <button
-          onClick={() => onSubscribe("apple")}
-          className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+          onClick={() => onSubscribe("google-webcal")}
+          className="w-full px-3 py-2 rounded text-left text-xs"
           style={{
-            backgroundColor: "var(--tg-theme-button-color, #3390ec)",
-            color: "var(--tg-theme-button-text-color, #ffffff)",
+            backgroundColor: "var(--tg-theme-secondary-bg-color, #e8e8e8)",
+            color: "var(--tg-theme-text-color, #000000)",
           }}
         >
-          📱 Apple Calendar
+          1️⃣ webcal:// protocol
         </button>
         <button
-          onClick={() => onSubscribe("google")}
-          className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+          onClick={() => onSubscribe("google-render")}
+          className="w-full px-3 py-2 rounded text-left text-xs"
           style={{
-            backgroundColor: "var(--tg-theme-button-color, #3390ec)",
-            color: "var(--tg-theme-button-text-color, #ffffff)",
+            backgroundColor: "var(--tg-theme-secondary-bg-color, #e8e8e8)",
+            color: "var(--tg-theme-text-color, #000000)",
           }}
         >
-          📆 Google Calendar
+          2️⃣ Google render URL
+        </button>
+        <button
+          onClick={() => onSubscribe("google-direct")}
+          className="w-full px-3 py-2 rounded text-left text-xs"
+          style={{
+            backgroundColor: "var(--tg-theme-secondary-bg-color, #e8e8e8)",
+            color: "var(--tg-theme-text-color, #000000)",
+          }}
+        >
+          3️⃣ Direct .ics link
+        </button>
+        <button
+          onClick={() => onSubscribe("google-intent")}
+          className="w-full px-3 py-2 rounded text-left text-xs"
+          style={{
+            backgroundColor: "var(--tg-theme-secondary-bg-color, #e8e8e8)",
+            color: "var(--tg-theme-text-color, #000000)",
+          }}
+        >
+          4️⃣ Android intent URL
         </button>
       </div>
     </div>
