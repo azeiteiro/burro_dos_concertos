@@ -400,9 +400,11 @@ router.get("/users/:userId/calendar.ics", async (req, res) => {
       });
     });
 
-    // Set headers
+    // Set headers for calendar subscription
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename="concerts-${userId}.ics"`);
+    res.setHeader("Content-Disposition", `inline; filename="concerts-${userId}.ics"`);
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Cache-Control", "no-cache, must-revalidate");
 
     // Send calendar
     res.send(calendar.toString());
