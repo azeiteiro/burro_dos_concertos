@@ -11,6 +11,11 @@ const mockConcert: Concert = {
   concertDate: new Date("2026-04-14T20:00:00"),
   concertTime: new Date("2026-04-14T20:00:00"),
   notes: "Special show",
+  url: "https://example.com/concert",
+  userId: 1,
+  notified: false,
+  createdAt: new Date("2026-01-01T00:00:00"),
+  updatedAt: new Date("2026-01-01T00:00:00"),
   responses: {
     going: 5,
     interested: 3,

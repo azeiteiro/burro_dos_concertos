@@ -13,6 +13,10 @@ const mockConcerts: Concert[] = [
     concertTime: null,
     notes: null,
     url: null,
+    userId: 1,
+    notified: false,
+    createdAt: new Date("2026-01-01T00:00:00"),
+    updatedAt: new Date("2026-01-01T00:00:00"),
     responses: { going: 1, interested: 0, not_going: 0, userResponse: null },
   },
   {
@@ -23,6 +27,10 @@ const mockConcerts: Concert[] = [
     concertTime: null,
     notes: null,
     url: null,
+    userId: 1,
+    notified: false,
+    createdAt: new Date("2026-01-01T00:00:00"),
+    updatedAt: new Date("2026-01-01T00:00:00"),
     responses: { going: 0, interested: 1, not_going: 0, userResponse: null },
   },
 ];
