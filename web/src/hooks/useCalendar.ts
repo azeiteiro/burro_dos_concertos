@@ -8,10 +8,9 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
     const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
     console.log("Tyoe:", type, "Calendar URL:", calendarUrl);
     if (type === "apple") {
-      // Try webcal:// - works on iOS and might work on Telegram Desktop app
-      // Falls back to download on Telegram Web
-      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
-      webApp.openLink(webcalUrl);
+      // Use https:// for iOS - Telegram WebApp doesn't support webcal://
+      // This will download the .ics file which can then be opened to subscribe
+      webApp.openLink(calendarUrl);
     } else if (type === "samsung") {
       // Samsung Calendar: Try direct link (might work better than Google Calendar)
       const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
