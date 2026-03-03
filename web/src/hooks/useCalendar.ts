@@ -8,8 +8,9 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
     const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
     console.log("Tyoe:", type, "Calendar URL:", calendarUrl);
     if (type === "apple") {
-      // iOS/macOS: Direct link opens in Calendar app
-      webApp.openLink(calendarUrl);
+      // iOS/macOS: Use webcal:// to trigger subscription (not download)
+      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+      webApp.openLink(webcalUrl);
     } else if (type === "samsung") {
       // Samsung Calendar: Try direct link (might work better than Google Calendar)
       const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
