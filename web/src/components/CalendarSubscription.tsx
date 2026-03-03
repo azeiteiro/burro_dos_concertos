@@ -2,10 +2,15 @@ import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import { HiCalendar } from "react-icons/hi2";
 
 interface CalendarSubscriptionProps {
-  onSubscribe: (type: "apple" | "google" | "samsung") => void;
+  userId: number;
 }
 
-export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps) {
+export function CalendarSubscription({ userId }: CalendarSubscriptionProps) {
+  const API_URL =
+    import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.host}`;
+  const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
+  const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+
   return (
     <div
       className="mb-4 p-4 rounded-lg border"
@@ -24,8 +29,8 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
         Get automatic updates for all your concerts
       </p>
       <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => onSubscribe("apple")}
+        <a
+          href={webcalUrl}
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -34,9 +39,9 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
         >
           <SiApple className="w-4 h-4" />
           Apple
-        </button>
-        <button
-          onClick={() => onSubscribe("samsung")}
+        </a>
+        <a
+          href={webcalUrl}
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -45,9 +50,11 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
         >
           <SiSamsung className="w-4 h-4" />
           Samsung
-        </button>
-        <button
-          onClick={() => onSubscribe("google")}
+        </a>
+        <a
+          href={`https://calendar.google.com/calendar/r?cid=${calendarUrl}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="col-span-2 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
@@ -56,7 +63,7 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
         >
           <SiGoogle className="w-4 h-4" />
           Google Calendar
-        </button>
+        </a>
       </div>
     </div>
   );
