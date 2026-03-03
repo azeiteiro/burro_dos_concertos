@@ -31,14 +31,23 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
-      - name: Run ESLint
+      - name: Run ESLint (Backend)
         run: pnpm lint
 
-      - name: Run tests
+      - name: Run tests (Backend)
         run: pnpm test:ci
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
+
+      - name: Run ESLint (Web)
+        run: cd web && npm run lint
+
+      - name: Run tests (Web)
+        run: cd web && npm test -- --run
+
+      - name: Build Web App
+        run: cd web && npm run build
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2
