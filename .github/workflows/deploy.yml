@@ -33,11 +33,17 @@ jobs:
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
-      - name: Run tests
+      - name: Run tests (Backend)
         run: pnpm test:ci
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test
           NODE_ENV: test
+
+      - name: Run tests (Web)
+        run: cd web && npm test -- --run
+
+      - name: Build Web App (test)
+        run: cd web && npm run build
 
   deploy:
     needs: test
