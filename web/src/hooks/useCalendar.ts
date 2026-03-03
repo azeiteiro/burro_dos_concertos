@@ -12,9 +12,9 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
       // This will download the .ics file which can then be opened to subscribe
       webApp.openLink(calendarUrl);
     } else if (type === "samsung") {
-      // Samsung Calendar: Try direct link (might work better than Google Calendar)
-      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
-      webApp.openLink(webcalUrl);
+      // Samsung Calendar: Use https:// - Telegram WebApp doesn't support webcal://
+      // This will download the .ics file which can then be opened to subscribe
+      webApp.openLink(calendarUrl);
     } else {
       // Google Calendar: Copy URL for manual subscription
       // (Direct links don't refresh properly on older Android versions)
