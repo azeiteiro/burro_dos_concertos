@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTelegram } from "./hooks/useTelegram";
 import { useConcerts } from "./hooks/useConcerts";
-import { useCalendar } from "./hooks/useCalendar";
 import { Concert } from "./types/concert";
 import { ConcertDetail } from "./components/ConcertDetail";
 import { CalendarSubscription } from "./components/CalendarSubscription";
@@ -24,8 +23,6 @@ export function App() {
     myConcertsCount,
     handleVote,
   } = useConcerts({ isReady, telegramUser });
-
-  const { handleCalendarSubscribe } = useCalendar(userId, webApp);
 
   const handleConcertClick = (concert: Concert) => {
     setSelectedConcert(concert);
@@ -67,9 +64,7 @@ export function App() {
         </h1>
 
         {/* Calendar Subscription - Only show in My Concerts tab */}
-        {activeTab === "my" && userId && (
-          <CalendarSubscription onSubscribe={handleCalendarSubscribe} />
-        )}
+        {activeTab === "my" && userId && <CalendarSubscription userId={userId} />}
 
         <input
           type="text"

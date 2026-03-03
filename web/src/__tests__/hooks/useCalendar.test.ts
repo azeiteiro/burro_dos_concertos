@@ -20,13 +20,13 @@ describe("useCalendar", () => {
   });
 
   describe("Apple Calendar", () => {
-    it("should open webcal:// URL for Apple Calendar", () => {
+    it("should open https:// URL for Apple Calendar", () => {
       const { result } = renderHook(() => useCalendar(1, mockWebApp as any));
 
       result.current.handleCalendarSubscribe("apple");
 
       expect(mockWebApp.openLink).toHaveBeenCalledWith(
-        "webcal://localhost:3001/api/users/1/calendar.ics"
+        "http://localhost:3001/api/users/1/calendar.ics"
       );
     });
 
@@ -40,13 +40,13 @@ describe("useCalendar", () => {
   });
 
   describe("Samsung Calendar", () => {
-    it("should open webcal:// URL for Samsung Calendar", () => {
+    it("should open https:// URL for Samsung Calendar", () => {
       const { result } = renderHook(() => useCalendar(1, mockWebApp as any));
 
       result.current.handleCalendarSubscribe("samsung");
 
       expect(mockWebApp.openLink).toHaveBeenCalledWith(
-        "webcal://localhost:3001/api/users/1/calendar.ics"
+        "http://localhost:3001/api/users/1/calendar.ics"
       );
     });
   });
@@ -99,7 +99,7 @@ describe("useCalendar", () => {
       result.current.handleCalendarSubscribe("apple");
 
       expect(mockWebApp.openLink).toHaveBeenCalledWith(
-        "webcal://example.com/api/users/1/calendar.ics"
+        "https://example.com/api/users/1/calendar.ics"
       );
 
       vi.unstubAllEnvs();

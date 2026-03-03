@@ -1,76 +1,59 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { CalendarSubscription } from "@/components/CalendarSubscription";
 
 describe("CalendarSubscription", () => {
   it("should render calendar subscription section", () => {
-    const mockOnSubscribe = vi.fn();
-
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
+    render(<CalendarSubscription userId={1} />);
 
     expect(screen.getByText("Subscribe to Calendar")).toBeInTheDocument();
     expect(screen.getByText("Get automatic updates for all your concerts")).toBeInTheDocument();
   });
 
-  it("should render all calendar buttons", () => {
-    const mockOnSubscribe = vi.fn();
+  it("should render all calendar links", () => {
+    render(<CalendarSubscription userId={1} />);
 
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
-
-    expect(screen.getByRole("button", { name: /apple/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /samsung/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /google calendar/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /apple/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /samsung/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /google calendar/i })).toBeInTheDocument();
   });
 
-  it("should call onSubscribe with 'apple' when Apple button is clicked", async () => {
-    const user = userEvent.setup();
-    const mockOnSubscribe = vi.fn();
+  it("should have webcal:// URL for Apple Calendar link", () => {
+    render(<CalendarSubscription userId={1} />);
 
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
-
-    const appleButton = screen.getByRole("button", { name: /apple/i });
-    await user.click(appleButton);
-
-    expect(mockOnSubscribe).toHaveBeenCalledWith("apple");
-    expect(mockOnSubscribe).toHaveBeenCalledTimes(1);
+    const appleLink = screen.getByRole("link", { name: /apple/i });
+    expect(appleLink).toHaveAttribute("href", expect.stringContaining("webcal://"));
+    expect(appleLink).toHaveAttribute("href", expect.stringContaining("/api/users/1/calendar.ics"));
   });
 
-  it("should call onSubscribe with 'samsung' when Samsung button is clicked", async () => {
-    const user = userEvent.setup();
-    const mockOnSubscribe = vi.fn();
+  it("should have webcal:// URL for Samsung Calendar link", () => {
+    render(<CalendarSubscription userId={1} />);
 
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
-
-    const samsungButton = screen.getByRole("button", { name: /samsung/i });
-    await user.click(samsungButton);
-
-    expect(mockOnSubscribe).toHaveBeenCalledWith("samsung");
-    expect(mockOnSubscribe).toHaveBeenCalledTimes(1);
+    const samsungLink = screen.getByRole("link", { name: /samsung/i });
+    expect(samsungLink).toHaveAttribute("href", expect.stringContaining("webcal://"));
+    expect(samsungLink).toHaveAttribute(
+      "href",
+      expect.stringContaining("/api/users/1/calendar.ics")
+    );
   });
 
-  it("should call onSubscribe with 'google' when Google button is clicked", async () => {
-    const user = userEvent.setup();
-    const mockOnSubscribe = vi.fn();
+  it("should have Google Calendar URL with calendar ID parameter", () => {
+    render(<CalendarSubscription userId={1} />);
 
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
-
-    const googleButton = screen.getByRole("button", { name: /google calendar/i });
-    await user.click(googleButton);
-
-    expect(mockOnSubscribe).toHaveBeenCalledWith("google");
-    expect(mockOnSubscribe).toHaveBeenCalledTimes(1);
+    const googleLink = screen.getByRole("link", { name: /google calendar/i });
+    expect(googleLink).toHaveAttribute("href", expect.stringContaining("calendar.google.com"));
+    expect(googleLink).toHaveAttribute("href", expect.stringContaining("cid="));
+    expect(googleLink).toHaveAttribute("target", "_blank");
+    expect(googleLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("should display icons for all calendar types", () => {
-    const mockOnSubscribe = vi.fn();
+    render(<CalendarSubscription userId={1} />);
 
-    render(<CalendarSubscription onSubscribe={mockOnSubscribe} />);
-
-    // Check that buttons contain SVG icons (from react-icons)
-    const buttons = screen.getAllByRole("button");
-    buttons.forEach((button) => {
-      const svg = button.querySelector("svg");
+    // Check that links contain SVG icons (from react-icons)
+    const links = screen.getAllByRole("link");
+    links.forEach((link) => {
+      const svg = link.querySelector("svg");
       expect(svg).toBeInTheDocument();
     });
   });
