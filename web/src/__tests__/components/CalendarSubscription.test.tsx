@@ -18,11 +18,11 @@ describe("CalendarSubscription", () => {
     expect(screen.getByRole("link", { name: /google calendar/i })).toBeInTheDocument();
   });
 
-  it("should have webcal:// URL for Apple Calendar link", () => {
+  it("should have https:// URL for Apple Calendar link", () => {
     render(<CalendarSubscription userId={1} />);
 
     const appleLink = screen.getByRole("link", { name: /apple/i });
-    expect(appleLink).toHaveAttribute("href", expect.stringContaining("webcal://"));
+    expect(appleLink).toHaveAttribute("href", expect.stringMatching(/^https?:\/\//));
     expect(appleLink).toHaveAttribute("href", expect.stringContaining("/api/users/1/calendar.ics"));
   });
 

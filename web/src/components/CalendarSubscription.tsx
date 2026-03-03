@@ -30,7 +30,7 @@ export function CalendarSubscription({ userId }: CalendarSubscriptionProps) {
       </p>
       <div className="grid grid-cols-2 gap-2">
         <a
-          href={webcalUrl}
+          href={calendarUrl}
           className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
