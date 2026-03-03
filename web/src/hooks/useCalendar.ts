@@ -1,17 +1,21 @@
 import type WebApp from "@twa-dev/sdk";
 
 export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
-  const handleCalendarSubscribe = async (type: "apple" | "google") => {
+  const handleCalendarSubscribe = async (type: "apple" | "google" | "samsung") => {
     if (!userId) return;
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
     const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
-
+    console.log("Tyoe:", type, "Calendar URL:", calendarUrl);
     if (type === "apple") {
       // iOS/macOS: Direct link opens in Calendar app
       webApp.openLink(calendarUrl);
+    } else if (type === "samsung") {
+      // Samsung Calendar: Try direct link (might work better than Google Calendar)
+      const webcalUrl = calendarUrl.replace(/^https?:\/\//, "webcal://");
+      webApp.openLink(webcalUrl);
     } else {
-      // Android/Google Calendar: Copy URL for manual subscription
+      // Google Calendar: Copy URL for manual subscription
       // (Direct links don't refresh properly on older Android versions)
       try {
         await navigator.clipboard.writeText(calendarUrl);

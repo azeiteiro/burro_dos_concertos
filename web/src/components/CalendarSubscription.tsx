@@ -1,5 +1,8 @@
+import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
+import { HiCalendar } from "react-icons/hi2";
+
 interface CalendarSubscriptionProps {
-  onSubscribe: (type: "apple" | "google") => void;
+  onSubscribe: (type: "apple" | "google" | "samsung") => void;
 }
 
 export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps) {
@@ -12,7 +15,7 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
       }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg">📅</span>
+        <HiCalendar className="text-lg" style={{ color: "var(--tg-theme-text-color, #000000)" }} />
         <h3 className="font-semibold" style={{ color: "var(--tg-theme-text-color, #000000)" }}>
           Subscribe to Calendar
         </h3>
@@ -20,26 +23,39 @@ export function CalendarSubscription({ onSubscribe }: CalendarSubscriptionProps)
       <p className="text-sm mb-3" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
         Get automatic updates for all your concerts
       </p>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={() => onSubscribe("apple")}
-          className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
             color: "var(--tg-theme-button-text-color, #ffffff)",
           }}
         >
-          📱 Apple Calendar
+          <SiApple className="w-4 h-4" />
+          Apple
+        </button>
+        <button
+          onClick={() => onSubscribe("samsung")}
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
+          style={{
+            backgroundColor: "var(--tg-theme-button-color, #3390ec)",
+            color: "var(--tg-theme-button-text-color, #ffffff)",
+          }}
+        >
+          <SiSamsung className="w-4 h-4" />
+          Samsung
         </button>
         <button
           onClick={() => onSubscribe("google")}
-          className="flex-1 px-4 py-2 rounded-lg text-center text-sm font-medium"
+          className="col-span-2 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
           style={{
             backgroundColor: "var(--tg-theme-button-color, #3390ec)",
             color: "var(--tg-theme-button-text-color, #ffffff)",
           }}
         >
-          📆 Google Calendar
+          <SiGoogle className="w-4 h-4" />
+          Google Calendar
         </button>
       </div>
     </div>
