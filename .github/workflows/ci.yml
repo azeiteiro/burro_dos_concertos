@@ -44,12 +44,29 @@ jobs:
         run: cd web && npm run lint
 
       - name: Run tests (Web)
-        run: cd web && npm test -- --run
+        run: cd web && npm run test:coverage -- --run
 
       - name: Build Web App
         run: cd web && npm run build
 
-      - name: Upload coverage to Coveralls
+      - name: Upload Backend coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./coverage/lcov.info
+          flag-name: backend
+          parallel: true
+
+      - name: Upload Web coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./web/coverage/lcov.info
+          flag-name: web
+          parallel: true
+
+      - name: Finish Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
