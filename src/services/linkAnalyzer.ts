@@ -204,7 +204,13 @@ async function browserlessFetch(url: string): Promise<{ body: string; url: strin
     const finalUrl = page.url();
 
     // Check if we've been redirected to Queue-it (bot protection)
-    if (finalUrl.includes("queue-it.net")) {
+    let queueItHost = "";
+    try {
+      queueItHost = new URL(finalUrl).hostname.toLowerCase();
+    } catch {
+      queueItHost = "";
+    }
+    if (queueItHost === "queue-it.net" || queueItHost.endsWith(".queue-it.net")) {
       console.warn(
         `⚠️ Detected Queue-it bot protection on ${url}. Cannot extract metadata due to anti-bot measures.`
       );
