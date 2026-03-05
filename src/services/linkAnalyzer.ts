@@ -153,10 +153,42 @@ async function browserlessFetch(url: string): Promise<{ body: string; url: strin
 
     const page = await browser.newPage();
 
-    // Set a realistic user agent
+    // Set realistic headers to avoid bot detection
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     );
+    await page.setExtraHTTPHeaders({
+      "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+      "Accept-Encoding": "gzip, deflate, br",
+      "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+      "Sec-Ch-Ua-Mobile": "?0",
+      "Sec-Ch-Ua-Platform": '"Windows"',
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "Sec-Fetch-User": "?1",
+      "Upgrade-Insecure-Requests": "1",
+    });
+
+    // Mask webdriver detection
+    await page.evaluateOnNewDocument(() => {
+      // Override the navigator.webdriver property
+      Object.defineProperty(navigator, "webdriver", {
+        get: () => false,
+      });
+
+      // Override the plugins array to look more realistic
+      Object.defineProperty(navigator, "plugins", {
+        get: () => [1, 2, 3, 4, 5],
+      });
+
+      // Override the languages array
+      Object.defineProperty(navigator, "languages", {
+        get: () => ["pt-PT", "pt", "en-US", "en"],
+      });
+    });
 
     // Navigate and wait for network to settle
     await page.goto(url, {
@@ -164,11 +196,22 @@ async function browserlessFetch(url: string): Promise<{ body: string; url: strin
       timeout: 30000,
     });
 
-    // Wait a bit for any dynamic content to load
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait longer for dynamic content to load
+    // MEO Blue Ticket and similar sites need time to render
+    await new Promise((resolve) => setTimeout(resolve, 5000));
 
     // Get the final URL (after redirects)
     const finalUrl = page.url();
+
+    // Check if we've been redirected to Queue-it (bot protection)
+    if (finalUrl.includes("queue-it.net")) {
+      console.warn(
+        `⚠️ Detected Queue-it bot protection on ${url}. Cannot extract metadata due to anti-bot measures.`
+      );
+      await page.close();
+      await browser.disconnect();
+      return null; // Return null to trigger fallback
+    }
 
     // Get the HTML content
     const html = await page.content();
@@ -292,6 +335,25 @@ export async function extractMetadata(
 
     const metadata = await scraper({ html, url: finalUrl });
 
+    // Check if we hit bot protection (Queue-it, Cloudflare, etc.)
+    const restrictedKeywords = [
+      "restricted access",
+      "access has been restricted",
+      "checking your browser",
+      "just a moment",
+      "please wait",
+      "verifying you are human",
+    ];
+    const titleLower = (metadata.title || "").toLowerCase();
+    const isRestricted = restrictedKeywords.some((keyword) => titleLower.includes(keyword));
+
+    if (isRestricted) {
+      console.warn(
+        `⚠️ Bot protection detected on ${url}. Title: "${metadata.title}". Cannot extract metadata.`
+      );
+      return null;
+    }
+
     // Basic validation - we need at least a title or description
     if (!metadata.title && !metadata.description) {
       console.warn(`No metadata found for ${url}`);
@@ -311,6 +373,25 @@ export async function extractMetadata(
     console.error(`Failed to parse metadata from ${url}: ${errorMessage}`);
     return null;
   }
+}
+
+/**
+ * Extracts event title from MEO Blue Ticket HTML
+ */
+function extractMeoBlueTicketTitle(html: string): string | null {
+  // Look for h1 with event title
+  const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+  if (h1Match) {
+    return h1Match[1].trim();
+  }
+
+  // Look for schema.org name
+  const schemaMatch = html.match(/"name"\s*:\s*"([^"]+)"/);
+  if (schemaMatch) {
+    return schemaMatch[1].trim();
+  }
+
+  return null;
 }
 
 /**
@@ -360,7 +441,18 @@ export function parseConcertInfo(
   }
 
   // The title often contains "Artist @ Venue" or "Artist - Venue" patterns
-  const title = metadata.title || "";
+  let title = metadata.title || "";
+
+  // Special handling for MEO Blue Ticket
+  if (metadata.url.includes("blueticket.meo.pt") && html) {
+    const meoTitle = extractMeoBlueTicketTitle(html);
+    console.log(`[MEO Blue Ticket] Extracted title: ${meoTitle}`);
+    console.log(`[MEO Blue Ticket] Original title: ${metadata.title}`);
+    if (meoTitle && meoTitle !== "Restricted access") {
+      title = meoTitle;
+      console.log(`[MEO Blue Ticket] Using extracted title: ${title}`);
+    }
+  }
 
   // Common patterns for ticket sites
   const patterns = [
