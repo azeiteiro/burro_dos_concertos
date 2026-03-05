@@ -64,7 +64,7 @@ export function App() {
         </h1>
 
         {/* Calendar Subscription - Only show in My Concerts tab */}
-        {activeTab === "my" && userId && <CalendarSubscription userId={userId} />}
+        {activeTab === "my" && userId && <CalendarSubscription userId={userId} webApp={webApp} />}
 
         <input
           type="text"

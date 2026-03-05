@@ -6,7 +6,7 @@ export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
 
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
     const calendarUrl = `${API_URL}/api/users/${userId}/calendar.ics`;
-    console.log("Tyoe:", type, "Calendar URL:", calendarUrl);
+    console.log("Type:", type, "Calendar URL:", calendarUrl);
     if (type === "apple") {
       // Use https:// for iOS - Telegram WebApp doesn't support webcal://
       // This will download the .ics file which can then be opened to subscribe

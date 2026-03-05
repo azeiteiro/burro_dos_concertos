@@ -1,59 +1,81 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { CalendarSubscription } from "@/components/CalendarSubscription";
 
+// Mock WebApp
+const mockWebApp = {
+  openLink: vi.fn(),
+  showPopup: vi.fn(),
+} as any;
+
 describe("CalendarSubscription", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("should render calendar subscription section", () => {
-    render(<CalendarSubscription userId={1} />);
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
     expect(screen.getByText("Subscribe to Calendar")).toBeInTheDocument();
     expect(screen.getByText("Get automatic updates for all your concerts")).toBeInTheDocument();
   });
 
-  it("should render all calendar links", () => {
-    render(<CalendarSubscription userId={1} />);
+  it("should render all calendar buttons", () => {
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    expect(screen.getByRole("link", { name: /apple/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /samsung/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /google calendar/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /apple/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /samsung/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /google calendar/i })).toBeInTheDocument();
   });
 
-  it("should have https:// URL for Apple Calendar link", () => {
-    render(<CalendarSubscription userId={1} />);
+  it("should call openLink for Apple Calendar button", () => {
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    const appleLink = screen.getByRole("link", { name: /apple/i });
-    expect(appleLink).toHaveAttribute("href", expect.stringMatching(/^https?:\/\//));
-    expect(appleLink).toHaveAttribute("href", expect.stringContaining("/api/users/1/calendar.ics"));
-  });
+    const appleButton = screen.getByRole("button", { name: /apple/i });
+    fireEvent.click(appleButton);
 
-  it("should have webcal:// URL for Samsung Calendar link", () => {
-    render(<CalendarSubscription userId={1} />);
-
-    const samsungLink = screen.getByRole("link", { name: /samsung/i });
-    expect(samsungLink).toHaveAttribute("href", expect.stringContaining("webcal://"));
-    expect(samsungLink).toHaveAttribute(
-      "href",
+    expect(mockWebApp.openLink).toHaveBeenCalledWith(
       expect.stringContaining("/api/users/1/calendar.ics")
     );
   });
 
-  it("should have Google Calendar URL with calendar ID parameter", () => {
-    render(<CalendarSubscription userId={1} />);
+  it("should call openLink for Samsung Calendar button", () => {
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    const googleLink = screen.getByRole("link", { name: /google calendar/i });
-    expect(googleLink).toHaveAttribute("href", expect.stringContaining("calendar.google.com"));
-    expect(googleLink).toHaveAttribute("href", expect.stringContaining("cid="));
-    expect(googleLink).toHaveAttribute("target", "_blank");
-    expect(googleLink).toHaveAttribute("rel", "noopener noreferrer");
+    const samsungButton = screen.getByRole("button", { name: /samsung/i });
+    fireEvent.click(samsungButton);
+
+    expect(mockWebApp.openLink).toHaveBeenCalledWith(
+      expect.stringContaining("/api/users/1/calendar.ics")
+    );
+  });
+
+  it("should handle Google Calendar button click", () => {
+    // Mock clipboard
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
+
+    const googleButton = screen.getByRole("button", { name: /google calendar/i });
+    fireEvent.click(googleButton);
+
+    // Should attempt to copy to clipboard
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      expect.stringContaining("/api/users/1/calendar.ics")
+    );
   });
 
   it("should display icons for all calendar types", () => {
-    render(<CalendarSubscription userId={1} />);
+    render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    // Check that links contain SVG icons (from react-icons)
-    const links = screen.getAllByRole("link");
-    links.forEach((link) => {
-      const svg = link.querySelector("svg");
+    // Check that buttons contain SVG icons (from react-icons)
+    const buttons = screen.getAllByRole("button");
+    buttons.forEach((button) => {
+      const svg = button.querySelector("svg");
       expect(svg).toBeInTheDocument();
     });
   });
