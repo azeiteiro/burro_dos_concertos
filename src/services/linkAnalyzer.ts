@@ -89,9 +89,35 @@ async function fallbackFetch(url: string): Promise<{ body: string; url: string }
 }
 
 /**
+ * Domains known to require JavaScript rendering
+ */
+const JS_REQUIRED_DOMAINS = [
+  "blueticket.meo.pt",
+  "ticketline.sapo.pt",
+  // Add more domains here as needed
+];
+
+/**
+ * Checks if a URL's domain requires JavaScript rendering
+ */
+function domainRequiresJavaScript(url: string): boolean {
+  try {
+    const hostname = new URL(url).hostname;
+    return JS_REQUIRED_DOMAINS.some((domain) => hostname.includes(domain));
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks if HTML contains indicators that JavaScript is required
  */
-function requiresJavaScript(html: string): boolean {
+function requiresJavaScript(html: string, url: string): boolean {
+  // Check domain whitelist first
+  if (domainRequiresJavaScript(url)) {
+    return true;
+  }
+
   // Check for common queue/JavaScript-required patterns
   const indicators = [
     /requires? (the )?activation (of )?javascript/i,
@@ -201,7 +227,7 @@ export async function extractMetadata(
     finalUrl = response.url;
 
     // Check if the page requires JavaScript
-    if (requiresJavaScript(html)) {
+    if (requiresJavaScript(html, finalUrl)) {
       console.log(`⚠️ Page requires JavaScript for ${url}`);
 
       // Notify user about longer wait time
@@ -239,7 +265,7 @@ export async function extractMetadata(
     finalUrl = fallbackResult.url;
 
     // Check if this HTML requires JavaScript
-    if (requiresJavaScript(html)) {
+    if (requiresJavaScript(html, finalUrl)) {
       console.log(`⚠️ Fallback HTML requires JavaScript for ${url}`);
 
       // Notify user about longer wait time
