@@ -14,6 +14,7 @@ Telegram bot to manage concert listings for private groups.
 - 🎸 Add, edit, and delete concerts
 - 📋 List upcoming concerts
 - 📱 **Telegram Mini App** - Beautiful web interface for browsing concerts
+- 📅 **Calendar Subscriptions** - Subscribe to personal concert calendars (iCal format)
 - 🔔 Automated daily/weekly/monthly notifications
 - 👥 Role-based permissions (User, Moderator, Admin, SuperAdmin)
 - 🔗 Smart concert link detection with automatic metadata extraction
@@ -34,6 +35,7 @@ Telegram bot to manage concert listings for private groups.
 - Vite - Build tool
 - Telegram Web App SDK
 - date-fns - Date formatting
+- ical-generator - iCalendar feed generation
 
 **Deployment:**
 - Production: Fly.io
@@ -107,11 +109,46 @@ The bot includes a beautiful web interface accessible from Telegram:
 
 - 🎵 Browse all upcoming concerts
 - 🔍 Search by artist, venue, or notes
+- 📅 Subscribe to personal calendar feeds
 - 🌓 Dark/light mode (follows Telegram theme)
 - 📱 Mobile-optimized responsive design
 - 🔗 One-click to concert URLs
 
 **Setup:** See [MINIAPP_SETUP.md](./MINIAPP_SETUP.md) for deployment instructions.
+
+## Calendar Subscriptions
+
+Users can subscribe to their personal concert calendars (concerts marked as "going" or "interested") in their favorite calendar apps.
+
+**Technical Implementation:**
+- **Format**: iCalendar (RFC 5545) via `ical-generator`
+- **Endpoint**: `GET /api/users/:userId/calendar.ics`
+- **Timezone**: Europe/Lisbon (configurable in code)
+- **TTL**: 1 hour (calendar apps refresh hourly)
+- **Event Features**:
+  - Status prefix in title (`[Going]` or `[Interested]`)
+  - Venue as location
+  - Concert notes as description
+  - Concert URL (if available)
+  - 24-hour notification alarm
+  - All-day events for concerts without specific time
+  - 3-hour duration for timed concerts
+
+**Supported Platforms:**
+- Apple Calendar (iOS/macOS) - Direct subscription
+- Samsung Calendar - Direct subscription
+- Google Calendar - Manual subscription (webcal URL copied to clipboard)
+
+**Filtering:**
+- Only includes concerts with `responseType` = `going` or `interested`
+- Excludes concerts marked as `not_going`
+- Only shows upcoming concerts (from today onwards)
+
+**Implementation Details:**
+- Frontend: `CalendarSubscription` component with platform-specific buttons
+- Hook: `useCalendar` handles subscription logic and Telegram WebApp integration
+- Backend: Express route generates ICS feed with proper HTTP headers
+- Debug endpoint: `/api/users/:userId/calendar-debug` returns JSON for troubleshooting
 
 ## Concert Link Detection
 

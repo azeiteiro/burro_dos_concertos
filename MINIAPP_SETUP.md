@@ -193,8 +193,18 @@ Built files will be in `web/dist/`
 
 ## API Endpoints
 
+**Concerts:**
 - `GET /api/concerts` - Get all concerts
 - `GET /api/concerts/upcoming` - Get upcoming concerts (from today onwards)
+
+**Calendar:**
+- `GET /api/users/:userId/calendar.ics` - Generate iCalendar feed for user's concerts
+  - Returns: `text/calendar` with ICS format
+  - Filters: Only "going" and "interested" concerts, upcoming only
+  - Headers: Proper `Content-Disposition` for calendar subscription
+- `GET /api/users/:userId/calendar-debug` - Debug endpoint returning JSON representation of calendar
+
+**Health:**
 - `GET /health` - Health check endpoint
 
 ## Mini App Features
@@ -202,8 +212,17 @@ Built files will be in `web/dist/`
 - 🎵 View upcoming concerts
 - 🔍 Search by artist, venue, or notes
 - 📅 Sorted by date
+- 📆 Subscribe to personal calendar (Apple, Samsung, Google Calendar)
 - 🔗 Click concert to open URL (if available)
 - 🌓 Dark/light mode (follows Telegram theme)
+
+**Calendar Subscription UI:**
+- Displayed in "My Concerts" tab when user is authenticated
+- Platform-specific buttons (Apple, Samsung, Google)
+- Apple/Samsung: Direct link opening via `webApp.openLink()`
+- Google: Clipboard copy + instruction popup for manual subscription
+- Uses `useCalendar` hook for logic
+- Generates webcal URL: `webcal://yourdomain.com/api/users/:userId/calendar.ics`
 
 ## Production Deployment (Fly.io)
 
