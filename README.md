@@ -24,7 +24,7 @@ Telegram bot to manage concert listings for private groups.
 ## Tech Stack
 
 **Bot Backend:**
-- Node.js 22 + TypeScript
+- Node.js 24 + TypeScript
 - [grammY](https://grammy.dev/) - Telegram Bot framework
 - Express.js - API server for Mini App
 - PostgreSQL + Prisma 7

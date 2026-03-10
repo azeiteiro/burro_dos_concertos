@@ -1,5 +1,5 @@
 # ===== Stage 1: Builder =====
-FROM node:22-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
@@ -39,7 +39,7 @@ COPY src ./src
 RUN pnpm build
 
 # ===== Stage 2: Production (Alpine) =====
-FROM node:22-alpine AS production
+FROM node:24-alpine AS production
 
 WORKDIR /app
 

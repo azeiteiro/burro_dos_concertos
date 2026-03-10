@@ -2,9 +2,6 @@
   "name": "burro-dos-concertos-miniapp",
   "version": "0.1.0",
   "type": "module",
-  "resolutions": {
-    "minimatch": "^9.0.7"
-  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
