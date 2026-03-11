@@ -10,7 +10,7 @@ import { editConcertConversation } from "./conversations/edit_concert";
 import { registerCommands } from "./bot/commands";
 import { startNotifications } from "./notifications/notifications";
 import { setupCommands } from "./setupCommands";
-import { helpCommand } from "./commands/help";
+import { helpCommand, handleHelpCallbacks, calendarCommand } from "./commands/help";
 import { aboutCommand } from "./commands/about";
 import {
   handleUrlMessage,
@@ -67,6 +67,7 @@ console.log("🔔 Notifications system initialized.");
 // 🚀 Start command
 bot.command("start", startCommand);
 bot.command("help", helpCommand);
+bot.command("calendar", calendarCommand);
 bot.command("about", aboutCommand);
 
 // 🔗 URL detection for concert links (admin only)
@@ -80,6 +81,9 @@ bot.callbackQuery(/^quick_add:/, handleQuickAddCallback);
 
 // ➕ Manual add callback handler
 bot.callbackQuery("add_manual", handleManualAddCallback);
+
+// ❓ Help navigation callback handler
+bot.callbackQuery(/^help_/, handleHelpCallbacks);
 
 // 🏁 Run the bot
 let apiServer: ReturnType<typeof startServer> | undefined;
