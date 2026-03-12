@@ -4,7 +4,7 @@ primary_region = "lhr"
 [build]
 
 [deploy]
-  release_command = "sh -c 'pnpm exec prisma migrate deploy || echo \"Database already initialized\"'"
+  release_command = "npx prisma migrate deploy"
 
 [env]
   NODE_ENV = "production"
