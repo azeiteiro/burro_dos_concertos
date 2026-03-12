@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import path from "path";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { defineConfig, env } from "prisma/config";
 
 // Load environment-specific .env file
@@ -19,6 +20,9 @@ if (!process.env.DATABASE_URL) {
 
 export default defineConfig({
   datasource: {
-    url: env("DATABASE_URL"),
+    // Use a placeholder during build (prisma generate doesn't need real URL)
+    // At runtime, DATABASE_URL will be available from Fly secrets
+    url:
+      process.env.DATABASE_URL || "postgresql://placeholder:placeholder@localhost:5432/placeholder",
   },
 });
