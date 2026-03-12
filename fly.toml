@@ -4,7 +4,7 @@ primary_region = "lhr"
 [build]
 
 [deploy]
-  release_command = "node_modules/.bin/prisma migrate deploy"
+  release_command = "sh -c 'echo \"=== Starting migrations ===\"  && ls -la prisma/migrations && echo \"DATABASE_URL is set: ${DATABASE_URL:+yes}\" && node_modules/.bin/prisma migrate deploy && echo \"=== Migrations completed ===\"'"
 
 [env]
   NODE_ENV = "production"
