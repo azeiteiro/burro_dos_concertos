@@ -13,7 +13,7 @@ RUN apt-get update -y && \
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy dependency files (root and workspace)
-COPY package.json pnpm-lock.yaml tsconfig.json pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml tsconfig.json pnpm-workspace.yaml prisma.config.ts ./
 COPY prisma ./prisma
 
 # Copy web app files
@@ -53,7 +53,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 ENV NODE_ENV=production
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml prisma.config.ts ./
 COPY prisma ./prisma
 
 # Fetch only production dependencies to store (faster)
