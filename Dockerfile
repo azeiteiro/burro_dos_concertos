@@ -55,6 +55,7 @@ ENV NODE_ENV=production
 # Copy package files
 COPY package.json pnpm-lock.yaml prisma.config.ts ./
 COPY prisma ./prisma
+COPY scripts ./scripts
 
 # Fetch only production dependencies to store (faster)
 RUN pnpm fetch --prod
