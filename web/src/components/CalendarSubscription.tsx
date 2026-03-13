@@ -1,11 +1,11 @@
 import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import { HiCalendar } from "react-icons/hi2";
-import type WebApp from "@twa-dev/sdk";
+import type { WebApp } from "@twa-dev/types";
 import { useCalendar } from "../hooks/useCalendar";
 
 interface CalendarSubscriptionProps {
   userId: number;
-  webApp: typeof WebApp;
+  webApp: WebApp;
 }
 
 export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionProps) {

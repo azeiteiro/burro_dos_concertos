@@ -1,6 +1,6 @@
-import type WebApp from "@twa-dev/sdk";
+import type { WebApp } from "@twa-dev/types";
 
-export function useCalendar(userId: number | undefined, webApp: typeof WebApp) {
+export function useCalendar(userId: number | undefined, webApp: WebApp) {
   const handleCalendarSubscribe = async (type: "apple" | "google" | "samsung") => {
     if (!userId) return;
 

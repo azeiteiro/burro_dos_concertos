@@ -24,4 +24,7 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: true,
   },
+  optimizeDeps: {
+    include: ["@twa-dev/sdk"],
+  },
 });

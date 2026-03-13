@@ -35,7 +35,7 @@ export function App() {
     try {
       await handleVote(concertId, responseType);
     } catch (err) {
-      webApp.showAlert(err instanceof Error ? err.message : "Failed to submit response");
+      webApp?.showAlert(err instanceof Error ? err.message : "Failed to submit response");
     }
   };
 
@@ -64,7 +64,9 @@ export function App() {
         </h1>
 
         {/* Calendar Subscription - Only show in My Concerts tab */}
-        {activeTab === "my" && userId && <CalendarSubscription userId={userId} webApp={webApp} />}
+        {activeTab === "my" && userId && webApp && (
+          <CalendarSubscription userId={userId} webApp={webApp} />
+        )}
 
         <input
           type="text"
