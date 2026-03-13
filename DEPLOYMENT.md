@@ -15,8 +15,8 @@ SSH into your Digital Ocean droplet and install required software:
 # Update system
 sudo apt update && sudo apt upgrade -y
 
-# Install Node.js 22
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+# Install Node.js 24
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt install -y nodejs
 
 # Install pnpm
@@ -99,13 +99,13 @@ Go to your GitHub repository → Settings → Secrets and variables → Actions
 
 Add these secrets:
 
-| Secret Name | Description | Example |
-|------------|-------------|---------|
-| `DO_STAGING_HOST` | Digital Ocean droplet IP | `123.45.67.89` |
-| `DO_STAGING_USER` | SSH username | `root` or `ubuntu` |
-| `DO_STAGING_SSH_KEY` | Private SSH key | Contents of `~/.ssh/id_rsa` |
-| `DO_STAGING_PORT` | SSH port (optional) | `22` |
-| `DO_STAGING_APP_PATH` | App directory path | `/opt/burro_dos_concertos` |
+| Secret Name           | Description              | Example                     |
+| --------------------- | ------------------------ | --------------------------- |
+| `DO_STAGING_HOST`     | Digital Ocean droplet IP | `123.45.67.89`              |
+| `DO_STAGING_USER`     | SSH username             | `root` or `ubuntu`          |
+| `DO_STAGING_SSH_KEY`  | Private SSH key          | Contents of `~/.ssh/id_rsa` |
+| `DO_STAGING_PORT`     | SSH port (optional)      | `22`                        |
+| `DO_STAGING_APP_PATH` | App directory path       | `/opt/burro_dos_concertos`  |
 
 #### Getting your SSH key:
 
@@ -168,6 +168,7 @@ git push origin v1.0.4
 ```
 
 This will:
+
 1. Run tests
 2. Deploy to Fly.io production
 3. Available at your Fly.io app URL
