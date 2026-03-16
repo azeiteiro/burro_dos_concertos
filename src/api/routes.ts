@@ -361,6 +361,8 @@ router.get("/users/:userId/calendar.ics", async (req, res) => {
       timezone: "Europe/Lisbon",
       ttl: 3600, // Refresh every hour
       method: ICalCalendarMethod.PUBLISH,
+      scale: "GREGORIAN", // Required by some calendar apps
+      prodId: "//Burro dos Concertos//Concert Calendar//EN",
     });
 
     // Add concerts as events
@@ -463,6 +465,8 @@ router.get("/users/:userId/calendar-debug", async (req, res) => {
       timezone: "Europe/Lisbon",
       ttl: 3600,
       method: ICalCalendarMethod.PUBLISH,
+      scale: "GREGORIAN",
+      prodId: "//Burro dos Concertos//Concert Calendar//EN",
     });
 
     // Add concerts as events
