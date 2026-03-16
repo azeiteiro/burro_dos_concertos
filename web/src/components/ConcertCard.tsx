@@ -57,9 +57,9 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
       case "going":
         return "border-l-4 border-l-green-500 pl-3";
       case "interested":
-        return "border-l-4 border-l-orange-500 pl-3";
+        return "border-l-4 border-l-amber-500 pl-3";
       case "not_going":
-        return "border-l-4 border-l-gray-400 pl-3";
+        return "border-l-4 border-l-red-600 pl-3";
       default:
         return "";
     }
@@ -83,8 +83,6 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
           className="text-lg font-semibold"
           style={{ color: "var(--tg-theme-text-color, #000000)" }}
         >
-          {" "}
-          {getStatusBorderClass()}
           {concert.artistName}
         </h3>
       </div>
