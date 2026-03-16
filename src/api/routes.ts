@@ -393,6 +393,7 @@ router.get("/users/:userId/calendar.ics", async (req, res) => {
         location: concert.venue,
         url: concert.url || undefined,
         allDay: !concert.concertTime,
+        timezone: concert.concertTime ? "Europe/Lisbon" : undefined,
       });
 
       // Add alarm (1 day before)
@@ -506,6 +507,7 @@ router.get("/users/:userId/calendar-debug", async (req, res) => {
         id: c.id,
         artist: c.artistName,
         date: c.concertDate,
+        time: c.concertTime,
         venue: c.venue,
         response: c.responses[0]?.responseType,
       })),
