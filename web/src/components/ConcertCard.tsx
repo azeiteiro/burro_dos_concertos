@@ -50,21 +50,32 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     };
   };
 
-  const userResponse = concert.responses?.userResponse;
+  const getStatusBorderClass = () => {
+    if (!concert.responses?.userResponse) return "";
+
+    switch (concert.responses.userResponse) {
+      case "going":
+        return "border-l-4 border-l-green-500 pl-3";
+      case "interested":
+        return "border-l-4 border-l-orange-500 pl-3";
+      case "not_going":
+        return "border-l-4 border-l-gray-400 pl-3";
+      default:
+        return "";
+    }
+  };
+
+  const hasStatusBorder = !!concert.responses?.userResponse;
 
   return (
     <div
       onClick={onClick}
-      className={`
-        p-4 mb-3 rounded-xl border
-        ${onClick ? "cursor-pointer" : ""}
-        ${userResponse === "going" ? "border-l-4 border-l-green-500 pl-3" : ""}
-        ${userResponse === "interested" ? "border-l-4 border-l-orange-500 pl-3" : ""}
-        ${userResponse === "not_going" ? "border-l-4 border-l-gray-400 pl-3" : ""}
-      `.trim()}
+      className={`p-4 mb-3 rounded-xl border ${onClick ? "cursor-pointer" : ""} ${getStatusBorderClass()}`}
       style={{
         backgroundColor: "var(--tg-theme-section-bg-color, #ffffff)",
-        borderColor: "var(--tg-theme-section-separator-color, #e0e0e0)",
+        borderColor: hasStatusBorder
+          ? undefined
+          : "var(--tg-theme-section-separator-color, #e0e0e0)",
       }}
     >
       <div className="mb-2">
@@ -72,6 +83,8 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
           className="text-lg font-semibold"
           style={{ color: "var(--tg-theme-text-color, #000000)" }}
         >
+          {" "}
+          {getStatusBorderClass()}
           {concert.artistName}
         </h3>
       </div>
