@@ -50,13 +50,28 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     };
   };
 
+  const getStatusBorderClass = () => {
+    if (!concert.responses?.userResponse) return "";
+
+    switch (concert.responses.userResponse) {
+      case "going":
+        return "border-l-4 border-l-green-500 pl-3";
+      case "interested":
+        return "border-l-4 border-l-orange-500 pl-3";
+      case "not_going":
+        return "border-l-4 border-l-gray-400 pl-3";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div
       onClick={onClick}
-      className={`p-4 mb-3 rounded-xl border ${onClick ? "cursor-pointer" : ""}`}
+      className={`p-4 mb-3 rounded-xl border ${onClick ? "cursor-pointer" : ""} ${getStatusBorderClass()}`}
       style={{
-        backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
-        borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
+        backgroundColor: "var(--tg-theme-section-bg-color, #ffffff)",
+        borderColor: "var(--tg-theme-section-separator-color, #e0e0e0)",
       }}
     >
       <div className="mb-2">
