@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-lightsalmon.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
 [![grammY](https://img.shields.io/badge/grammY-Bot_Framework-mediumslateblue)](https://grammy.dev)
-[![Fly.io](https://img.shields.io/badge/deployed-fly.io-blueviolet)](https://fly.io)
+[![Fly.io](https://img.shields.io/badge/deployed-fly.io-palegreen)](https://fly.io)
 
 Telegram bot to manage concert listings for private groups.
 
