@@ -6,6 +6,7 @@ import { demoteUserCommand } from "@/commands/users/demote_user";
 import { listUsersCommand } from "@/commands/users/list_users";
 import { promoteUserCommand } from "@/commands/users/promote_user";
 import { userInfoCommand } from "@/commands/users/user_info";
+import { announceCommand } from "@/commands/announce";
 import { BotContext } from "@/types/global";
 import { isAdmin } from "@/utils/user";
 import { Bot } from "grammy";
@@ -36,5 +37,10 @@ export const registerCommands = (bot: Bot) => {
   bot.command("user_info", async (ctx: BotContext) => {
     if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await userInfoCommand(ctx);
+  });
+
+  bot.command("announce", async (ctx: BotContext) => {
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
+    await announceCommand(ctx);
   });
 };

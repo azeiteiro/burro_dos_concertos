@@ -64,6 +64,11 @@ Add to your `.env` file on the server:
 ```bash
 # API server port (default: 3001)
 API_PORT=3001
+
+# Optional: Mini App URL (used for inline buttons in bot commands)
+# Only needed for staging/development environments
+# Production uses the default URL hardcoded in the bot
+MINI_APP_URL=https://your-staging-domain.com
 ```
 
 ### 5. Add GitHub Secrets
@@ -245,6 +250,7 @@ Make sure you have these secrets set in Fly.io:
 fly secrets set BOT_TOKEN=your_production_token
 fly secrets set DATABASE_URL=your_production_db_url
 fly secrets set BROWSERLESS_API_KEY=your_browserless_key  # Optional
+fly secrets set MINI_APP_URL=https://your-production-domain.fly.dev  # Optional, for Mini App buttons
 ```
 
 ### Deploy

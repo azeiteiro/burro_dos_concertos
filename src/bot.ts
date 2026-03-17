@@ -7,6 +7,7 @@ import { addConcertConversation } from "./conversations/add_concert";
 import { deleteConcertConversation } from "./conversations/delete_concert";
 import { type BotContext } from "./types/global";
 import { editConcertConversation } from "./conversations/edit_concert";
+import { announceConversation } from "./conversations/announce";
 import { registerCommands } from "./bot/commands";
 import { startNotifications } from "./notifications/notifications";
 import { setupCommands } from "./setupCommands";
@@ -52,6 +53,7 @@ bot.use(conversations());
 bot.use(createConversation(addConcertConversation));
 bot.use(createConversation(deleteConcertConversation));
 bot.use(createConversation(editConcertConversation));
+bot.use(createConversation(announceConversation));
 
 // 🧩 Register all commands (these are your handlers)
 registerCommands(bot);

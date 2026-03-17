@@ -54,6 +54,22 @@ describe("listConcertsCommand", () => {
     expect(ctx.reply.mock.calls[0][0]).toContain("Altice Arena, Lisbon");
   });
 
+  it("includes Mini App button in reply markup", async () => {
+    const user = createMockUser();
+    const concert = createMockConcert({ userId: user.id });
+
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([concert]);
+
+    await listConcertsCommand(ctx);
+
+    const replyOptions = ctx.reply.mock.calls[0][1];
+    expect(replyOptions).toHaveProperty("reply_markup");
+    expect(replyOptions.reply_markup.inline_keyboard[0][0]).toMatchObject({
+      text: "🎵 Open Mini App",
+      web_app: { url: expect.stringContaining("https://") },
+    });
+  });
+
   it("includes user name with last name initial", async () => {
     const user = createMockUser({ firstName: "John", lastName: "Doe" });
     const concert = createMockConcert({ userId: user.id, user });

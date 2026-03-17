@@ -98,6 +98,7 @@ pnpm dev
 - `/delete_concert` - Delete your concerts
 
 **Admin/SuperAdmin only:**
+- `/announce` - Send anonymous announcement to group (logged)
 - `/list_users` - List all users
 - `/promote_user` - Promote user to admin
 - `/demote_user` - Demote admin to user
