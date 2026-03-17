@@ -52,6 +52,7 @@ export const setupCommands = (bot: Bot<BotContext>) => {
             { command: "see_concerts", description: "View upcoming concerts" },
             { command: "edit_concert", description: "Edit an existing concert" },
             { command: "delete_concert", description: "Delete a concert" },
+            { command: "announce", description: "📢 Send announcement to group" },
             { command: "list_users", description: "📋 List all users" },
             { command: "promote_user", description: "⬆️ Promote user to admin" },
             { command: "demote_user", description: "⬇️ Demote admin to user" },

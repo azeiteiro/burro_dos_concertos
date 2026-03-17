@@ -65,7 +65,22 @@ export const listConcertsCommand = async (ctx: CommandContext<Context>) => {
 
     logAction(ctx.msg.from?.id ?? 0, `Accessed concert list`);
 
-    await ctx.reply(message, { parse_mode: "MarkdownV2" });
+    // Get Mini App URL from environment or use production default
+    const miniAppUrl = process.env.MINI_APP_URL || "https://burro-dos-concertos.fly.dev";
+
+    await ctx.reply(message, {
+      parse_mode: "MarkdownV2",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: "🎵 Open Mini App",
+              web_app: { url: miniAppUrl },
+            },
+          ],
+        ],
+      },
+    });
   } catch (err) {
     console.error("Failed to list concerts:", err);
     await ctx.reply("❌ Something went wrong while listing concerts.");

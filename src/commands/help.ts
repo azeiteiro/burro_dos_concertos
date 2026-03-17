@@ -190,8 +190,16 @@ export const showAdminHelp = async (ctx: BotContext) => {
 
   const message = `⚙️ *Admin Commands*
 
-As an admin, you have access to user management:
+As an admin, you have access to:
 
+*Announcements:*
+\`/announce\`
+Send anonymous announcements to the group
+• Your name won't appear on the message
+• Sent as the bot
+• All usage is logged for accountability
+
+*User Management:*
 \`/list_users\`
 View all registered users with their roles
 
