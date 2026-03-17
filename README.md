@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/azeiteiro/burro_dos_concertos/actions/workflows/ci.yml/badge.svg)](https://github.com/azeiteiro/burro_dos_concertos/actions)
 [![Coverage Status](https://coveralls.io/repos/github/azeiteiro/burro_dos_concertos/badge.svg?branch=master)](https://coveralls.io/github/azeiteiro/burro_dos_concertos?branch=master)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightsalmon.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
-[![grammY](https://img.shields.io/badge/grammY-Bot_Framework-blue)](https://grammy.dev)
+[![grammY](https://img.shields.io/badge/grammY-Bot_Framework-mediumslateblue)](https://grammy.dev)
 [![Fly.io](https://img.shields.io/badge/deployed-fly.io-blueviolet)](https://fly.io)
 
 Telegram bot to manage concert listings for private groups.
