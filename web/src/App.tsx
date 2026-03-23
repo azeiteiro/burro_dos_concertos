@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Input } from "@telegram-apps/telegram-ui";
 import { useTelegram } from "./hooks/useTelegram";
 import { useConcerts } from "./hooks/useConcerts";
 import { Concert } from "./types/concert";
@@ -68,17 +69,11 @@ export function App() {
           <CalendarSubscription userId={userId} webApp={webApp} />
         )}
 
-        <input
-          type="text"
+        <Input
           placeholder="Search concerts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-3 rounded-lg border text-base outline-none mb-4"
-          style={{
-            borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
-            backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
-            color: "var(--tg-theme-text-color, #000000)",
-          }}
+          className="mb-4"
         />
 
         <ConcertList
