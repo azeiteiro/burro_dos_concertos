@@ -74,7 +74,7 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
       header={
         <div className="flex justify-between items-center">
           <span>Concert Details</span>
-          <Modal.Close asChild>
+          <Modal.Close>
             <button className="text-2xl leading-none text-gray-500" aria-label="×">
               ×
             </button>
