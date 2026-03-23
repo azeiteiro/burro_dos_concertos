@@ -1,9 +1,9 @@
-import { prisma } from "@/config/db";
-import { editConcertConversation } from "@/conversations/edit_concert";
-import { ask } from "@/utils/helpers";
-import { logAction } from "@/utils/logger";
+import { prisma } from "#/config/db";
+import { editConcertConversation } from "#/conversations/edit_concert";
+import { ask } from "#/utils/helpers";
+import { logAction } from "#/utils/logger";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     concert: {
       findMany: jest.fn(),
@@ -12,12 +12,12 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
-jest.mock("@/utils/helpers", () => ({
+jest.mock("#/utils/helpers", () => ({
   ask: jest.fn(),
-  canEditConcert: jest.requireActual("@/utils/helpers").canEditConcert,
+  canEditConcert: jest.requireActual("#/utils/helpers").canEditConcert,
 }));
 
-jest.mock("@/utils/logger", () => ({
+jest.mock("#/utils/logger", () => ({
   logAction: jest.fn(),
 }));
 

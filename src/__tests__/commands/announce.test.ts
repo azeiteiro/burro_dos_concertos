@@ -1,5 +1,5 @@
-import { announceCommand } from "@/commands/announce";
-import { BotContext } from "@/types/global";
+import { announceCommand } from "#/commands/announce";
+import { BotContext } from "#/types/global";
 
 describe("announceCommand", () => {
   let ctx: any;

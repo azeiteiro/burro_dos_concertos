@@ -1,7 +1,7 @@
-import { announceConversation } from "@/conversations/announce";
+import { announceConversation } from "#/conversations/announce";
 
 // Mock logger
-jest.mock("@/utils/logger", () => ({
+jest.mock("#/utils/logger", () => ({
   logAction: jest.fn(),
 }));
 

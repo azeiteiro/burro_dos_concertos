@@ -1,11 +1,11 @@
-import { deleteConcertCommand } from "@/commands/concerts/delete_concert";
-import { prisma } from "@/config/db";
+import { deleteConcertCommand } from "#/commands/concerts/delete_concert";
+import { prisma } from "#/config/db";
 import { CommandContext } from "grammy";
 import { ConversationFlavor } from "@grammyjs/conversations";
-import { BotContext } from "@/types/global";
+import { BotContext } from "#/types/global";
 
 // ---- Mock Prisma ----
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: { upsert: jest.fn() },
   },

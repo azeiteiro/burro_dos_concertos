@@ -1,4 +1,4 @@
-import { ask, canDeleteConcert, canEditConcert } from "@/utils/helpers";
+import { ask, canDeleteConcert, canEditConcert } from "#/utils/helpers";
 
 describe("ask helper", () => {
   let ctx: any;

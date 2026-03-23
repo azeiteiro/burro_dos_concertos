@@ -1,12 +1,12 @@
 import { addConcertConversation } from "../../conversations/add_concert";
-import { prisma } from "@/config/db";
-import { logAction } from "@/utils/logger";
-import { ask } from "@/utils/helpers";
+import { prisma } from "#/config/db";
+import { logAction } from "#/utils/logger";
+import { ask } from "#/utils/helpers";
 
-jest.mock("@/utils/helpers");
-jest.mock("@/utils/logger");
+jest.mock("#/utils/helpers");
+jest.mock("#/utils/logger");
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     concert: {
       create: jest.fn(),
@@ -14,8 +14,8 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
-jest.mock("@/notifications/helpers", () => ({
-  ...jest.requireActual("@/notifications/helpers"),
+jest.mock("#/notifications/helpers", () => ({
+  ...jest.requireActual("#/notifications/helpers"),
   notifyNewConcert: jest.fn().mockResolvedValue(undefined),
 }));
 

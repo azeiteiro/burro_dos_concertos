@@ -1,7 +1,7 @@
-import { getUserByTelegramId } from "@/utils/helpers";
+import { getUserByTelegramId } from "#/utils/helpers";
 
 // 🛠 Mock before importing the module under test
-jest.mock("@/utils/helpers", () => ({
+jest.mock("#/utils/helpers", () => ({
   getUserByTelegramId: jest.fn(),
 }));
 
@@ -28,7 +28,7 @@ const createMockBot = () => ({
 });
 
 // ⬇️ Import AFTER mocks are applied — ESM-safe, ESLint-safe
-import { setupCommands } from "@/setupCommands";
+import { setupCommands } from "#/setupCommands";
 
 describe("setupCommands", () => {
   beforeEach(() => {

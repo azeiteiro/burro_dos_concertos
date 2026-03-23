@@ -1,4 +1,4 @@
-import { BotContext } from "@/types/global";
+import { BotContext } from "#/types/global";
 
 export const aboutCommand = async (ctx: BotContext) => {
   if (ctx.chat?.type !== "private") {

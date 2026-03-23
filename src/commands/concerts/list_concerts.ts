@@ -1,8 +1,8 @@
 // commands/list_concerts.ts
 import { CommandContext, Context } from "grammy";
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { format } from "date-fns";
-import { logAction } from "@/utils/logger";
+import { logAction } from "#/utils/logger";
 
 // Escape MarkdownV2 special characters
 const escapeMarkdownV2 = (text: string): string =>

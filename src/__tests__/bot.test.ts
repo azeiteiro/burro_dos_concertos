@@ -38,23 +38,23 @@ describe("bot.ts", () => {
     });
 
     // Mock functions imported by bot.ts
-    jest.mock("@/bot/commands", () => ({
+    jest.mock("#/bot/commands", () => ({
       registerCommands: jest.fn(),
     }));
 
-    jest.mock("@/setupCommands", () => ({
+    jest.mock("#/setupCommands", () => ({
       setupCommands: jest.fn(),
     }));
 
-    jest.mock("@/notifications/notifications", () => ({
+    jest.mock("#/notifications/notifications", () => ({
       startNotifications: jest.fn(),
     }));
 
-    jest.mock("@/commands/start", () => jest.fn());
-    jest.mock("@/commands/help", () => ({ helpCommand: jest.fn() }));
-    jest.mock("@/commands/about", () => ({ aboutCommand: jest.fn() }));
+    jest.mock("#/commands/start", () => jest.fn());
+    jest.mock("#/commands/help", () => ({ helpCommand: jest.fn() }));
+    jest.mock("#/commands/about", () => ({ aboutCommand: jest.fn() }));
 
-    jest.mock("@/handlers/urlHandler", () => ({
+    jest.mock("#/handlers/urlHandler", () => ({
       handleUrlMessage: jest.fn(),
       handleQuickAddCallback: jest.fn(),
       handleManualAddCallback: jest.fn(),
@@ -65,14 +65,14 @@ describe("bot.ts", () => {
       createConversation: jest.fn(() => "conversation-middleware"),
     }));
 
-    jest.mock("@/api/server", () => ({
+    jest.mock("#/api/server", () => ({
       startServer: jest.fn(() => ({ close: jest.fn() })),
     }));
 
     // Now load bot.ts inside isolateModules
     jest.isolateModules(() => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { bot } = require("@/bot"); // this triggers initialization
+      const { bot } = require("#/bot"); // this triggers initialization
 
       expect(bot).toBeDefined();
 
@@ -114,23 +114,23 @@ describe("bot.ts", () => {
       };
     });
 
-    jest.mock("@/bot/commands", () => ({
+    jest.mock("#/bot/commands", () => ({
       registerCommands: jest.fn(),
     }));
 
-    jest.mock("@/setupCommands", () => ({
+    jest.mock("#/setupCommands", () => ({
       setupCommands: jest.fn(),
     }));
 
-    jest.mock("@/notifications/notifications", () => ({
+    jest.mock("#/notifications/notifications", () => ({
       startNotifications: jest.fn(),
     }));
 
-    jest.mock("@/commands/start", () => jest.fn());
-    jest.mock("@/commands/help", () => ({ helpCommand: jest.fn() }));
-    jest.mock("@/commands/about", () => ({ aboutCommand: jest.fn() }));
+    jest.mock("#/commands/start", () => jest.fn());
+    jest.mock("#/commands/help", () => ({ helpCommand: jest.fn() }));
+    jest.mock("#/commands/about", () => ({ aboutCommand: jest.fn() }));
 
-    jest.mock("@/handlers/urlHandler", () => ({
+    jest.mock("#/handlers/urlHandler", () => ({
       handleUrlMessage: jest.fn(),
       handleQuickAddCallback: jest.fn(),
       handleManualAddCallback: jest.fn(),
@@ -141,13 +141,13 @@ describe("bot.ts", () => {
       createConversation: jest.fn(() => "conversation-middleware"),
     }));
 
-    jest.mock("@/api/server", () => ({
+    jest.mock("#/api/server", () => ({
       startServer: jest.fn(() => ({ close: jest.fn() })),
     }));
 
     jest.isolateModules(() => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      require("@/bot");
+      require("#/bot");
       expect(startMock).toHaveBeenCalled();
     });
 

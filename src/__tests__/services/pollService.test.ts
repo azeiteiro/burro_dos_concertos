@@ -1,8 +1,8 @@
-import { prisma } from "@/config/db";
-import { linkPollToConcert, savePollResponse, getPollResponses } from "@/services/pollService";
+import { prisma } from "#/config/db";
+import { linkPollToConcert, savePollResponse, getPollResponses } from "#/services/pollService";
 import { ResponseType } from "@prisma/client";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     concert: {
       update: jest.fn(),

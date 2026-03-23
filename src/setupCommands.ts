@@ -1,5 +1,5 @@
 import { Bot } from "grammy";
-import { BotContext } from "@/types/global";
+import { BotContext } from "#/types/global";
 import { getUserByTelegramId } from "./utils/helpers";
 
 // 🧠 Cache: userId -> timestamp (so we can refresh periodically)

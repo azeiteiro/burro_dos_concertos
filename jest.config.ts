@@ -31,7 +31,7 @@ const config: Config = {
     },
   },
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/src/$1",
+    "^#/(.*)$": "<rootDir>/src/$1",
     "^node-cron$": "<rootDir>/src/__tests__/mocks/node-cron.ts",
   },
 };

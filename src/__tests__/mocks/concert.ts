@@ -1,4 +1,4 @@
-import { Concert } from "@/types/types";
+import { Concert } from "#/types/types";
 
 export const mockConcert: Concert = {
   id: "1",

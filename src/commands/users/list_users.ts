@@ -1,5 +1,5 @@
-import { prisma } from "@/config/db";
-import { BotContext } from "@/types/global";
+import { prisma } from "#/config/db";
+import { BotContext } from "#/types/global";
 
 export const listUsersCommand = async (ctx: BotContext) => {
   const users = await prisma.user.findMany({

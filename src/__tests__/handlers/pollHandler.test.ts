@@ -1,11 +1,11 @@
 // Mock dependencies before importing
-jest.mock("@/utils/user");
-jest.mock("@/services/pollService");
+jest.mock("#/utils/user");
+jest.mock("#/services/pollService");
 
-import { handlePollAnswer } from "@/handlers/pollHandler";
-import { BotContext } from "@/types/global";
-import * as userUtils from "@/utils/user";
-import * as pollService from "@/services/pollService";
+import { handlePollAnswer } from "#/handlers/pollHandler";
+import { BotContext } from "#/types/global";
+import * as userUtils from "#/utils/user";
+import * as pollService from "#/services/pollService";
 
 const mockedFindOrCreateUser = userUtils.findOrCreateUser as jest.MockedFunction<
   typeof userUtils.findOrCreateUser

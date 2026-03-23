@@ -1,5 +1,5 @@
-import { aboutCommand } from "@/commands/about";
-import { BotContext } from "@/types/global";
+import { aboutCommand } from "#/commands/about";
+import { BotContext } from "#/types/global";
 
 describe("aboutCommand", () => {
   // Silence logs for clean output

@@ -1,7 +1,7 @@
-import { createServer, startServer } from "@/api/server";
+import { createServer, startServer } from "#/api/server";
 import request from "supertest";
 
-jest.mock("@/api/routes", () => {
+jest.mock("#/api/routes", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const express = require("express");
   const router = express.Router();

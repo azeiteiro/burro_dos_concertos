@@ -1,7 +1,7 @@
-import { prisma } from "@/config/db";
-import { BotContext } from "@/types/global";
-import { roles } from "@/utils/constants";
-import { logAction } from "@/utils/logger";
+import { prisma } from "#/config/db";
+import { BotContext } from "#/types/global";
+import { roles } from "#/utils/constants";
+import { logAction } from "#/utils/logger";
 
 export const demoteUserCommand = async (ctx: BotContext) => {
   const args = ctx.message?.text?.split(" ") ?? [];

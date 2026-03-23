@@ -1,5 +1,5 @@
-import { BotContext } from "@/types/global";
-import { getUserByTelegramId } from "@/utils/helpers";
+import { BotContext } from "#/types/global";
+import { getUserByTelegramId } from "#/utils/helpers";
 import { InlineKeyboard } from "grammy";
 
 export const helpCommand = async (ctx: BotContext) => {

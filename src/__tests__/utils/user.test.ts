@@ -1,8 +1,8 @@
-import { findOrCreateUser, isAdmin } from "@/utils/user";
-import { prisma } from "@/config/db";
-import { BotContext } from "@/types/global";
+import { findOrCreateUser, isAdmin } from "#/utils/user";
+import { prisma } from "#/config/db";
+import { BotContext } from "#/types/global";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: {
       upsert: jest.fn(),

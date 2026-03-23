@@ -1,7 +1,7 @@
-import { editConcertCommand } from "@/commands/concerts/edit_concert";
-import { findOrCreateUser } from "@/utils/user";
+import { editConcertCommand } from "#/commands/concerts/edit_concert";
+import { findOrCreateUser } from "#/utils/user";
 
-jest.mock("@/utils/user", () => ({
+jest.mock("#/utils/user", () => ({
   findOrCreateUser: jest.fn(),
 }));
 

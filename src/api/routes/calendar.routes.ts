@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { prisma } from "@/config/db";
-import { getUserConcertsForCalendar } from "@/services/concertService";
-import { generateCalendar } from "@/services/calendarService";
+import { prisma } from "#/config/db";
+import { getUserConcertsForCalendar } from "#/services/concertService";
+import { generateCalendar } from "#/services/calendarService";
 
 const router = Router();
 

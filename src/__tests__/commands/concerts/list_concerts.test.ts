@@ -1,9 +1,9 @@
 // __tests__/list_concerts.test.ts
-import { createMockUser, createMockConcert } from "@/__tests__/mocks/prismaMocks";
-import { listConcertsCommand } from "@/commands/concerts/list_concerts";
-import { prisma } from "@/config/db";
+import { createMockUser, createMockConcert } from "#/__tests__/mocks/prismaMocks";
+import { listConcertsCommand } from "#/commands/concerts/list_concerts";
+import { prisma } from "#/config/db";
 
-jest.mock("@/config/db", () => {
+jest.mock("#/config/db", () => {
   return {
     prisma: {
       concert: {

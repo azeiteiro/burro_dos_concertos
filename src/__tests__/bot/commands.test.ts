@@ -1,24 +1,24 @@
 import { Bot } from "grammy";
-import * as concerts from "@/commands/concerts/add_concert";
-import * as deleteConcert from "@/commands/concerts/delete_concert";
-import * as editConcert from "@/commands/concerts/edit_concert";
-import * as listConcerts from "@/commands/concerts/list_concerts";
-import * as users from "@/commands/users/list_users";
-import * as promoteUser from "@/commands/users/promote_user";
-import * as demoteUser from "@/commands/users/demote_user";
-import * as userInfo from "@/commands/users/user_info";
-import { isAdmin } from "@/utils/user";
-import { registerCommands } from "@/bot/commands";
+import * as concerts from "#/commands/concerts/add_concert";
+import * as deleteConcert from "#/commands/concerts/delete_concert";
+import * as editConcert from "#/commands/concerts/edit_concert";
+import * as listConcerts from "#/commands/concerts/list_concerts";
+import * as users from "#/commands/users/list_users";
+import * as promoteUser from "#/commands/users/promote_user";
+import * as demoteUser from "#/commands/users/demote_user";
+import * as userInfo from "#/commands/users/user_info";
+import { isAdmin } from "#/utils/user";
+import { registerCommands } from "#/bot/commands";
 
-jest.mock("@/commands/concerts/add_concert");
-jest.mock("@/commands/concerts/delete_concert");
-jest.mock("@/commands/concerts/edit_concert");
-jest.mock("@/commands/concerts/list_concerts");
-jest.mock("@/commands/users/list_users");
-jest.mock("@/commands/users/promote_user");
-jest.mock("@/commands/users/demote_user");
-jest.mock("@/commands/users/user_info");
-jest.mock("@/utils/user");
+jest.mock("#/commands/concerts/add_concert");
+jest.mock("#/commands/concerts/delete_concert");
+jest.mock("#/commands/concerts/edit_concert");
+jest.mock("#/commands/concerts/list_concerts");
+jest.mock("#/commands/users/list_users");
+jest.mock("#/commands/users/promote_user");
+jest.mock("#/commands/users/demote_user");
+jest.mock("#/commands/users/user_info");
+jest.mock("#/utils/user");
 
 describe("registerCommands", () => {
   let bot: any;

@@ -1,7 +1,7 @@
-import { userInfoCommand } from "@/commands/users/user_info";
-import { prisma } from "@/config/db";
+import { userInfoCommand } from "#/commands/users/user_info";
+import { prisma } from "#/config/db";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),

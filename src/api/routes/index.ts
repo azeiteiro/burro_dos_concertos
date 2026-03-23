@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { apiRateLimiter } from "@/api/middleware/rateLimiter";
+import { apiRateLimiter } from "#/api/middleware/rateLimiter";
 import usersRoutes from "./users.routes";
 import concertsRoutes from "./concerts.routes";
 import calendarRoutes from "./calendar.routes";

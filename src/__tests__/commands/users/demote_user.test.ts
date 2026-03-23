@@ -1,9 +1,9 @@
-import { prisma } from "@/config/db";
-import { logAction } from "@/utils/logger";
-import { roles } from "@/utils/constants";
-import { demoteUserCommand } from "@/commands/users/demote_user";
+import { prisma } from "#/config/db";
+import { logAction } from "#/utils/logger";
+import { roles } from "#/utils/constants";
+import { demoteUserCommand } from "#/commands/users/demote_user";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: {
       findUnique: jest.fn(),
@@ -12,7 +12,7 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
-jest.mock("@/utils/logger", () => ({
+jest.mock("#/utils/logger", () => ({
   logAction: jest.fn(),
 }));
 

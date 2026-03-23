@@ -1,11 +1,11 @@
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: { upsert: jest.fn() },
   },
 }));
 
-import { addConcertCommand } from "@/commands/concerts/add_concert";
-import { prisma } from "@/config/db";
+import { addConcertCommand } from "#/commands/concerts/add_concert";
+import { prisma } from "#/config/db";
 
 describe("addConcertCommand", () => {
   let ctx: any;

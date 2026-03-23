@@ -1,5 +1,5 @@
-import { prisma } from "@/config/db";
-import { BotContext } from "@/types/global";
+import { prisma } from "#/config/db";
+import { BotContext } from "#/types/global";
 
 export const userInfoCommand = async (ctx: BotContext) => {
   const args = ctx.message?.text?.split(" ") ?? [];

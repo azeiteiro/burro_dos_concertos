@@ -1,6 +1,6 @@
-import { BotContext } from "@/types/global";
-import { savePollResponse } from "@/services/pollService";
-import { findOrCreateUser } from "@/utils/user";
+import { BotContext } from "#/types/global";
+import { savePollResponse } from "#/services/pollService";
+import { findOrCreateUser } from "#/utils/user";
 import pino from "pino";
 
 const logger = pino({ name: "pollHandler" });

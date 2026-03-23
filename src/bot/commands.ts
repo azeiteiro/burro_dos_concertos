@@ -1,14 +1,14 @@
-import { addConcertCommand } from "@/commands/concerts/add_concert";
-import { deleteConcertCommand } from "@/commands/concerts/delete_concert";
-import { editConcertCommand } from "@/commands/concerts/edit_concert";
-import { listConcertsCommand } from "@/commands/concerts/list_concerts";
-import { demoteUserCommand } from "@/commands/users/demote_user";
-import { listUsersCommand } from "@/commands/users/list_users";
-import { promoteUserCommand } from "@/commands/users/promote_user";
-import { userInfoCommand } from "@/commands/users/user_info";
-import { announceCommand } from "@/commands/announce";
-import { BotContext } from "@/types/global";
-import { isAdmin } from "@/utils/user";
+import { addConcertCommand } from "#/commands/concerts/add_concert";
+import { deleteConcertCommand } from "#/commands/concerts/delete_concert";
+import { editConcertCommand } from "#/commands/concerts/edit_concert";
+import { listConcertsCommand } from "#/commands/concerts/list_concerts";
+import { demoteUserCommand } from "#/commands/users/demote_user";
+import { listUsersCommand } from "#/commands/users/list_users";
+import { promoteUserCommand } from "#/commands/users/promote_user";
+import { userInfoCommand } from "#/commands/users/user_info";
+import { announceCommand } from "#/commands/announce";
+import { BotContext } from "#/types/global";
+import { isAdmin } from "#/utils/user";
 import { Bot } from "grammy";
 
 export const registerCommands = (bot: Bot) => {

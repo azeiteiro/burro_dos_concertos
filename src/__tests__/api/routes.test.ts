@@ -1,11 +1,11 @@
 import request from "supertest";
 import express from "express";
-import { prisma } from "@/config/db";
-import apiRoutes from "@/api/routes";
-import * as pollService from "@/services/pollService";
+import { prisma } from "#/config/db";
+import apiRoutes from "#/api/routes";
+import * as pollService from "#/services/pollService";
 import { ResponseType } from "@prisma/client";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     concert: {
       findMany: jest.fn(),
@@ -20,7 +20,7 @@ jest.mock("@/config/db", () => ({
   },
 }));
 
-jest.mock("@/services/pollService", () => ({
+jest.mock("#/services/pollService", () => ({
   getPollResponses: jest.fn(),
 }));
 

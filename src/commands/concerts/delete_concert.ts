@@ -1,5 +1,5 @@
-import { BotContext } from "@/types/global";
-import { findOrCreateUser } from "@/utils/user";
+import { BotContext } from "#/types/global";
+import { findOrCreateUser } from "#/utils/user";
 
 export const deleteConcertCommand = async (ctx: BotContext) => {
   const tgUser = ctx.from;

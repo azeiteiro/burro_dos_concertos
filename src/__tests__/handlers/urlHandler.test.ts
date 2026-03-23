@@ -1,16 +1,16 @@
 // Mock dependencies before importing
 jest.mock("got", () => jest.fn());
-jest.mock("@/utils/user");
-jest.mock("@/services/linkAnalyzer");
+jest.mock("#/utils/user");
+jest.mock("#/services/linkAnalyzer");
 
 import {
   handleUrlMessage,
   handleQuickAddCallback,
   handleManualAddCallback,
-} from "@/handlers/urlHandler";
-import { BotContext } from "@/types/global";
-import * as userUtils from "@/utils/user";
-import * as linkAnalyzer from "@/services/linkAnalyzer";
+} from "#/handlers/urlHandler";
+import { BotContext } from "#/types/global";
+import * as userUtils from "#/utils/user";
+import * as linkAnalyzer from "#/services/linkAnalyzer";
 
 const mockedFindOrCreateUser = userUtils.findOrCreateUser as jest.MockedFunction<
   typeof userUtils.findOrCreateUser

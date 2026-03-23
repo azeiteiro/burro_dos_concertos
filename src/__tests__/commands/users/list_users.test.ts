@@ -1,7 +1,7 @@
-import { listUsersCommand } from "@/commands/users/list_users";
-import { prisma } from "@/config/db";
+import { listUsersCommand } from "#/commands/users/list_users";
+import { prisma } from "#/config/db";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     user: {
       findMany: jest.fn(),

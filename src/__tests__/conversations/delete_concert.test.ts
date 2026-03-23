@@ -1,12 +1,12 @@
-import { deleteConcertConversation } from "@/conversations/delete_concert";
-import { prisma } from "@/config/db";
-import { MockContext } from "@/__tests__/mocks/grammy";
-import { createMockConcert, createMockUser } from "@/__tests__/mocks/prismaMocks";
+import { deleteConcertConversation } from "#/conversations/delete_concert";
+import { prisma } from "#/config/db";
+import { MockContext } from "#/__tests__/mocks/grammy";
+import { createMockConcert, createMockUser } from "#/__tests__/mocks/prismaMocks";
 import { Conversation } from "@grammyjs/conversations";
 import { Context } from "grammy";
 
 // ---- Mock Prisma ----
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: {
     concert: { findMany: jest.fn(), delete: jest.fn() },
   },

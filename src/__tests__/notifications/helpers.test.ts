@@ -1,4 +1,4 @@
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { Bot } from "grammy";
 import {
   formatConcertList,
@@ -6,13 +6,13 @@ import {
   sendWeekConcerts,
   sendMonthConcerts,
   notifyNewConcert,
-} from "@/notifications/helpers";
+} from "#/notifications/helpers";
 import { Context } from "grammy";
 import { Concert } from "@prisma/client";
 
 process.env.GROUP_ID = "123456789";
 
-jest.mock("@/config/db", () => ({
+jest.mock("#/config/db", () => ({
   prisma: { concert: { findMany: jest.fn() } },
 }));
 

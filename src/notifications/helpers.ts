@@ -1,9 +1,9 @@
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { Concert } from "@prisma/client";
 import { Bot, Context } from "grammy";
 import { format, startOfDay, endOfDay } from "date-fns";
 import pino from "pino";
-import { linkPollToConcert } from "@/services/pollService";
+import { linkPollToConcert } from "#/services/pollService";
 
 const logger = pino({ name: "notifications" });
 

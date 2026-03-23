@@ -1,5 +1,5 @@
-import { prisma } from "@/config/db";
-import { BotContext } from "@/types/global";
+import { prisma } from "#/config/db";
+import { BotContext } from "#/types/global";
 import { UserFromGetMe } from "grammy/types";
 
 export const findOrCreateUser = (tgUser: UserFromGetMe) => {

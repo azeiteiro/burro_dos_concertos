@@ -6,12 +6,12 @@ import {
   showAdminHelp,
   showFAQHelp,
   handleHelpCallbacks,
-} from "@/commands/help";
-import { getUserByTelegramId } from "@/utils/helpers";
-import { BotContext } from "@/types/global";
+} from "#/commands/help";
+import { getUserByTelegramId } from "#/utils/helpers";
+import { BotContext } from "#/types/global";
 
 // Mock DB helper
-jest.mock("@/utils/helpers", () => ({
+jest.mock("#/utils/helpers", () => ({
   getUserByTelegramId: jest.fn(),
 }));
 

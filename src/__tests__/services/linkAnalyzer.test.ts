@@ -42,7 +42,7 @@ jest.mock("https", () => ({
   }),
 }));
 
-import { extractMetadata, parseConcertInfo, formatConcertPreview } from "@/services/linkAnalyzer";
+import { extractMetadata, parseConcertInfo, formatConcertPreview } from "#/services/linkAnalyzer";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const got = require("got");

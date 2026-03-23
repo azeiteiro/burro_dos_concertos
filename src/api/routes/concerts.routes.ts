@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { ResponseType } from "@prisma/client";
-import { getPollResponses } from "@/services/pollService";
+import { getPollResponses } from "#/services/pollService";
 import {
   getAllConcerts,
   getUpcomingConcerts,
   getConcertById,
   upsertConcertResponse,
-} from "@/services/concertService";
-import { setNoCacheHeaders, transformConcertWithResponses } from "@/api/utils/serializers";
+} from "#/services/concertService";
+import { setNoCacheHeaders, transformConcertWithResponses } from "#/api/utils/serializers";
 
 const router = Router();
 

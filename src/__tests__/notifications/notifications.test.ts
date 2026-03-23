@@ -1,7 +1,7 @@
 // notifications.test.ts
 import cron from "node-cron";
-import * as notifications from "@/notifications/notifications";
-import * as helpers from "@/notifications/helpers";
+import * as notifications from "#/notifications/notifications";
+import * as helpers from "#/notifications/helpers";
 import { Bot } from "grammy";
 
 jest.mock("node-cron", () => ({

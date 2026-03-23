@@ -1,4 +1,4 @@
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { ResponseType } from "@prisma/client";
 import { startOfDay } from "date-fns";
 import pino from "pino";

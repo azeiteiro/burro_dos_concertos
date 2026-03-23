@@ -1,10 +1,10 @@
 import { Conversation } from "@grammyjs/conversations";
 import { Context, InlineKeyboard } from "grammy";
-import { prisma } from "@/config/db";
+import { prisma } from "#/config/db";
 import { Concert } from "@prisma/client";
-import { ask, canEditConcert } from "@/utils/helpers";
-import { validateConcertInput } from "@/utils/validators";
-import { logAction } from "@/utils/logger";
+import { ask, canEditConcert } from "#/utils/helpers";
+import { validateConcertInput } from "#/utils/validators";
+import { logAction } from "#/utils/logger";
 
 export const editConcertConversation = async (
   conversation: Conversation,

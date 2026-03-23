@@ -1,6 +1,6 @@
 import { Conversation } from "@grammyjs/conversations";
-import { BotContext } from "@/types/global";
-import { logAction } from "@/utils/logger";
+import { BotContext } from "#/types/global";
+import { logAction } from "#/utils/logger";
 import { InlineKeyboard } from "grammy";
 
 export async function announceConversation(
