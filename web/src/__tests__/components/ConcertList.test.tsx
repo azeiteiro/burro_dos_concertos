@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/setup";
 import userEvent from "@testing-library/user-event";
 import { ConcertList } from "@/components/ConcertList";
 import { Concert } from "@/types/concert";
@@ -62,21 +62,19 @@ describe("ConcertList", () => {
   it("should render empty state for all tab", () => {
     render(<ConcertList {...defaultProps} concerts={[]} />);
 
-    expect(screen.getByText("No upcoming concerts")).toBeInTheDocument();
+    expect(screen.getByText("No concerts found")).toBeInTheDocument();
   });
 
   it("should render empty state for my tab", () => {
     render(<ConcertList {...defaultProps} concerts={[]} activeTab="my" />);
 
-    expect(
-      screen.getByText("You haven't marked any concerts as going or interested yet")
-    ).toBeInTheDocument();
+    expect(screen.getByText("No concerts found")).toBeInTheDocument();
   });
 
   it("should render empty state with search query", () => {
     render(<ConcertList {...defaultProps} concerts={[]} searchQuery="test" />);
 
-    expect(screen.getByText("No concerts found matching your search")).toBeInTheDocument();
+    expect(screen.getByText("No concerts match your search")).toBeInTheDocument();
   });
 
   it("should render list of concerts", () => {

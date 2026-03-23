@@ -1,6 +1,7 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useState } from "react";
+import { Button, Cell } from "@telegram-apps/telegram-ui";
 
 interface ConcertCardProps {
   concert: Concert;
@@ -30,24 +31,11 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     }
   };
 
-  const getButtonClasses = (responseType: "going" | "interested" | "not_going") => {
+  const getButtonMode = (
+    responseType: "going" | "interested" | "not_going"
+  ): "filled" | "outline" => {
     const isSelected = concert.responses?.userResponse === responseType;
-    return `
-      flex-1 px-3 py-2 rounded-lg border text-sm transition-all
-      ${isVoting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-      ${isSelected ? "font-semibold" : "font-normal"}
-    `.trim();
-  };
-
-  const getButtonStyle = (responseType: "going" | "interested" | "not_going") => {
-    const isSelected = concert.responses?.userResponse === responseType;
-    return {
-      borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
-      backgroundColor: isSelected ? "var(--tg-theme-button-color, #3390ec)" : "transparent",
-      color: isSelected
-        ? "var(--tg-theme-button-text-color, #ffffff)"
-        : "var(--tg-theme-text-color, #000000)",
-    };
+    return isSelected ? "filled" : "outline";
   };
 
   const getStatusBorderClass = () => {
@@ -65,86 +53,62 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     }
   };
 
-  const hasStatusBorder = !!concert.responses?.userResponse;
-
   return (
-    <div
-      onClick={onClick}
-      className={`p-4 mb-3 rounded-xl border ${onClick ? "cursor-pointer" : ""} ${getStatusBorderClass()}`}
-      style={{
-        backgroundColor: "var(--tg-theme-section-bg-color, #ffffff)",
-        borderColor: hasStatusBorder
-          ? undefined
-          : "var(--tg-theme-section-separator-color, #e0e0e0)",
-      }}
-    >
-      <div className="mb-2">
-        <h3
-          className="text-lg font-semibold"
-          style={{ color: "var(--tg-theme-text-color, #000000)" }}
-        >
-          {concert.artistName}
-        </h3>
-      </div>
-
-      <div
-        className="flex items-center gap-2 mb-1 text-sm"
-        style={{ color: "var(--tg-theme-hint-color, #999999)" }}
+    <div className={`mb-3 ${getStatusBorderClass()}`}>
+      <Cell
+        onClick={onClick}
+        className="cursor-pointer"
+        subhead={
+          <>
+            <div className="flex items-center gap-2 mb-1 text-sm">
+              <span>📍</span>
+              <span>{concert.venue}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span>📅</span>
+              <span>
+                {dateStr}
+                {timeStr && ` at ${timeStr}`}
+              </span>
+            </div>
+          </>
+        }
+        description={concert.notes}
       >
-        <span>📍</span>
-        <span>{concert.venue}</span>
-      </div>
-
-      <div
-        className="flex items-center gap-2 text-sm"
-        style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-      >
-        <span>📅</span>
-        <span>
-          {dateStr}
-          {timeStr && ` at ${timeStr}`}
-        </span>
-      </div>
-
-      {concert.notes && (
-        <div className="mt-2 text-xs" style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
-          {concert.notes}
-        </div>
-      )}
+        {concert.artistName}
+      </Cell>
 
       {concert.responses && userId && onVote && (
-        <div
-          className="mt-3 pt-3 border-t"
-          style={{ borderColor: "var(--tg-theme-hint-color, #e0e0e0)" }}
-        >
-          <div className="flex gap-2">
-            <button
-              onClick={(e) => handleVote(e, "going")}
-              disabled={isVoting}
-              className={getButtonClasses("going")}
-              style={getButtonStyle("going")}
-            >
-              🎉 Going ({concert.responses.going})
-            </button>
+        <div className="mt-3 pt-3 px-4 pb-3 border-t flex gap-2">
+          <Button
+            onClick={(e) => handleVote(e, "going")}
+            disabled={isVoting}
+            mode={getButtonMode("going")}
+            size="s"
+            className="flex-1"
+          >
+            🎉 Going ({concert.responses.going})
+          </Button>
 
-            <button
-              onClick={(e) => handleVote(e, "interested")}
-              disabled={isVoting}
-              className={getButtonClasses("interested")}
-              style={getButtonStyle("interested")}
-            >
-              🤔 Interested ({concert.responses.interested})
-            </button>
+          <Button
+            onClick={(e) => handleVote(e, "interested")}
+            disabled={isVoting}
+            mode={getButtonMode("interested")}
+            size="s"
+            className="flex-1"
+          >
+            🤔 Interested ({concert.responses.interested})
+          </Button>
 
-            <button
-              onClick={(e) => handleVote(e, "not_going")}
-              disabled={isVoting}
-              className={getButtonClasses("not_going")}
-              style={getButtonStyle("not_going")}
-            >
-              ❌ Not Going ({concert.responses.not_going})
-            </button>
-          </div>
+          <Button
+            onClick={(e) => handleVote(e, "not_going")}
+            disabled={isVoting}
+            mode={getButtonMode("not_going")}
+            size="s"
+            className="flex-1"
+          >
+            ❌ Not Going ({concert.responses.not_going})
+          </Button>
         </div>
       )}
     </div>

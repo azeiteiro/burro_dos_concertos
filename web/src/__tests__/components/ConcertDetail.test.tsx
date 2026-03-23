@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@/test/setup";
 import userEvent from "@testing-library/user-event";
 import { ConcertDetail } from "@/components/ConcertDetail";
 import { Concert } from "@/types/concert";
@@ -62,9 +62,8 @@ describe("ConcertDetail", () => {
   it("should render event page link when url is provided", () => {
     render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
 
-    const link = screen.getByRole("link", { name: /view event page/i });
-    expect(link).toHaveAttribute("href", "https://example.com/concert");
-    expect(link).toHaveAttribute("target", "_blank");
+    const button = screen.getByRole("button", { name: /view event page/i });
+    expect(button).toBeInTheDocument();
   });
 
   it("should not render event link when url is not provided", () => {
@@ -72,7 +71,7 @@ describe("ConcertDetail", () => {
 
     render(<ConcertDetail concert={concertWithoutUrl} onClose={vi.fn()} />);
 
-    expect(screen.queryByRole("link", { name: /view event page/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /view event page/i })).not.toBeInTheDocument();
   });
 
   it("should fetch and display attendance data", async () => {

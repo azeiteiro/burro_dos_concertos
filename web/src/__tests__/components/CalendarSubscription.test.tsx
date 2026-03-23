@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@/test/setup";
 import { CalendarSubscription } from "@/components/CalendarSubscription";
 
 // Mock WebApp
@@ -16,8 +16,8 @@ describe("CalendarSubscription", () => {
   it("should render calendar subscription section", () => {
     render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    expect(screen.getByText("Subscribe to Calendar")).toBeInTheDocument();
-    expect(screen.getByText("Get automatic updates for all your concerts")).toBeInTheDocument();
+    expect(screen.getByText("📅 Calendar Subscription")).toBeInTheDocument();
+    expect(screen.getByText(/Subscribe to your concert calendar/i)).toBeInTheDocument();
   });
 
   it("should render all calendar buttons", () => {
