@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@/test/setup";
 import userEvent from "@testing-library/user-event";
 import { ConcertCard } from "@/components/ConcertCard";
 import { Concert } from "@/types/concert";

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen } from "@/test/setup";
 import userEvent from "@testing-library/user-event";
 import { ConcertList } from "@/components/ConcertList";
 import { Concert } from "@/types/concert";
