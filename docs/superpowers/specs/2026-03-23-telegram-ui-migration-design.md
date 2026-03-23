@@ -45,10 +45,10 @@ Migrate the Burro dos Concertos Telegram Mini App from custom Tailwind CSS styli
 - **Keep Tailwind CSS** - Use library components first, Tailwind only for spacing/layout when library doesn't provide it
 
 ### Key Files Affected
-- `main.tsx` - Add `AppRoot` wrapper and import library CSS
+- `main.tsx` - Add `AppRoot` wrapper
 - `App.tsx` - Replace custom containers with library layout components
 - All components in `src/components/` - Migrate to library components
-- `index.css` - Keep Tailwind imports
+- `index.css` - Import library CSS, keep Tailwind for utilities
 - `src/__tests__/` - Update component tests for new structure
 
 ## Dependencies
@@ -56,13 +56,14 @@ Migrate the Burro dos Concertos Telegram Mini App from custom Tailwind CSS styli
 ### To Add
 ```json
 {
-  "@telegram-apps/telegram-ui": "latest"
+  "@telegram-apps/telegram-ui": "latest",
+  "@telegram-apps/sdk-react": "latest"
 }
 ```
 
 ### To Keep
 - `@tailwindcss/vite` - For layout/spacing utilities when library doesn't provide
-- `@twa-dev/types` - TypeScript definitions
+- `@twa-dev/types` - TypeScript definitions (may coexist with library types)
 - All existing dependencies (React, Vite, etc.)
 
 ## Component Mapping
@@ -91,13 +92,12 @@ Migrate the Burro dos Concertos Telegram Mini App from custom Tailwind CSS styli
 - Each concert becomes a `Cell` inside the list
 - Loading/error states remain custom (library may not provide these patterns)
 
-### ConcertDetail → Modal
+### ConcertDetail → ModalCard
 **Current:** Custom modal overlay with custom styling
-**New:** Library's `Modal` component
+**New:** Library's `ModalCard` component
 - Full-screen modal with close button
-- Use `ModalHeader`, `ModalClose` for structure
-- Header, content, and action areas
 - Matches current overlay pattern
+- Header, content, and action areas
 
 ### Search Input → Input Component
 **Current:** Custom input with Tailwind and inline theme styles
@@ -124,7 +124,6 @@ Migrate the Burro dos Concertos Telegram Mini App from custom Tailwind CSS styli
 ## Theming & Integration
 
 ### App Initialization
-Import library CSS in `main.tsx`:
 ```tsx
 // main.tsx
 import { AppRoot } from '@telegram-apps/telegram-ui';
@@ -147,12 +146,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 ### Integration with Hooks
 - Keep existing `useTelegram` hook for WebApp methods (showAlert, close, etc.)
+- Library's SDK React hooks (`useWebApp`, `useInitData`) can coexist
 - For this migration, preserve current `useTelegram` implementation
 - Library handles UI, hooks handle Telegram API interactions
 
 ### CSS Structure
 - Keep `index.css` for global resets and Tailwind imports
-- Add library CSS import in `main.tsx` (as shown above)
+- Add library CSS import: `import '@telegram-apps/telegram-ui/dist/styles.css'`
 - Tailwind remains available for utilities when library gaps exist
 - Prefer library component props over Tailwind classes
 
@@ -161,14 +161,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 ### Step 1: Install Dependencies
 ```bash
 cd web
-pnpm add @telegram-apps/telegram-ui
+pnpm add @telegram-apps/telegram-ui @telegram-apps/sdk-react
 ```
 - Import library CSS in `main.tsx`
 - Verify build still works
 
 ### Step 2: Setup AppRoot Wrapper
 - Modify `main.tsx` to wrap `<App />` in `<AppRoot>`
-- Import library CSS: `import '@telegram-apps/telegram-ui/dist/styles.css'`
 - Run dev server and verify app renders (no visual changes expected)
 - Commit: "Setup Telegram UI library AppRoot wrapper"
 
@@ -209,12 +208,11 @@ pnpm add @telegram-apps/telegram-ui
 - Commit: "Migrate ConcertList to Telegram UI List"
 
 #### 3.6 ConcertDetail
-- Convert to library `Modal` component
-- Use `ModalHeader` and `ModalClose` for structure
+- Convert to library `ModalCard`
 - Preserve modal behavior and close interaction
 - Update `ConcertDetail.test.tsx`
 - Verify modal open/close works
-- Commit: "Migrate ConcertDetail to Telegram UI Modal"
+- Commit: "Migrate ConcertDetail to Telegram UI ModalCard"
 
 #### 3.7 CalendarSubscription
 - Use library `Section` and `Button`
@@ -234,6 +232,7 @@ pnpm add @telegram-apps/telegram-ui
 - Remove unused custom CSS that library now handles
 - Verify Tailwind only used where library doesn't provide functionality
 - Run full test suite: `pnpm test`
+- Run coverage: `pnpm test:coverage`
 - Visual testing in dev server
 - Commit: "Complete Telegram UI migration cleanup"
 
@@ -298,7 +297,7 @@ Migration is complete when:
 After migration is complete and verified:
 1. Implement design mockups using library components
 2. Add new features using library's component catalog
-3. Consider optimizing Tailwind usage based on library capabilities
+3. Consider removing Tailwind if library provides all needed utilities
 4. Explore additional library components (Avatar, Badge, Progress, etc.)
 
 ## References
