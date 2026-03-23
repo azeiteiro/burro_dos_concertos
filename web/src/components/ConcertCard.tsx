@@ -1,6 +1,7 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useState } from "react";
+import { Button } from "@telegram-apps/telegram-ui";
 
 interface ConcertCardProps {
   concert: Concert;
@@ -30,24 +31,11 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     }
   };
 
-  const getButtonClasses = (responseType: "going" | "interested" | "not_going") => {
+  const getButtonMode = (
+    responseType: "going" | "interested" | "not_going"
+  ): "filled" | "outline" => {
     const isSelected = concert.responses?.userResponse === responseType;
-    return `
-      flex-1 px-3 py-2 rounded-lg border text-sm transition-all
-      ${isVoting ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}
-      ${isSelected ? "font-semibold" : "font-normal"}
-    `.trim();
-  };
-
-  const getButtonStyle = (responseType: "going" | "interested" | "not_going") => {
-    const isSelected = concert.responses?.userResponse === responseType;
-    return {
-      borderColor: "var(--tg-theme-hint-color, #e0e0e0)",
-      backgroundColor: isSelected ? "var(--tg-theme-button-color, #3390ec)" : "transparent",
-      color: isSelected
-        ? "var(--tg-theme-button-text-color, #ffffff)"
-        : "var(--tg-theme-text-color, #000000)",
-    };
+    return isSelected ? "filled" : "outline";
   };
 
   const getStatusBorderClass = () => {
@@ -118,32 +106,35 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
           style={{ borderColor: "var(--tg-theme-hint-color, #e0e0e0)" }}
         >
           <div className="flex gap-2">
-            <button
+            <Button
               onClick={(e) => handleVote(e, "going")}
               disabled={isVoting}
-              className={getButtonClasses("going")}
-              style={getButtonStyle("going")}
+              mode={getButtonMode("going")}
+              size="s"
+              className="flex-1"
             >
               🎉 Going ({concert.responses.going})
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={(e) => handleVote(e, "interested")}
               disabled={isVoting}
-              className={getButtonClasses("interested")}
-              style={getButtonStyle("interested")}
+              mode={getButtonMode("interested")}
+              size="s"
+              className="flex-1"
             >
               🤔 Interested ({concert.responses.interested})
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={(e) => handleVote(e, "not_going")}
               disabled={isVoting}
-              className={getButtonClasses("not_going")}
-              style={getButtonStyle("not_going")}
+              mode={getButtonMode("not_going")}
+              size="s"
+              className="flex-1"
             >
               ❌ Not Going ({concert.responses.not_going})
-            </button>
+            </Button>
           </div>
         </div>
       )}
