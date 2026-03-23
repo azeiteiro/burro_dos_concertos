@@ -16,8 +16,8 @@ describe("CalendarSubscription", () => {
   it("should render calendar subscription section", () => {
     render(<CalendarSubscription userId={1} webApp={mockWebApp} />);
 
-    expect(screen.getByText("Subscribe to Calendar")).toBeInTheDocument();
-    expect(screen.getByText("Get automatic updates for all your concerts")).toBeInTheDocument();
+    expect(screen.getByText("📅 Calendar Subscription")).toBeInTheDocument();
+    expect(screen.getByText(/Subscribe to your concert calendar/i)).toBeInTheDocument();
   });
 
   it("should render all calendar buttons", () => {

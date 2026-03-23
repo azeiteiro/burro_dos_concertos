@@ -56,6 +56,13 @@ function customRender(ui: React.ReactElement, options = {}) {
 export * from "@testing-library/react";
 export { customRender as render };
 
+// Mock pointer capture for Modal/Drawer components (not supported in jsdom)
+if (typeof Element !== "undefined") {
+  Element.prototype.setPointerCapture = vi.fn();
+  Element.prototype.releasePointerCapture = vi.fn();
+  Element.prototype.hasPointerCapture = vi.fn();
+}
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

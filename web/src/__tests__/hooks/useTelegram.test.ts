@@ -47,6 +47,11 @@ describe("useTelegram", () => {
     expect(result.current.themeParams).toEqual({
       bg_color: "#ffffff",
       text_color: "#000000",
+      hint_color: "#999999",
+      link_color: "#3390ec",
+      button_color: "#3390ec",
+      button_text_color: "#ffffff",
+      secondary_bg_color: "#f5f5f5",
     });
     expect(result.current.colorScheme).toBe("light");
   });
