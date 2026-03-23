@@ -1,7 +1,6 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import { ModalHeader, ModalClose } from "@telegram-apps/telegram-ui";
 
 interface ConcertDetailProps {
   concert: Concert;
@@ -79,7 +78,13 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <ModalHeader after={<ModalClose onClick={onClose} />}>Concert Details</ModalHeader>
+        {/* Header */}
+        <div className="sticky top-0 px-4 py-3 border-b flex justify-between items-center bg-white">
+          <h2 className="text-lg font-semibold">Concert Details</h2>
+          <button onClick={onClose} className="text-2xl leading-none text-gray-500">
+            ×
+          </button>
+        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
