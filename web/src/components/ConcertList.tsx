@@ -1,5 +1,6 @@
 import { Concert } from "@/types/concert";
 import { ConcertCard } from "./ConcertCard";
+import { List } from "@telegram-apps/telegram-ui";
 
 interface ConcertListProps {
   concerts: Concert[];
@@ -23,41 +24,35 @@ export function ConcertList({
   onVote,
 }: ConcertListProps) {
   if (loading) {
-    return (
-      <div className="text-center p-5">
-        <p>Loading concerts...</p>
-      </div>
-    );
+    return <div className="text-center py-8">Loading concerts...</div>;
   }
 
   if (error) {
-    return (
-      <div
-        className="p-4 rounded-lg text-white mb-4"
-        style={{ backgroundColor: "var(--tg-theme-destructive-text-color, #ff3b30)" }}
-      >
-        {error}
-      </div>
-    );
+    return <div className="text-center py-8 text-red-500">{error}</div>;
   }
 
-  if (concerts.length === 0) {
+  const filteredConcerts = concerts.filter((concert) => {
+    const matchesSearch =
+      concert.artistName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      concert.venue.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesTab =
+      activeTab === "all" || (activeTab === "my" && concert.responses?.userResponse);
+
+    return matchesSearch && matchesTab;
+  });
+
+  if (filteredConcerts.length === 0) {
     return (
-      <div className="text-center p-5">
-        <p style={{ color: "var(--tg-theme-hint-color, #999999)" }}>
-          {activeTab === "my"
-            ? "You haven't marked any concerts as going or interested yet"
-            : searchQuery
-              ? "No concerts found matching your search"
-              : "No upcoming concerts"}
-        </p>
+      <div className="text-center py-8">
+        {searchQuery ? "No concerts match your search" : "No concerts found"}
       </div>
     );
   }
 
   return (
-    <div>
-      {concerts.map((concert) => (
+    <List>
+      {filteredConcerts.map((concert) => (
         <ConcertCard
           key={concert.id}
           concert={concert}
@@ -66,6 +61,6 @@ export function ConcertList({
           userId={userId}
         />
       ))}
-    </div>
+    </List>
   );
 }
