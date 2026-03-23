@@ -49,18 +49,9 @@ export function App() {
   }
 
   return (
-    <div
-      className="min-h-screen pb-20"
-      style={{
-        backgroundColor: "var(--tg-theme-bg-color, #ffffff)",
-        color: "var(--tg-theme-text-color, #000000)",
-      }}
-    >
+    <div className="min-h-screen pb-20">
       <div className="p-4">
-        <h1
-          className="text-2xl font-bold mb-4"
-          style={{ color: "var(--tg-theme-text-color, #000000)" }}
-        >
+        <h1 className="text-2xl font-bold mb-4">
           {activeTab === "all" ? "All Concerts" : "My Concerts"}
         </h1>
 
