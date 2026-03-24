@@ -7,9 +7,9 @@
 
   body {
     @apply antialiased;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-      sans-serif;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+      "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
     background-color: var(--tg-theme-bg-color, #ffffff);
     color: var(--tg-theme-text-color, #000000);
   }
@@ -20,7 +20,15 @@
 }
 
 @layer components {
+  /* Override Telegram theme colors with Tailwind indigo */
+  :root {
+    --tg-theme-button-color: #4f46e5; /* indigo-600 */
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-link-color: #6366f1; /* indigo-500 */
+    --tg-theme-accent-text-color: #4f46e5; /* indigo-600 */
+  }
+
   input:focus {
-    border-color: var(--tg-theme-button-color, #3390ec) !important;
+    border-color: var(--tg-theme-button-color) !important;
   }
 }

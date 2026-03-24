@@ -50,34 +50,32 @@ export function App() {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="p-4">
-        <h1 className="text-2xl font-bold mb-4">
-          {activeTab === "all" ? "All Concerts" : "My Concerts"}
-        </h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {activeTab === "all" ? "All Concerts" : "My Concerts"}
+      </h1>
 
-        {/* Calendar Subscription - Only show in My Concerts tab */}
-        {activeTab === "my" && userId && webApp && (
-          <CalendarSubscription userId={userId} webApp={webApp} />
-        )}
+      {/* Calendar Subscription - Only show in My Concerts tab */}
+      {activeTab === "my" && userId && webApp && (
+        <CalendarSubscription userId={userId} webApp={webApp} />
+      )}
 
-        <Input
-          placeholder="Search concerts..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="mb-4"
-        />
+      <Input
+        placeholder="Search concerts..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="mb-4"
+      />
 
-        <ConcertList
-          concerts={concerts}
-          loading={loading}
-          error={error}
-          searchQuery={searchQuery}
-          activeTab={activeTab}
-          userId={userId}
-          onConcertClick={handleConcertClick}
-          onVote={handleVoteWithErrorHandling}
-        />
-      </div>
+      <ConcertList
+        concerts={concerts}
+        loading={loading}
+        error={error}
+        searchQuery={searchQuery}
+        activeTab={activeTab}
+        userId={userId}
+        onConcertClick={handleConcertClick}
+        onVote={handleVoteWithErrorHandling}
+      />
 
       <TabNavigation
         activeTab={activeTab}
