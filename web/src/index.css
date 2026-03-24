@@ -21,6 +21,6 @@
 
 @layer components {
   input:focus {
-    border-color: var(--tg-theme-button-color, #3390ec) !important;
+    border-color: var(--tg-theme-button-color, #800f7c) !important;
   }
 }

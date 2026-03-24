@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import type { WebApp } from "@twa-dev/types";
 import { useCalendar } from "../hooks/useCalendar";
@@ -8,8 +9,26 @@ interface CalendarSubscriptionProps {
   webApp: WebApp;
 }
 
+type CalendarType = "apple" | "google" | "samsung";
+
+const CALENDAR_BUTTONS = [
+  { type: "apple" as const, icon: SiApple, label: "Apple" },
+  { type: "google" as const, icon: SiGoogle, label: "Google" },
+  { type: "samsung" as const, icon: SiSamsung, label: "Samsung" },
+];
+
 export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionProps) {
   const { handleCalendarSubscribe } = useCalendar(userId, webApp);
+  const [loadingType, setLoadingType] = useState<CalendarType | null>(null);
+
+  const handleClick = async (type: CalendarType) => {
+    setLoadingType(type);
+    try {
+      await handleCalendarSubscribe(type);
+    } finally {
+      setLoadingType(null);
+    }
+  };
 
   return (
     <Section header="📅 Calendar Subscription">
@@ -18,36 +37,20 @@ export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionPro
           Subscribe to your concert calendar in your favorite calendar app:
         </p>
 
-        <div className="flex flex-col gap-2">
-          <Button
-            mode="filled"
-            size="m"
-            onClick={() => handleCalendarSubscribe("apple")}
-            className="w-full"
-          >
-            <SiApple className="w-4 h-4 inline mr-2" />
-            Add to Apple Calendar
-          </Button>
-
-          <Button
-            mode="filled"
-            size="m"
-            onClick={() => handleCalendarSubscribe("google")}
-            className="w-full"
-          >
-            <SiGoogle className="w-4 h-4 inline mr-2" />
-            Add to Google Calendar
-          </Button>
-
-          <Button
-            mode="filled"
-            size="m"
-            onClick={() => handleCalendarSubscribe("samsung")}
-            className="w-full"
-          >
-            <SiSamsung className="w-4 h-4 inline mr-2" />
-            Add to Samsung Calendar
-          </Button>
+        <div className="flex gap-2">
+          {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
+            <Button
+              key={type}
+              before={<Icon />}
+              mode="bezeled"
+              size="m"
+              loading={loadingType === type}
+              disabled={loadingType !== null}
+              onClick={() => handleClick(type)}
+            >
+              {label}
+            </Button>
+          ))}
         </div>
       </div>
     </Section>
