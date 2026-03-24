@@ -30,7 +30,7 @@
     "test": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage",
     "test:ci": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage --ci",
     "test:watch": "jest --watch",
-    "format": "prettier --write \"src/**/*\"",
+    "format": "prettier --write \"src/**/*\" \"web/src/**/*\"",
     "lint": "eslint \"src/**/*.{js,ts}\"",
     "lint:fix": "pnpm lint --fix",
     "seed": "node dist/prisma/seed.js",

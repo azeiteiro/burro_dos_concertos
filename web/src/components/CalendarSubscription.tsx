@@ -31,28 +31,29 @@ export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionPro
   };
 
   return (
-    <Section header="📅 Calendar Subscription">
-      <div className="mb-4">
-        <p className="text-sm mb-3">
-          Subscribe to your concert calendar in your favorite calendar app:
-        </p>
+    <Section className="p-2">
+      <div className="flex py-4 justify-between items-center">
+        <span className="text-base font-bold">Sync Calendar</span>
+        <span className="text-xs text-gray-500">Stay updated</span>
+      </div>
 
-        <div className="flex gap-2">
-          {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
-            <Button
-              key={type}
-              before={<Icon />}
-              mode="bezeled"
-              size="m"
-              loading={loadingType === type}
-              disabled={loadingType !== null}
-              onClick={() => handleClick(type)}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
+      <div className="flex gap-2">
+        {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
+          <Button
+            key={type}
+            before={<Icon />}
+            mode="bezeled"
+            size="m"
+            loading={loadingType === type}
+            disabled={loadingType !== null}
+            onClick={() => handleClick(type)}
+            className="flex-1"
+          >
+            {label}
+          </Button>
+        ))}
       </div>
     </Section>
+    // <span className="text-base font-bold">Upcoming Events</span>
   );
 }
