@@ -20,7 +20,15 @@
 }
 
 @layer components {
+  /* Override Telegram theme colors with Tailwind indigo */
+  :root {
+    --tg-theme-button-color: #4f46e5; /* indigo-600 */
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-link-color: #6366f1; /* indigo-500 */
+    --tg-theme-accent-text-color: #4f46e5; /* indigo-600 */
+  }
+
   input:focus {
-    border-color: var(--tg-theme-button-color, #800f7c) !important;
+    border-color: var(--tg-theme-button-color) !important;
   }
 }
