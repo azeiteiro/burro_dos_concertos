@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, Section } from "@telegram-apps/telegram-ui";
+import { Input } from "@telegram-apps/telegram-ui";
 import { useTelegram } from "./hooks/useTelegram";
 import { useConcerts } from "./hooks/useConcerts";
 import { Concert } from "./types/concert";
@@ -48,21 +48,8 @@ export function App() {
     );
   }
 
-  // Example data for rendering list cells
-  const cellsTexts = ["Chat Settings", "Data and Storage", "Devices"];
-
   return (
     <div className="min-h-screen pb-20">
-      {/* Section component to group items within the list */}
-      <Section header="Header for the section" footer="Footer for the section">
-        {/* Mapping through the cells data to render Cell components */}
-        <TabsList>
-          {cellsTexts.map((cellText, index) => (
-            <TabsItem key={index}>{cellText}</TabsItem>
-          ))}
-        </TabsList>
-      </Section>
-
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">
           {activeTab === "all" ? "All Concerts" : "My Concerts"}
