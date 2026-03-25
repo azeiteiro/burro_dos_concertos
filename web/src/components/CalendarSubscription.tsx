@@ -2,7 +2,8 @@ import { useState } from "react";
 import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import type { WebApp } from "@twa-dev/types";
 import { useCalendar } from "../hooks/useCalendar";
-import { Section, Button } from "@telegram-apps/telegram-ui";
+import { Section, InlineButtons, Spinner } from "@telegram-apps/telegram-ui";
+import { InlineButtonsItem } from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem";
 
 interface CalendarSubscriptionProps {
   userId: number;
@@ -36,23 +37,18 @@ export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionPro
         <span className="text-base font-bold">Sync Calendar</span>
         <span className="text-xs text-gray-500">Stay updated</span>
       </div>
-
-      <div className="flex gap-2">
+      <InlineButtons mode="bezeled">
         {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
-          <Button
+          <InlineButtonsItem
             key={type}
-            before={<Icon />}
-            mode="bezeled"
-            size="m"
-            loading={loadingType === type}
+            text={label}
             disabled={loadingType !== null}
             onClick={() => handleClick(type)}
-            className="flex-1"
           >
-            {label}
-          </Button>
+            {loadingType === type ? <Spinner size="m" /> : <Icon />}
+          </InlineButtonsItem>
         ))}
-      </div>
+      </InlineButtons>
     </Section>
     // <span className="text-base font-bold">Upcoming Events</span>
   );
