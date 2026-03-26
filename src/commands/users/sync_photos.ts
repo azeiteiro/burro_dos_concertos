@@ -20,7 +20,7 @@ export const syncPhotosCommand = async (ctx: BotContext) => {
 
     await ctx.reply(message);
   } catch (error) {
-    logger.error("Sync photos command error:", error);
+    logger.error({ error }, "Sync photos command error");
     await ctx.reply(`❌ Sync failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

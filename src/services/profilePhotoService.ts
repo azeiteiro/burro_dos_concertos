@@ -17,7 +17,7 @@ interface SyncResult {
 async function fetchUserProfilePhoto(botOrApi: Bot | Api, user: User): Promise<string | null> {
   try {
     // Support both Bot instance and Api instance
-    const api = botOrApi.api || botOrApi;
+    const api = "api" in botOrApi ? botOrApi.api : botOrApi;
 
     // Get user's profile photos (limit 1 = most recent)
     const photos = await api.getUserProfilePhotos(Number(user.telegramId), {
@@ -109,7 +109,7 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
 
     return result;
   } catch (error) {
-    logger.error("Fatal error during profile photo sync:", error);
+    logger.error({ error }, "Fatal error during profile photo sync");
     throw error;
   }
 }
@@ -125,10 +125,10 @@ export function scheduleProfilePhotoSync(bot: Bot): void {
       const result = await fetchAllUserProfilePhotos(bot);
       logger.info(`Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}`);
       if (result.errors.length > 0) {
-        logger.error("Sync errors:", result.errors);
+        logger.error({ errors: result.errors }, "Sync errors");
       }
     } catch (error) {
-      logger.error("Scheduled profile photo sync failed:", error);
+      logger.error({ error }, "Scheduled profile photo sync failed");
     }
   });
 
