@@ -172,13 +172,25 @@ describe("API Routes", () => {
         going: [
           {
             userId: 10,
-            user: { telegramId: BigInt(123), username: "user1", firstName: "John" },
+            user: {
+              telegramId: BigInt(123),
+              username: "user1",
+              firstName: "John",
+              lastName: "Doe",
+              profilePhotoUrl: "https://example.com/photo1.jpg",
+            },
           },
         ],
         interested: [
           {
             userId: 11,
-            user: { telegramId: BigInt(456), username: "user2", firstName: "Jane" },
+            user: {
+              telegramId: BigInt(456),
+              username: "user2",
+              firstName: "Jane",
+              lastName: "Smith",
+              profilePhotoUrl: null,
+            },
           },
         ],
         not_going: [],
@@ -197,6 +209,8 @@ describe("API Routes", () => {
               telegramId: "123",
               username: "user1",
               firstName: "John",
+              lastName: "Doe",
+              profilePhotoUrl: "https://example.com/photo1.jpg",
             },
           ],
         },
@@ -208,6 +222,8 @@ describe("API Routes", () => {
               telegramId: "456",
               username: "user2",
               firstName: "Jane",
+              lastName: "Smith",
+              profilePhotoUrl: null,
             },
           ],
         },
@@ -226,7 +242,13 @@ describe("API Routes", () => {
         not_going: [
           {
             userId: 12,
-            user: { telegramId: BigInt(789), username: "user3", firstName: "Bob" },
+            user: {
+              telegramId: BigInt(789),
+              username: "user3",
+              firstName: "Bob",
+              lastName: "Johnson",
+              profilePhotoUrl: "https://example.com/photo3.jpg",
+            },
           },
         ],
       });
@@ -242,6 +264,8 @@ describe("API Routes", () => {
             telegramId: "789",
             username: "user3",
             firstName: "Bob",
+            lastName: "Johnson",
+            profilePhotoUrl: "https://example.com/photo3.jpg",
           },
         ],
       });

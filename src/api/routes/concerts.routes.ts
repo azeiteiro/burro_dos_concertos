@@ -85,6 +85,8 @@ router.get("/:id/responses", async (req, res) => {
           telegramId: r.user.telegramId.toString(),
           username: r.user.username,
           firstName: r.user.firstName,
+          lastName: r.user.lastName,
+          profilePhotoUrl: r.user.profilePhotoUrl,
         })),
       },
       interested: {
@@ -94,6 +96,8 @@ router.get("/:id/responses", async (req, res) => {
           telegramId: r.user.telegramId.toString(),
           username: r.user.username,
           firstName: r.user.firstName,
+          lastName: r.user.lastName,
+          profilePhotoUrl: r.user.profilePhotoUrl,
         })),
       },
       not_going: {
@@ -103,6 +107,8 @@ router.get("/:id/responses", async (req, res) => {
           telegramId: r.user.telegramId.toString(),
           username: r.user.username,
           firstName: r.user.firstName,
+          lastName: r.user.lastName,
+          profilePhotoUrl: r.user.profilePhotoUrl,
         })),
       },
     };
