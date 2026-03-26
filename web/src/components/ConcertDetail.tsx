@@ -63,10 +63,17 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
   }, [concert.id]);
 
   const formatUserName = (user: AttendanceResponse) => {
+    // Priority: firstName + lastName > firstName > username
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user.firstName) {
+      return user.firstName;
+    }
     if (user.username) {
       return `@${user.username}`;
     }
-    return user.firstName;
+    return "Unknown";
   };
 
   const Avatar = ({ user }: { user: AttendanceResponse }) => {
