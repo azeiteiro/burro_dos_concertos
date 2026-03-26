@@ -17,7 +17,11 @@ interface User {
 export function getInitials(user: User): string {
   // Try firstName + lastName (both must be non-empty)
   if (user.firstName && user.lastName) {
-    return (user.firstName[0] + user.lastName[0]).toUpperCase();
+    // Get first letter of firstName and last word of lastName
+    const firstInitial = user.firstName[0];
+    const lastNameParts = user.lastName.trim().split(/\s+/);
+    const lastInitial = lastNameParts[lastNameParts.length - 1][0];
+    return (firstInitial + lastInitial).toUpperCase();
   }
 
   // Try firstName only (if lastName is missing, repeat first letter)

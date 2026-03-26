@@ -79,6 +79,17 @@ describe("Avatar Utilities", () => {
 
       expect(getInitials(user)).toBe("AB");
     });
+
+    it("should use last word of multi-part lastName", () => {
+      const user = {
+        id: 1,
+        firstName: "Margarida",
+        lastName: "Ferreira Gomes",
+        username: "margarida",
+      };
+
+      expect(getInitials(user)).toBe("MG");
+    });
   });
 
   describe("generateColorFromName", () => {
