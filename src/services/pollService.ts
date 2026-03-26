@@ -105,6 +105,8 @@ export const getPollResponses = async (concertId: number) => {
             telegramId: true,
             username: true,
             firstName: true,
+            lastName: true,
+            profilePhotoUrl: true,
           },
         },
       },

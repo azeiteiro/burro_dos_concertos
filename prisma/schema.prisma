@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id           Int               @id @default(autoincrement())
-  telegramId   BigInt            @unique
-  username     String?
-  firstName    String?
-  lastName     String?
-  languageCode String?
-  createdAt    DateTime          @default(now())
-  role         String            @default("User")
-  concerts     Concert[]
-  responses    ConcertResponse[]
+  id              Int               @id @default(autoincrement())
+  telegramId      BigInt            @unique
+  username        String?
+  firstName       String?
+  lastName        String?
+  languageCode    String?
+  profilePhotoUrl String?
+  createdAt       DateTime          @default(now())
+  role            String            @default("User")
+  concerts        Concert[]
+  responses       ConcertResponse[]
 }
 
 model Concert {

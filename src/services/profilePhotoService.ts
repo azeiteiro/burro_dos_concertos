@@ -1,0 +1,136 @@
+import { Bot, Api } from "grammy";
+import { prisma } from "#/config/db";
+import { User } from "@prisma/client";
+import logger from "#/config/logger";
+import cron from "node-cron";
+
+interface SyncResult {
+  success: number;
+  failed: number;
+  errors: string[];
+}
+
+/**
+ * Fetches single user's profile photo from Telegram
+ * @returns Photo URL or null if no photo available
+ */
+async function fetchUserProfilePhoto(botOrApi: Bot | Api, user: User): Promise<string | null> {
+  try {
+    // Support both Bot instance and Api instance
+    const api = botOrApi.api || botOrApi;
+
+    // Get user's profile photos (limit 1 = most recent)
+    const photos = await api.getUserProfilePhotos(Number(user.telegramId), {
+      limit: 1,
+    });
+
+    // Check if user has any photos
+    if (!photos.photos || photos.photos.length === 0) {
+      logger.info(`User ${user.id} has no profile photo`);
+      return null;
+    }
+
+    // Get the smallest photo size (first element is smallest)
+    const photo = photos.photos[0];
+    const smallestPhoto = photo[0];
+
+    if (!smallestPhoto) {
+      logger.warn(`User ${user.id} photo array is empty`);
+      return null;
+    }
+
+    // Get file info to construct URL
+    const file = await api.getFile(smallestPhoto.file_id);
+
+    if (!file.file_path) {
+      logger.warn(`User ${user.id} file has no file_path`);
+      return null;
+    }
+
+    // Construct full URL using environment variable
+    const photoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+    logger.info(`Fetched photo for user ${user.id}: ${photoUrl}`);
+
+    return photoUrl;
+  } catch (error) {
+    logger.error(
+      { userId: user.id, error: error instanceof Error ? error.message : String(error) },
+      `Failed to fetch photo for user ${user.id}`
+    );
+    return null;
+  }
+}
+
+/**
+ * Fetches and updates profile photos for all users
+ * @param botOrApi - Bot instance or Api instance
+ * @returns Summary with success/failure counts and errors
+ */
+export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<SyncResult> {
+  logger.info("Starting profile photo sync for all users");
+
+  const result: SyncResult = {
+    success: 0,
+    failed: 0,
+    errors: [],
+  };
+
+  try {
+    // Get all users from database
+    const users = await prisma.user.findMany({
+      orderBy: { id: "asc" },
+    });
+
+    logger.info(`Found ${users.length} users to sync`);
+
+    // Process each user
+    for (const user of users) {
+      try {
+        const photoUrl = await fetchUserProfilePhoto(botOrApi, user);
+
+        // Update user's profile photo URL (null if no photo)
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { profilePhotoUrl: photoUrl },
+        });
+
+        result.success++;
+      } catch (error) {
+        result.failed++;
+        const errorMsg = `User ${user.id} (${user.username || user.firstName}): ${error instanceof Error ? error.message : "Unknown error"}`;
+        result.errors.push(errorMsg);
+        logger.error(errorMsg);
+      }
+    }
+
+    logger.info(
+      `Profile photo sync complete. Success: ${result.success}, Failed: ${result.failed}`
+    );
+
+    return result;
+  } catch (error) {
+    logger.error("Fatal error during profile photo sync:", error);
+    throw error;
+  }
+}
+
+/**
+ * Schedules weekly profile photo sync (Sunday 3 AM)
+ */
+export function scheduleProfilePhotoSync(bot: Bot): void {
+  // Sunday at 3:00 AM (Europe/Lisbon timezone)
+  cron.schedule("0 3 * * 0", async () => {
+    logger.info("Starting scheduled profile photo sync (cron job)");
+    try {
+      const result = await fetchAllUserProfilePhotos(bot);
+      logger.info(`Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}`);
+      if (result.errors.length > 0) {
+        logger.error("Sync errors:", result.errors);
+      }
+    } catch (error) {
+      logger.error("Scheduled profile photo sync failed:", error);
+    }
+  });
+
+  logger.info("Profile photo sync cron job scheduled (every Sunday at 3 AM)");
+}

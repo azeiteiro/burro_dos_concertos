@@ -20,6 +20,7 @@ import {
 } from "./handlers/urlHandler";
 import { handlePollAnswer } from "./handlers/pollHandler";
 import { startServer } from "./api/server";
+import { scheduleProfilePhotoSync } from "#/services/profilePhotoService";
 
 // Load environment-specific .env file
 const envFile =
@@ -57,6 +58,9 @@ bot.use(createConversation(announceConversation));
 
 // 🧩 Register all commands (these are your handlers)
 registerCommands(bot);
+
+// Schedule profile photo sync
+scheduleProfilePhotoSync(bot);
 
 // 🪄 Setup dynamic command lists for users and admins
 setupCommands(bot);

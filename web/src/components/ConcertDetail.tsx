@@ -2,6 +2,7 @@ import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { Modal, Button } from "@telegram-apps/telegram-ui";
+import { getInitials, generateColorFromName } from "@/utils/avatar";
 
 interface ConcertDetailProps {
   concert: Concert;
@@ -13,6 +14,8 @@ interface AttendanceResponse {
   telegramId: string;
   username: string | null;
   firstName: string;
+  lastName?: string;
+  profilePhotoUrl?: string;
 }
 
 interface AttendanceData {
@@ -60,10 +63,48 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
   }, [concert.id]);
 
   const formatUserName = (user: AttendanceResponse) => {
+    // Priority: firstName + lastName > firstName > username
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`;
+    }
+    if (user.firstName) {
+      return user.firstName;
+    }
     if (user.username) {
       return `@${user.username}`;
     }
-    return user.firstName;
+    return "Unknown";
+  };
+
+  const Avatar = ({ user }: { user: AttendanceResponse }) => {
+    const [imageError, setImageError] = useState(false);
+    const initials = getInitials({
+      firstName: user.firstName,
+      lastName: user.lastName || null,
+      username: user.username,
+    });
+    const colorName = user.firstName || user.username || "?";
+    const backgroundColor = generateColorFromName(colorName);
+
+    if (user.profilePhotoUrl && !imageError) {
+      return (
+        <img
+          src={user.profilePhotoUrl}
+          alt={formatUserName(user)}
+          className="w-6 h-6 rounded-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+
+    return (
+      <div
+        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+        style={{ backgroundColor }}
+      >
+        {initials}
+      </div>
+    );
   };
 
   return (
@@ -180,12 +221,13 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
                     {attendance.going.users.map((user) => (
                       <span
                         key={user.id}
-                        className="px-3 py-1 rounded-full text-sm"
+                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
                         style={{
                           backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
                           color: "var(--tg-theme-text-color, #000000)",
                         }}
                       >
+                        <Avatar user={user} />
                         {formatUserName(user)}
                       </span>
                     ))}
@@ -216,12 +258,13 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
                     {attendance.interested.users.map((user) => (
                       <span
                         key={user.id}
-                        className="px-3 py-1 rounded-full text-sm"
+                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
                         style={{
                           backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
                           color: "var(--tg-theme-text-color, #000000)",
                         }}
                       >
+                        <Avatar user={user} />
                         {formatUserName(user)}
                       </span>
                     ))}
@@ -252,12 +295,13 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
                     {attendance.not_going.users.map((user) => (
                       <span
                         key={user.id}
-                        className="px-3 py-1 rounded-full text-sm"
+                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
                         style={{
                           backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
                           color: "var(--tg-theme-text-color, #000000)",
                         }}
                       >
+                        <Avatar user={user} />
                         {formatUserName(user)}
                       </span>
                     ))}
