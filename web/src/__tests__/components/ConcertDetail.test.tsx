@@ -78,11 +78,11 @@ describe("ConcertDetail", () => {
     render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByText("@user1")).toBeInTheDocument();
+      expect(screen.getByText("John")).toBeInTheDocument();
     });
 
     expect(screen.getByText("Jane")).toBeInTheDocument();
-    expect(screen.getByText("@user3")).toBeInTheDocument();
+    expect(screen.getByText("Bob")).toBeInTheDocument();
   });
 
   it("should show loading state while fetching attendance", () => {
@@ -123,11 +123,11 @@ describe("ConcertDetail", () => {
     });
   });
 
-  it("should format username with @ when username exists", async () => {
+  it("should prioritize firstName over username when both exist", async () => {
     render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
 
     await waitFor(() => {
-      expect(screen.getByText("@user1")).toBeInTheDocument();
+      expect(screen.getByText("John")).toBeInTheDocument();
     });
   });
 
@@ -221,7 +221,7 @@ describe("ConcertDetail", () => {
     render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
 
     await waitFor(() => {
-      const img = screen.getByAltText("@user1") as HTMLImageElement;
+      const img = screen.getByAltText("John") as HTMLImageElement;
       expect(img).toBeInTheDocument();
       expect(img.src).toBe("https://example.com/photo1.jpg");
     });

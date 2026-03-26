@@ -31,6 +31,7 @@ describe("ProfilePhotoService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.BOT_TOKEN = "test_bot_token_123";
     mockBot = {
       api: {
         getUserProfilePhotos: jest.fn(),

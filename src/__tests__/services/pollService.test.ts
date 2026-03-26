@@ -174,6 +174,8 @@ describe("pollService", () => {
               telegramId: true,
               username: true,
               firstName: true,
+              lastName: true,
+              profilePhotoUrl: true,
             },
           },
         },
