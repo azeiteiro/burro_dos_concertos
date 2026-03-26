@@ -380,6 +380,8 @@ describe("API Routes", () => {
         telegramId: BigInt(123456),
         username: "testuser",
         firstName: "Test",
+        lastName: "User",
+        profilePhotoUrl: null,
       });
 
       const response = await request(app).get("/api/users/telegram/123456");
@@ -390,6 +392,8 @@ describe("API Routes", () => {
         telegramId: "123456",
         username: "testuser",
         firstName: "Test",
+        lastName: "User",
+        profilePhotoUrl: null,
       });
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { telegramId: BigInt(123456) },
@@ -398,6 +402,8 @@ describe("API Routes", () => {
           telegramId: true,
           username: true,
           firstName: true,
+          lastName: true,
+          profilePhotoUrl: true,
         },
       });
     });

@@ -39,9 +39,14 @@ export async function submitConcertResponse(
   }
 }
 
-export async function getUserByTelegramId(
-  telegramId: number
-): Promise<{ id: number; telegramId: string; username: string | null; firstName: string }> {
+export async function getUserByTelegramId(telegramId: number): Promise<{
+  id: number;
+  telegramId: string;
+  username: string | null;
+  firstName: string;
+  lastName: string | null;
+  profilePhotoUrl: string | null;
+}> {
   const response = await fetch(`${API_URL}/api/users/telegram/${telegramId}`);
   if (!response.ok) {
     throw new Error("Failed to fetch user");

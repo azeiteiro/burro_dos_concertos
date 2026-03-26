@@ -15,6 +15,8 @@ router.get("/telegram/:telegramId", async (req, res) => {
         telegramId: true,
         username: true,
         firstName: true,
+        lastName: true,
+        profilePhotoUrl: true,
       },
     });
 
@@ -27,6 +29,8 @@ router.get("/telegram/:telegramId", async (req, res) => {
       telegramId: user.telegramId.toString(),
       username: user.username,
       firstName: user.firstName,
+      lastName: user.lastName,
+      profilePhotoUrl: user.profilePhotoUrl,
     });
   } catch (error) {
     console.error("Error fetching user:", error);

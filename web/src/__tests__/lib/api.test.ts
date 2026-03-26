@@ -146,6 +146,8 @@ describe("API", () => {
         telegramId: "456",
         username: "testuser",
         firstName: "Test",
+        lastName: "User",
+        profilePhotoUrl: null,
       };
 
       vi.mocked(fetch).mockResolvedValue({
