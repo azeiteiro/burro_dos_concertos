@@ -13,6 +13,8 @@ interface AttendanceResponse {
   telegramId: string;
   username: string | null;
   firstName: string;
+  lastName?: string;
+  profilePhotoUrl?: string;
 }
 
 interface AttendanceData {
