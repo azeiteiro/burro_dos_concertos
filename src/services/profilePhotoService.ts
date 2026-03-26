@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, Api } from "grammy";
 import { prisma } from "#/config/db";
 import { User } from "@prisma/client";
 import logger from "#/config/logger";
@@ -14,10 +14,13 @@ interface SyncResult {
  * Fetches single user's profile photo from Telegram
  * @returns Photo URL or null if no photo available
  */
-async function fetchUserProfilePhoto(bot: Bot, user: User): Promise<string | null> {
+async function fetchUserProfilePhoto(botOrApi: Bot | Api, user: User): Promise<string | null> {
   try {
+    // Support both Bot instance and Api instance
+    const api = botOrApi.api || botOrApi;
+
     // Get user's profile photos (limit 1 = most recent)
-    const photos = await bot.api.getUserProfilePhotos(Number(user.telegramId), {
+    const photos = await api.getUserProfilePhotos(Number(user.telegramId), {
       limit: 1,
     });
 
@@ -37,15 +40,15 @@ async function fetchUserProfilePhoto(bot: Bot, user: User): Promise<string | nul
     }
 
     // Get file info to construct URL
-    const file = await bot.api.getFile(smallestPhoto.file_id);
+    const file = await api.getFile(smallestPhoto.file_id);
 
     if (!file.file_path) {
       logger.warn(`User ${user.id} file has no file_path`);
       return null;
     }
 
-    // Construct full URL
-    const photoUrl = `https://api.telegram.org/file/bot${bot.token}/${file.file_path}`;
+    // Construct full URL using environment variable
+    const photoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
     logger.info(`Fetched photo for user ${user.id}: ${photoUrl}`);
 
     return photoUrl;
@@ -60,9 +63,10 @@ async function fetchUserProfilePhoto(bot: Bot, user: User): Promise<string | nul
 
 /**
  * Fetches and updates profile photos for all users
+ * @param botOrApi - Bot instance or Api instance
  * @returns Summary with success/failure counts and errors
  */
-export async function fetchAllUserProfilePhotos(bot: Bot): Promise<SyncResult> {
+export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<SyncResult> {
   logger.info("Starting profile photo sync for all users");
 
   const result: SyncResult = {
@@ -82,7 +86,7 @@ export async function fetchAllUserProfilePhotos(bot: Bot): Promise<SyncResult> {
     // Process each user
     for (const user of users) {
       try {
-        const photoUrl = await fetchUserProfilePhoto(bot, user);
+        const photoUrl = await fetchUserProfilePhoto(botOrApi, user);
 
         // Update user's profile photo URL (null if no photo)
         await prisma.user.update({
