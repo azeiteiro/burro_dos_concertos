@@ -195,4 +195,103 @@ describe("ConcertDetail", () => {
     expect(screen.getByText("Interested (1)")).toBeInTheDocument();
     expect(screen.getByText("Not Going (0)")).toBeInTheDocument();
   });
+
+  it("should render profile photo when URL provided", async () => {
+    const attendanceWithPhotos = {
+      ...mockAttendance,
+      going: {
+        ...mockAttendance.going,
+        users: [
+          {
+            id: 1,
+            telegramId: "123",
+            username: "user1",
+            firstName: "John",
+            profilePhotoUrl: "https://example.com/photo1.jpg",
+          },
+        ],
+      },
+    };
+
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => attendanceWithPhotos,
+    } as Response);
+
+    render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
+
+    await waitFor(() => {
+      const img = screen.getByAltText("@user1") as HTMLImageElement;
+      expect(img).toBeInTheDocument();
+      expect(img.src).toBe("https://example.com/photo1.jpg");
+    });
+  });
+
+  it("should render initials fallback when no URL", async () => {
+    const attendanceNoPhotos = {
+      ...mockAttendance,
+      going: {
+        count: 1,
+        users: [
+          {
+            id: 1,
+            telegramId: "123",
+            username: "user1",
+            firstName: "John",
+            lastName: "Doe",
+            profilePhotoUrl: null,
+          },
+        ],
+      },
+      interested: { count: 0, users: [] },
+      not_going: { count: 0, users: [] },
+    };
+
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => attendanceNoPhotos,
+    } as Response);
+
+    render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
+
+    await waitFor(() => {
+      const initialsDiv = screen.getByText("JD");
+      expect(initialsDiv).toBeInTheDocument();
+      expect(initialsDiv).toHaveClass("rounded-full");
+    });
+  });
+
+  it("should render username-only user initials", async () => {
+    const attendanceUsernameOnly = {
+      concertId: 1,
+      going: {
+        count: 1,
+        users: [
+          {
+            id: 5,
+            telegramId: "999",
+            username: "someuser",
+            firstName: null,
+            lastName: null,
+            profilePhotoUrl: null,
+          },
+        ],
+      },
+      interested: { count: 0, users: [] },
+      not_going: { count: 0, users: [] },
+    };
+
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => attendanceUsernameOnly,
+    } as Response);
+
+    render(<ConcertDetail concert={mockConcert} onClose={vi.fn()} />);
+
+    await waitFor(() => {
+      const initialsDiv = screen.getByText("SO");
+      expect(initialsDiv).toBeInTheDocument();
+      expect(initialsDiv).toHaveClass("rounded-full");
+    });
+  });
 });

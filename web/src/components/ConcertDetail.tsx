@@ -76,7 +76,8 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
       lastName: user.lastName || null,
       username: user.username,
     });
-    const backgroundColor = generateColorFromName(user.firstName);
+    const colorName = user.firstName || user.username || "?";
+    const backgroundColor = generateColorFromName(colorName);
 
     if (user.profilePhotoUrl && !imageError) {
       return (
