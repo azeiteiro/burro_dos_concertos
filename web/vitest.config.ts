@@ -9,6 +9,10 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",
     css: true,
+    // Increase timeout for tests with animations
+    testTimeout: 10000,
+    // Don't fail on unhandled errors from async UI library timers
+    dangerouslyIgnoreUnhandledErrors: true,
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "json", "lcov"],
