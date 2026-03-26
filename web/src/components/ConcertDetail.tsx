@@ -65,10 +65,14 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
   const formatUserName = (user: AttendanceResponse) => {
     // Priority: firstName + lastName > firstName > username
     if (user.firstName && user.lastName) {
-      return `${user.firstName} ${user.lastName}`;
+      // Use first word of firstName and last word of lastName
+      const firstNamePart = user.firstName.trim().split(/\s+/)[0];
+      const lastNameParts = user.lastName.trim().split(/\s+/);
+      const lastNamePart = lastNameParts[lastNameParts.length - 1];
+      return `${firstNamePart} ${lastNamePart}`;
     }
     if (user.firstName) {
-      return user.firstName;
+      return user.firstName.trim().split(/\s+/)[0];
     }
     if (user.username) {
       return `@${user.username}`;
