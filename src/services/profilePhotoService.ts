@@ -50,7 +50,10 @@ async function fetchUserProfilePhoto(bot: Bot, user: User): Promise<string | nul
 
     return photoUrl;
   } catch (error) {
-    logger.error(`Failed to fetch photo for user ${user.id}:`, error);
+    logger.error(
+      { userId: user.id, error: error instanceof Error ? error.message : String(error) },
+      `Failed to fetch photo for user ${user.id}`
+    );
     return null;
   }
 }
