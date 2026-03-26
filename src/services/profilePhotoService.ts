@@ -2,6 +2,7 @@ import { Bot } from "grammy";
 import { prisma } from "#/config/db";
 import { User } from "@prisma/client";
 import logger from "#/config/logger";
+import cron from "node-cron";
 
 interface SyncResult {
   success: number;
@@ -104,4 +105,25 @@ export async function fetchAllUserProfilePhotos(bot: Bot): Promise<SyncResult> {
     logger.error("Fatal error during profile photo sync:", error);
     throw error;
   }
+}
+
+/**
+ * Schedules weekly profile photo sync (Sunday 3 AM)
+ */
+export function scheduleProfilePhotoSync(bot: Bot): void {
+  // Sunday at 3:00 AM (Europe/Lisbon timezone)
+  cron.schedule("0 3 * * 0", async () => {
+    logger.info("Starting scheduled profile photo sync (cron job)");
+    try {
+      const result = await fetchAllUserProfilePhotos(bot);
+      logger.info(`Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}`);
+      if (result.errors.length > 0) {
+        logger.error("Sync errors:", result.errors);
+      }
+    } catch (error) {
+      logger.error("Scheduled profile photo sync failed:", error);
+    }
+  });
+
+  logger.info("Profile photo sync cron job scheduled (every Sunday at 3 AM)");
 }

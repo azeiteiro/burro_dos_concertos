@@ -1,6 +1,10 @@
 import { Bot } from "grammy";
-import { fetchAllUserProfilePhotos } from "#/services/profilePhotoService";
+import {
+  fetchAllUserProfilePhotos,
+  scheduleProfilePhotoSync,
+} from "#/services/profilePhotoService";
 import { prisma } from "#/config/db";
+import cron from "node-cron";
 
 // Mock Grammy Bot API
 jest.mock("grammy", () => ({
@@ -15,6 +19,11 @@ jest.mock("#/config/db", () => ({
       update: jest.fn(),
     },
   },
+}));
+
+// Mock node-cron
+jest.mock("node-cron", () => ({
+  schedule: jest.fn(),
 }));
 
 describe("ProfilePhotoService", () => {
@@ -170,6 +179,14 @@ describe("ProfilePhotoService", () => {
       expect(result.success).toBe(3);
       expect(result.failed).toBe(0);
       expect(prisma.user.update).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("scheduleProfilePhotoSync", () => {
+    it("schedules cron job for Sunday 3 AM", () => {
+      scheduleProfilePhotoSync(mockBot);
+
+      expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function));
     });
   });
 });
