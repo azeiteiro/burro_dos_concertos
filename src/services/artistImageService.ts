@@ -107,8 +107,70 @@ export async function syncAllArtistImages(): Promise<{
   skipped: number;
   errors: string[];
 }> {
-  // Will implement later
-  throw new Error("Not implemented yet");
+  logger.info("Starting artist image sync for all concerts");
+
+  const result = {
+    success: 0,
+    failed: 0,
+    skipped: 0,
+    errors: [] as string[],
+  };
+
+  try {
+    // Get all concerts
+    const concerts = await prisma.concert.findMany({
+      select: {
+        id: true,
+        artistName: true,
+        artistImageUrl: true,
+        spotifyArtistId: true,
+      },
+      orderBy: { id: "asc" },
+    });
+
+    logger.info(`Found ${concerts.length} concerts to process`);
+
+    // Process each concert
+    for (const concert of concerts) {
+      try {
+        // Skip if already has both image and Spotify ID
+        if (concert.artistImageUrl && concert.spotifyArtistId) {
+          logger.debug({ concertId: concert.id }, "Skipping concert (already has image)");
+          result.skipped++;
+          continue;
+        }
+
+        // Fetch and update
+        const artistImage = await fetchArtistImage(concert.artistName);
+
+        await prisma.concert.update({
+          where: { id: concert.id },
+          data: {
+            artistImageUrl: artistImage?.imageUrl || null,
+            spotifyArtistId: artistImage?.spotifyArtistId || null,
+          },
+        });
+
+        result.success++;
+      } catch (error) {
+        result.failed++;
+        const errorMsg = `Concert ${concert.id} (${concert.artistName}): ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`;
+        result.errors.push(errorMsg);
+        logger.error({ error, concertId: concert.id }, errorMsg);
+      }
+    }
+
+    logger.info(
+      `Artist image sync complete. Success: ${result.success}, Failed: ${result.failed}, Skipped: ${result.skipped}`
+    );
+
+    return result;
+  } catch (error) {
+    logger.error({ error }, "Fatal error during artist image sync");
+    throw error;
+  }
 }
 
 /**
