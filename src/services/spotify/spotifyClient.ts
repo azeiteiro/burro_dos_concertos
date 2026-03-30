@@ -1,7 +1,14 @@
 import logger from "#/config/logger";
-import { SpotifyToken, CachedToken, SpotifyArtist, SpotifyErrorResponse } from "./types";
+import {
+  SpotifyToken,
+  CachedToken,
+  SpotifyArtist,
+  SpotifySearchResponse,
+  SpotifyErrorResponse,
+} from "./types";
 
 const SPOTIFY_AUTH_URL = "https://accounts.spotify.com/api/token";
+const SPOTIFY_API_URL = "https://api.spotify.com/v1";
 
 export class SpotifyClient {
   private token: CachedToken | null = null;
@@ -61,19 +68,80 @@ export class SpotifyClient {
 
   /**
    * Search for artist by name
+   * @returns First matching artist or null if not found
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async searchArtist(_artistName: string): Promise<SpotifyArtist | null> {
-    // Will implement in next task
-    throw new Error("Not implemented yet");
+  async searchArtist(artistName: string): Promise<SpotifyArtist | null> {
+    try {
+      const token = await this.getAccessToken();
+      const encodedQuery = encodeURIComponent(artistName);
+      const url = `${SPOTIFY_API_URL}/search?q=${encodedQuery}&type=artist&limit=1`;
+
+      logger.debug({ artistName }, "Searching for artist on Spotify");
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const error = (await response.json()) as SpotifyErrorResponse;
+        logger.error({ status: response.status, error }, "Spotify search failed");
+        throw new Error(`Spotify search failed: ${response.status}`);
+      }
+
+      const data = (await response.json()) as SpotifySearchResponse;
+
+      if (data.artists.items.length === 0) {
+        logger.info({ artistName }, "Artist not found on Spotify");
+        return null;
+      }
+
+      const artist = data.artists.items[0];
+      logger.info({ artistName, spotifyId: artist.id }, "Found artist on Spotify");
+
+      return artist;
+    } catch (error) {
+      logger.error({ error, artistName }, "Error searching for artist");
+      throw error;
+    }
   }
 
   /**
-   * Get artist by Spotify ID
+   * Get artist by Spotify ID (for future features)
+   * @returns Artist details or null if not found
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getArtist(_artistId: string): Promise<SpotifyArtist | null> {
-    // Will implement in next task
-    throw new Error("Not implemented yet");
+  async getArtist(artistId: string): Promise<SpotifyArtist | null> {
+    try {
+      const token = await this.getAccessToken();
+      const url = `${SPOTIFY_API_URL}/artists/${artistId}`;
+
+      logger.debug({ artistId }, "Fetching artist by ID from Spotify");
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 404) {
+        logger.info({ artistId }, "Artist ID not found on Spotify");
+        return null;
+      }
+
+      if (!response.ok) {
+        const error = (await response.json()) as SpotifyErrorResponse;
+        logger.error({ status: response.status, error }, "Spotify get artist failed");
+        throw new Error(`Spotify get artist failed: ${response.status}`);
+      }
+
+      const artist = (await response.json()) as SpotifyArtist;
+      logger.info({ artistId }, "Fetched artist by ID from Spotify");
+
+      return artist;
+    } catch (error) {
+      logger.error({ error, artistId }, "Error fetching artist by ID");
+      throw error;
+    }
   }
 }

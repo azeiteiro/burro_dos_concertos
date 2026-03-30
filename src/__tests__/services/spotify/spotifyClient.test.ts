@@ -135,3 +135,116 @@ describe("SpotifyClient - Authentication", () => {
     await expect(client.getAccessToken()).rejects.toThrow("Spotify authentication failed: 401");
   });
 });
+
+describe("SpotifyClient - Artist Search", () => {
+  let client: SpotifyClient;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Set dummy env vars for tests
+    process.env.SPOTIFY_CLIENT_ID = "test_client_id";
+    process.env.SPOTIFY_CLIENT_SECRET = "test_client_secret";
+    client = new SpotifyClient();
+    (client as any).token = null;
+
+    // Mock successful auth
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        access_token: "mock_token",
+        token_type: "Bearer",
+        expires_in: 3600,
+      }),
+    });
+  });
+
+  it("should search for artist and return first result", async () => {
+    const mockSearchResponse = {
+      artists: {
+        items: [
+          {
+            id: "spotify_id_123",
+            name: "Arctic Monkeys",
+            images: [
+              { url: "https://image.url/large.jpg", height: 640, width: 640 },
+              { url: "https://image.url/small.jpg", height: 320, width: 320 },
+            ],
+            popularity: 85,
+            genres: ["indie rock"],
+            external_urls: { spotify: "https://open.spotify.com/artist/..." },
+          },
+        ],
+        total: 1,
+      },
+    };
+
+    // Mock search request
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockSearchResponse,
+    });
+
+    const result = await client.searchArtist("Arctic Monkeys");
+
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe("spotify_id_123");
+    expect(result?.name).toBe("Arctic Monkeys");
+    expect(result?.images).toHaveLength(2);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("https://api.spotify.com/v1/search"),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "Bearer mock_token",
+        }),
+      })
+    );
+  });
+
+  it("should return null if artist not found", async () => {
+    const mockEmptyResponse = {
+      artists: {
+        items: [],
+        total: 0,
+      },
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockEmptyResponse,
+    });
+
+    const result = await client.searchArtist("NonexistentArtist12345");
+
+    expect(result).toBeNull();
+  });
+
+  it("should handle search API errors gracefully", async () => {
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        error: { status: 400, message: "Invalid search query" },
+      }),
+    });
+
+    await expect(client.searchArtist("")).rejects.toThrow("Spotify search failed: 400");
+  });
+
+  it("should URL encode artist name in search query", async () => {
+    const mockSearchResponse = {
+      artists: { items: [], total: 0 },
+    };
+
+    (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockSearchResponse,
+    });
+
+    await client.searchArtist("Artist Name With Spaces");
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining("q=Artist%20Name%20With%20Spaces"),
+      expect.any(Object)
+    );
+  });
+});
