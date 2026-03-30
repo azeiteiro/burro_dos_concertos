@@ -118,8 +118,13 @@ export async function syncAllArtistImages(): Promise<{
   };
 
   try {
-    // Get all concerts
+    // Get all upcoming concerts (concertDate >= now)
     const concerts = await prisma.concert.findMany({
+      where: {
+        concertDate: {
+          gte: new Date(),
+        },
+      },
       select: {
         id: true,
         artistName: true,

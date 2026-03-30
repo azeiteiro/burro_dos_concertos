@@ -286,6 +286,15 @@ describe("ArtistImageService - syncAllArtistImages", () => {
 
     const result = await syncAllArtistImages();
 
+    expect(prisma.concert.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          concertDate: {
+            gte: expect.any(Date),
+          },
+        },
+      })
+    );
     expect(result.success).toBe(2);
     expect(result.failed).toBe(0);
     expect(result.skipped).toBe(1);
