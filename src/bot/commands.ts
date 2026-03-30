@@ -2,6 +2,7 @@ import { addConcertCommand } from "#/commands/concerts/add_concert";
 import { deleteConcertCommand } from "#/commands/concerts/delete_concert";
 import { editConcertCommand } from "#/commands/concerts/edit_concert";
 import { listConcertsCommand } from "#/commands/concerts/list_concerts";
+import { syncArtistImagesCommand } from "#/commands/concerts/sync_artist_images";
 import { demoteUserCommand } from "#/commands/users/demote_user";
 import { listUsersCommand } from "#/commands/users/list_users";
 import { promoteUserCommand } from "#/commands/users/promote_user";
@@ -48,5 +49,10 @@ export const registerCommands = (bot: Bot) => {
   bot.command("sync_photos", async (ctx: BotContext) => {
     if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
     await syncPhotosCommand(ctx);
+  });
+
+  bot.command("sync_artist_images", async (ctx: BotContext) => {
+    if (!(await isAdmin(ctx))) return ctx.reply("❌ Not authorized.");
+    await syncArtistImagesCommand(ctx);
   });
 };
