@@ -1,8 +1,40 @@
 import "@testing-library/jest-dom";
-import { cleanup, render as rtlRender } from "@testing-library/react";
+import { cleanup, render as rtlRender, RenderOptions } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
-import React from "react";
-import { AppRoot } from "@telegram-apps/telegram-ui";
+import React, { ReactElement } from "react";
+
+// Hoist the mock context value so it's available during mock setup
+const { mockAppRootContextValue } = vi.hoisted(() => {
+  const contextValue = {
+    isReady: true,
+    platform: "base" as const,
+    appearance: "light" as const,
+    portalContainer: null,
+  };
+
+  return {
+    mockAppRootContextValue: contextValue,
+  };
+});
+
+// Mock the Telegram UI module
+vi.mock("@telegram-apps/telegram-ui", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@telegram-apps/telegram-ui")>();
+  const React = await import("react");
+  const { createContext, useContext } = React;
+
+  const Context = createContext(mockAppRootContextValue);
+
+  return {
+    ...mod,
+    useAppRootContext: () => useContext(Context),
+    usePlatform: () => "base" as const,
+    AppRoot: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(Context.Provider, { value: mockAppRootContextValue }, children),
+  };
+});
+
+// AppRoot is mocked above, no need to import
 
 // Mock Telegram WebApp in window with all required SDK methods
 (window as any).Telegram = {
@@ -47,11 +79,9 @@ import { AppRoot } from "@telegram-apps/telegram-ui";
   },
 };
 
-// Custom render function that wraps with AppRoot
-function customRender(ui: React.ReactElement, options = {}) {
-  const Wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(AppRoot, { appearance: "light", platform: "base" }, children);
-  return rtlRender(ui, { wrapper: Wrapper, ...options });
+// Custom render function - no AppRoot wrapper, hooks are mocked
+function customRender(ui: ReactElement, options?: RenderOptions) {
+  return rtlRender(ui, options);
 }
 
 // Re-export everything from testing-library
