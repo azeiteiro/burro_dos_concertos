@@ -1,7 +1,7 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useState } from "react";
-import { Button, Card, Headline, Image, Subheadline } from "@telegram-apps/telegram-ui";
+import { Badge, Button, Card, Headline, Image, Subheadline } from "@telegram-apps/telegram-ui";
 import { FaCalendar, FaCheck, FaMapPin, FaStar, FaX } from "react-icons/fa6";
 import React from "react";
 import { useTelegram } from "@/hooks/useTelegram";
@@ -117,7 +117,7 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
 
       {concert.responses && userId && onVote && (
         <div className="mt-3 pt-3 px-3 pb-3 border-t flex gap-2">
-          {VOTE_BUTTONS.map(({ type, label }) => {
+          {VOTE_BUTTONS.map(({ type, icon: Icon, label }) => {
             const isSelected = concert.responses?.userResponse === type;
             const isLoading = votingFor === type;
             const isDisabled = votingFor !== null;
@@ -130,16 +130,16 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
                 loading={isLoading}
                 mode={isSelected ? "filled" : "outline"}
                 className={`flex-1 ${isSelected ? RESPONSE_COLORS[type].bgActive : ""}`}
-                // before={<Icon />}
+                before={<Icon />}
                 stretched
                 size="m"
-                // after={
-                //   <Badge mode="gray" type="number">
-                //     {concert.responses![type]}
-                //   </Badge>
-                // }
+                after={
+                  <Badge mode="gray" type="number">
+                    {concert.responses![type]}
+                  </Badge>
+                }
               >
-                <span className="uppercase text-xs">{label}</span>
+                <span className="text-xs uppercase">{label}</span>
               </Button>
             );
           })}

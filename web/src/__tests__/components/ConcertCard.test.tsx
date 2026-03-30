@@ -77,9 +77,9 @@ describe("ConcertCard", () => {
 
       render(<ConcertCard concert={mockConcert} onVote={mockOnVote} userId={123} />);
 
-      expect(screen.getByRole("button", { name: /🎉 going 5/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /🤔 interested 3/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /❌ not going 1/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /going 5/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /interested 3/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /not going 1/i })).toBeInTheDocument();
     });
 
     it("should not show vote buttons when userId is not provided", () => {
@@ -102,7 +102,7 @@ describe("ConcertCard", () => {
 
       render(<ConcertCard concert={mockConcert} onVote={mockOnVote} userId={123} />);
 
-      const goingButton = screen.getByRole("button", { name: /🎉 going 5/i });
+      const goingButton = screen.getByRole("button", { name: /going 5/i });
       await user.click(goingButton);
 
       expect(mockOnVote).toHaveBeenCalledWith("going");
@@ -117,7 +117,7 @@ describe("ConcertCard", () => {
         <ConcertCard concert={mockConcert} onClick={mockOnClick} onVote={mockOnVote} userId={123} />
       );
 
-      const goingButton = screen.getByRole("button", { name: /🎉 going 5/i });
+      const goingButton = screen.getByRole("button", { name: /going 5/i });
       await user.click(goingButton);
 
       expect(mockOnVote).toHaveBeenCalled();
@@ -136,7 +136,7 @@ describe("ConcertCard", () => {
 
       render(<ConcertCard concert={mockConcert} onVote={mockOnVote} userId={123} />);
 
-      const goingButton = screen.getByRole("button", { name: /🎉 going 5/i });
+      const goingButton = screen.getByRole("button", { name: /going 5/i });
       await user.click(goingButton);
 
       // Button should be disabled while voting
@@ -160,7 +160,7 @@ describe("ConcertCard", () => {
 
       render(<ConcertCard concert={concertWithResponse} onVote={mockOnVote} userId={123} />);
 
-      const goingButton = screen.getByRole("button", { name: /🎉 going 5/i });
+      const goingButton = screen.getByRole("button", { name: /going 5/i });
       // Library Button component uses its own styling for selected state
       expect(goingButton).toBeInTheDocument();
     });
