@@ -1,5 +1,4 @@
 import { SpotifyClient } from "./spotify/spotifyClient";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { prisma } from "#/config/db";
 import logger from "#/config/logger";
 
@@ -51,11 +50,52 @@ export async function fetchArtistImage(artistName: string): Promise<ArtistImageR
 
 /**
  * Update single concert with artist image
+ * @returns true if successful, false otherwise
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function updateConcertArtistImage(concertId: number): Promise<boolean> {
-  // Will implement in next step
-  throw new Error("Not implemented yet");
+  try {
+    logger.debug({ concertId }, "Updating concert artist image");
+
+    // Get concert from database
+    const concert = await prisma.concert.findUnique({
+      where: { id: concertId },
+      select: { id: true, artistName: true },
+    });
+
+    if (!concert) {
+      logger.warn({ concertId }, "Concert not found");
+      return false;
+    }
+
+    // Fetch artist image from Spotify
+    const artistImage = await fetchArtistImage(concert.artistName);
+
+    // Update concert with image data (or null if not found)
+    await prisma.concert.update({
+      where: { id: concertId },
+      data: {
+        artistImageUrl: artistImage?.imageUrl || null,
+        spotifyArtistId: artistImage?.spotifyArtistId || null,
+      },
+    });
+
+    if (artistImage) {
+      logger.info(
+        { concertId, artistName: concert.artistName, spotifyId: artistImage.spotifyArtistId },
+        "Successfully updated concert with artist image"
+      );
+    } else {
+      logger.info(
+        { concertId, artistName: concert.artistName },
+        "Updated concert with null artist image (not found)"
+      );
+    }
+
+    return true;
+  } catch (error) {
+    logger.error({ error, concertId }, "Failed to update concert artist image");
+    return false;
+  }
 }
 
 /**
