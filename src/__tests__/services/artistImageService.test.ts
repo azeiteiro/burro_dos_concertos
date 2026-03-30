@@ -17,12 +17,19 @@ jest.mock("#/config/db", () => ({
   },
 }));
 
+// Mock node-cron
+jest.mock("node-cron", () => ({
+  schedule: jest.fn(),
+}));
+
 import {
   fetchArtistImage,
   updateConcertArtistImage,
   syncAllArtistImages,
+  scheduleArtistImageSync,
 } from "#/services/artistImageService";
 import { prisma } from "#/config/db";
+import cron from "node-cron";
 
 describe("ArtistImageService - fetchArtistImage", () => {
   beforeEach(() => {
@@ -326,5 +333,18 @@ describe("ArtistImageService - syncAllArtistImages", () => {
     expect(result.failed).toBe(0);
     expect(result.skipped).toBe(0);
     expect(result.errors).toHaveLength(0);
+  });
+});
+
+describe("ArtistImageService - scheduleArtistImageSync", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should schedule cron job for Sunday 3 AM", () => {
+    scheduleArtistImageSync();
+
+    expect(cron.schedule).toHaveBeenCalledTimes(1);
+    expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function));
   });
 });

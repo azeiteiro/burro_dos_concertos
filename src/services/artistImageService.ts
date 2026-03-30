@@ -1,6 +1,7 @@
 import { SpotifyClient } from "./spotify/spotifyClient";
 import { prisma } from "#/config/db";
 import logger from "#/config/logger";
+import cron from "node-cron";
 
 const spotifyClient = new SpotifyClient();
 
@@ -177,6 +178,21 @@ export async function syncAllArtistImages(): Promise<{
  * Schedule weekly artist image sync (Sunday 3 AM)
  */
 export function scheduleArtistImageSync(): void {
-  // Will implement later
-  throw new Error("Not implemented yet");
+  // Sunday at 3:00 AM
+  cron.schedule("0 3 * * 0", async () => {
+    logger.info("Starting scheduled artist image sync (cron job)");
+    try {
+      const result = await syncAllArtistImages();
+      logger.info(
+        `Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}, Skipped: ${result.skipped}`
+      );
+      if (result.errors.length > 0) {
+        logger.error({ errors: result.errors }, "Sync errors");
+      }
+    } catch (error) {
+      logger.error({ error }, "Scheduled artist image sync failed");
+    }
+  });
+
+  logger.info("Artist image sync cron job scheduled (every Sunday at 3 AM)");
 }
