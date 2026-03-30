@@ -1,8 +1,19 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import { Modal, Button } from "@telegram-apps/telegram-ui";
+import {
+  Modal,
+  Button,
+  Headline,
+  Subheadline,
+  Text,
+  Accordion,
+  AvatarStack,
+  Avatar,
+} from "@telegram-apps/telegram-ui";
 import { getInitials, generateColorFromName } from "@/utils/avatar";
+import { FaCalendar, FaMapPin, FaLink, FaCheck, FaStar, FaX } from "react-icons/fa6";
+import { IconType } from "react-icons/lib";
 
 interface ConcertDetailProps {
   concert: Concert;
@@ -38,6 +49,9 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
   const [attendance, setAttendance] = useState<AttendanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedSection, setExpandedSection] = useState<
+    "going" | "interested" | "not_going" | null
+  >(null);
 
   const concertDate = new Date(concert.concertDate);
   const dateStr = format(concertDate, "EEEE, MMMM d, yyyy");
@@ -63,9 +77,7 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
   }, [concert.id]);
 
   const formatUserName = (user: AttendanceResponse) => {
-    // Priority: firstName + lastName > firstName > username
     if (user.firstName && user.lastName) {
-      // Use first word of firstName and last word of lastName
       const firstNamePart = user.firstName.trim().split(/\s+/)[0];
       const lastNameParts = user.lastName.trim().split(/\s+/);
       const lastNamePart = lastNameParts[lastNameParts.length - 1];
@@ -80,34 +92,86 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
     return "Unknown";
   };
 
-  const Avatar = ({ user }: { user: AttendanceResponse }) => {
-    const [imageError, setImageError] = useState(false);
-    const initials = getInitials({
-      firstName: user.firstName,
-      lastName: user.lastName || null,
-      username: user.username,
-    });
-    const colorName = user.firstName || user.username || "?";
-    const backgroundColor = generateColorFromName(colorName);
-
-    if (user.profilePhotoUrl && !imageError) {
-      return (
-        <img
-          src={user.profilePhotoUrl}
-          alt={formatUserName(user)}
-          className="w-6 h-6 rounded-full object-cover"
-          onError={() => setImageError(true)}
-        />
-      );
-    }
+  const renderAttendanceCategory = (
+    type: "going" | "interested" | "not_going",
+    data: { count: number; users: AttendanceResponse[] },
+    title: string,
+    Icon: IconType,
+    colorClass: string
+  ) => {
+    if (data.count === 0) return null;
 
     return (
-      <div
-        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-        style={{ backgroundColor }}
+      <Accordion
+        expanded={expandedSection === type}
+        onChange={(expanded) => setExpandedSection(expanded ? type : null)}
       >
-        {initials}
-      </div>
+        <Accordion.Summary className="px-0 hover:bg-transparent">
+          <div className="flex items-center justify-between w-full">
+            <div className={`flex items-center gap-2 mr-3 ${colorClass}`}>
+              <Icon className="text-sm" />
+              <Subheadline level="1" weight="2" className="text-(--tg-theme-text-color) m-0">
+                {title} ({data.count})
+              </Subheadline>
+            </div>
+
+            {expandedSection !== type && data.users.length > 0 && (
+              <AvatarStack>
+                {data.users.slice(0, 3).map((user) => (
+                  <Avatar
+                    key={user.id}
+                    size={28}
+                    src={user.profilePhotoUrl || undefined}
+                    acronym={
+                      !user.profilePhotoUrl
+                        ? getInitials({
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            username: user.username,
+                          })
+                        : undefined
+                    }
+                    style={{
+                      backgroundColor: !user.profilePhotoUrl
+                        ? generateColorFromName(user.firstName || user.username || "?")
+                        : undefined,
+                    }}
+                  />
+                ))}
+              </AvatarStack>
+            )}
+          </div>
+        </Accordion.Summary>
+        <Accordion.Content>
+          <div className="flex flex-col gap-3 py-2 pl-6">
+            {data.users.map((user) => (
+              <div key={user.id} className="flex items-center gap-3">
+                <Avatar
+                  size={28}
+                  src={user.profilePhotoUrl || undefined}
+                  acronym={
+                    !user.profilePhotoUrl
+                      ? getInitials({
+                          firstName: user.firstName,
+                          lastName: user.lastName,
+                          username: user.username,
+                        })
+                      : undefined
+                  }
+                  style={{
+                    backgroundColor: !user.profilePhotoUrl
+                      ? generateColorFromName(user.firstName || user.username || "?")
+                      : undefined,
+                  }}
+                />
+                <Text className="text-(--tg-theme-text-color) font-medium">
+                  {formatUserName(user)}
+                </Text>
+              </div>
+            ))}
+          </div>
+        </Accordion.Content>
+      </Accordion>
     );
   };
 
@@ -117,208 +181,111 @@ export function ConcertDetail({ concert, onClose }: ConcertDetailProps) {
       onOpenChange={(open) => !open && onClose()}
       dismissible={true}
       header={
-        <div className="flex justify-between items-center">
-          <span>Concert Details</span>
-          <Modal.Close>
-            <button className="text-2xl leading-none text-gray-500" aria-label="×">
-              ×
-            </button>
-          </Modal.Close>
-        </div>
+        <Modal.Header>
+          <span className="font-semibold px-4 text-(--tg-theme-text-color)">Concert Details</span>
+        </Modal.Header>
       }
+      className="pb-10"
     >
-      <div className="p-4">
+      <div className="p-4 pb-8">
         {/* Concert Info */}
-        <div className="mb-6">
-          <h3
-            className="text-xl font-bold mb-3"
-            style={{ color: "var(--tg-theme-text-color, #000000)" }}
-          >
+        <div className="mb-8">
+          <Headline weight="1" className="mb-4 text-(--tg-theme-text-color)">
             {concert.artistName}
-          </h3>
+          </Headline>
 
-          <div
-            className="flex items-center gap-2 mb-2 text-sm"
-            style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-          >
-            <span>📍</span>
-            <span>{concert.venue}</span>
-          </div>
+          <div className="flex flex-col gap-3.5 mb-5">
+            <Subheadline
+              level="1"
+              className="flex items-start gap-3 text-(--tg-theme-hint-color,#8e8e93)"
+            >
+              <FaMapPin className="shrink-0 mt-0.5 text-[16px]" />
+              <span className="leading-tight">{concert.venue}</span>
+            </Subheadline>
 
-          <div
-            className="flex items-center gap-2 mb-2 text-sm"
-            style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-          >
-            <span>📅</span>
-            <span>
-              {dateStr}
-              {timeStr && ` at ${timeStr}`}
-            </span>
+            <Subheadline
+              level="1"
+              className="flex items-start gap-3 text-(--tg-theme-hint-color,#8e8e93)"
+            >
+              <FaCalendar className="shrink-0 mt-0.5 text-[16px]" />
+              <span className="leading-tight">
+                {dateStr}
+                {timeStr && ` • ${timeStr}`}
+              </span>
+            </Subheadline>
           </div>
 
           {concert.notes && (
-            <div
-              className="mt-3 p-3 rounded-lg text-sm"
-              style={{
-                backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
-                color: "var(--tg-theme-text-color, #000000)",
-              }}
-            >
-              {concert.notes}
+            <div className="mt-4 p-4 rounded-2xl bg-(--tg-theme-secondary-bg-color,#f1f1f2)">
+              <Text className="text-(--tg-theme-text-color) text-sm whitespace-pre-line">
+                {concert.notes}
+              </Text>
             </div>
           )}
 
           {concert.url && (
             <Button
               mode="filled"
-              size="m"
-              className="mt-3"
+              size="l"
+              stretched
+              className="mt-6 font-semibold"
+              before={<FaLink />}
               onClick={() => window.open(concert.url!, "_blank", "noopener,noreferrer")}
             >
-              🔗 View Event Page
+              View Event Page
             </Button>
           )}
         </div>
 
         {/* Attendance */}
         <div>
-          <h4
-            className="text-lg font-semibold mb-3"
-            style={{ color: "var(--tg-theme-text-color, #000000)" }}
-          >
+          <Headline weight="2" className="text-xl mb-3 text-(--tg-theme-text-color)">
             Who's Attending
-          </h4>
+          </Headline>
 
           {loading && (
             <div className="text-center py-8">
-              <p style={{ color: "var(--tg-theme-hint-color, #999999)" }}>Loading...</p>
+              <Text className="text-(--tg-theme-hint-color,#8e8e93)">Loading attendance...</Text>
             </div>
           )}
 
           {error && (
-            <div
-              className="p-3 rounded-lg text-sm mb-4"
-              style={{
-                backgroundColor: "var(--tg-theme-destructive-text-color, #ff3b30)",
-                color: "#ffffff",
-              }}
-            >
-              {error}
+            <div className="p-3.5 rounded-xl bg-red-500/10 mb-4 border border-red-500/20">
+              <Text className="text-red-500 text-sm">{error}</Text>
             </div>
           )}
 
           {attendance && (
-            <div className="space-y-4">
-              {/* Going */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🎉</span>
-                  <span
-                    className="font-semibold"
-                    style={{ color: "var(--tg-theme-text-color, #000000)" }}
-                  >
-                    Going ({attendance.going.count})
-                  </span>
-                </div>
-                {attendance.going.users.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 ml-7">
-                    {attendance.going.users.map((user) => (
-                      <span
-                        key={user.id}
-                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        style={{
-                          backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
-                          color: "var(--tg-theme-text-color, #000000)",
-                        }}
-                      >
-                        <Avatar user={user} />
-                        {formatUserName(user)}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p
-                    className="ml-7 text-sm"
-                    style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-                  >
-                    No one yet
-                  </p>
-                )}
-              </div>
+            <div className="space-y-1">
+              {renderAttendanceCategory(
+                "going",
+                attendance.going,
+                "Going",
+                FaCheck,
+                "text-green-500"
+              )}
+              {renderAttendanceCategory(
+                "interested",
+                attendance.interested,
+                "Interested",
+                FaStar,
+                "text-amber-500"
+              )}
+              {renderAttendanceCategory(
+                "not_going",
+                attendance.not_going,
+                "Not Going",
+                FaX,
+                "text-red-500"
+              )}
 
-              {/* Interested */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🤔</span>
-                  <span
-                    className="font-semibold"
-                    style={{ color: "var(--tg-theme-text-color, #000000)" }}
-                  >
-                    Interested ({attendance.interested.count})
-                  </span>
-                </div>
-                {attendance.interested.users.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 ml-7">
-                    {attendance.interested.users.map((user) => (
-                      <span
-                        key={user.id}
-                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        style={{
-                          backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
-                          color: "var(--tg-theme-text-color, #000000)",
-                        }}
-                      >
-                        <Avatar user={user} />
-                        {formatUserName(user)}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p
-                    className="ml-7 text-sm"
-                    style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-                  >
-                    No one yet
-                  </p>
+              {attendance.going.count === 0 &&
+                attendance.interested.count === 0 &&
+                attendance.not_going.count === 0 && (
+                  <Text className="text-(--tg-theme-hint-color,#8e8e93) text-sm italic">
+                    No one has responded yet.
+                  </Text>
                 )}
-              </div>
-
-              {/* Not Going */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">❌</span>
-                  <span
-                    className="font-semibold"
-                    style={{ color: "var(--tg-theme-text-color, #000000)" }}
-                  >
-                    Not Going ({attendance.not_going.count})
-                  </span>
-                </div>
-                {attendance.not_going.users.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 ml-7">
-                    {attendance.not_going.users.map((user) => (
-                      <span
-                        key={user.id}
-                        className="px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                        style={{
-                          backgroundColor: "var(--tg-theme-section-bg-color, #f5f5f5)",
-                          color: "var(--tg-theme-text-color, #000000)",
-                        }}
-                      >
-                        <Avatar user={user} />
-                        {formatUserName(user)}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p
-                    className="ml-7 text-sm"
-                    style={{ color: "var(--tg-theme-hint-color, #999999)" }}
-                  >
-                    No one yet
-                  </p>
-                )}
-              </div>
             </div>
           )}
         </div>

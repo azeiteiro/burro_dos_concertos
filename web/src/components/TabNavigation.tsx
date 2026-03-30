@@ -10,7 +10,7 @@ interface TabNavigationProps {
 
 export function TabNavigation({ activeTab, onTabChange, myConcertsCount }: TabNavigationProps) {
   return (
-    <Tabbar className="fixed bottom-0 left-0 right-0">
+    <Tabbar className="fixed bottom-0 left-0 right-0 z-50 bg-(--tg-theme-bg-color) shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
       <Tabbar.Item
         selected={activeTab === "all"}
         onClick={() => onTabChange("all")}
