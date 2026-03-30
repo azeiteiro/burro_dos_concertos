@@ -82,7 +82,9 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
         </CardChip>
       )}
       <Image
-        src="https://images.unsplash.com/6/blurred_lines.jpeg"
+        src={
+          concert.artistImageUrl || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819"
+        }
         alt={concert.artistName}
         fallbackIcon="music"
         className="w-full! h-48! object-cover rounded-t-2xl"
