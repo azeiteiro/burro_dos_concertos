@@ -14,6 +14,8 @@ const mockConcert: Concert = {
   url: "https://example.com/concert",
   userId: 1,
   notified: false,
+  artistImageUrl: "https://example.com/artist-image.jpg",
+  spotifyArtistId: "spotify123",
   createdAt: new Date("2026-01-01T00:00:00"),
   updatedAt: new Date("2026-01-01T00:00:00"),
   responses: {

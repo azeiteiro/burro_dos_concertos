@@ -49,7 +49,9 @@ import { AppRoot } from "@telegram-apps/telegram-ui";
 
 // Custom render function that wraps with AppRoot
 function customRender(ui: React.ReactElement, options = {}) {
-  return rtlRender(React.createElement(AppRoot, null, ui), options);
+  const Wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(AppRoot, { appearance: "light", platform: "base" }, children);
+  return rtlRender(ui, { wrapper: Wrapper, ...options });
 }
 
 // Re-export everything from testing-library
