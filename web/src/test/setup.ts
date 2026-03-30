@@ -44,6 +44,11 @@ import { AppRoot } from "@telegram-apps/telegram-ui";
     isExpanded: true,
     viewportHeight: 600,
     viewportStableHeight: 600,
+    HapticFeedback: {
+      impactOccurred: vi.fn(),
+      notificationOccurred: vi.fn(),
+      selectionChanged: vi.fn(),
+    },
   },
 };
 

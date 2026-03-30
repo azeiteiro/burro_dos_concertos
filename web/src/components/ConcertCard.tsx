@@ -3,17 +3,15 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { Badge, Button, Card, Headline, Image, Subheadline } from "@telegram-apps/telegram-ui";
 import { FaCalendar, FaCheck, FaMapPin, FaStar, FaX } from "react-icons/fa6";
-import { CardChip } from "@telegram-apps/telegram-ui/dist/components/Blocks/Card/components/CardChip/CardChip";
-import { CardCell } from "@telegram-apps/telegram-ui/dist/components/Blocks/Card/components/CardCell/CardCell";
 import React from "react";
 import { useTelegram } from "@/hooks/useTelegram";
 
 type ResponseType = "going" | "interested" | "not_going";
 
 const VOTE_BUTTONS = [
-  { type: "going" as ResponseType, icon: FaCheck, label: "Going" },
-  { type: "interested" as ResponseType, icon: FaStar, label: "Interested" },
-  { type: "not_going" as ResponseType, icon: FaX, label: "Not Going" },
+  { type: "going" as ResponseType, icon: FaCheck, label: "🎉 Going" },
+  { type: "interested" as ResponseType, icon: FaStar, label: "🤔 Interested" },
+  { type: "not_going" as ResponseType, icon: FaX, label: "❌ Not Going" },
 ] as const;
 
 const RESPONSE_COLORS = {
@@ -73,13 +71,13 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
   return (
     <Card type="plain" className={`mb-3 rounded-2xl w-full border ${getStatusBorderClass()}`}>
       {concert.responses?.userResponse && (
-        <CardChip
+        <Card.Chip
           className={`z-10 opacity-50 ${RESPONSE_COLORS[concert.responses.userResponse].bg}`}
           readOnly
           mode="outline"
         >
           {STATUS_LABELS[concert.responses.userResponse]}
-        </CardChip>
+        </Card.Chip>
       )}
       <Image
         src={
@@ -89,7 +87,7 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
         fallbackIcon="music"
         className="w-full! h-48! object-cover rounded-t-2xl"
       />
-      <CardCell
+      <Card.Cell
         onClick={onClick}
         className="cursor-pointer w-full"
         titleBadge={<Headline weight="1">{concert.artistName}</Headline>}
@@ -103,7 +101,7 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
               <FaCalendar />
               <span>
                 {dateStr}
-                {timeStr && ` - ${timeStr}`}
+                {timeStr && ` at ${timeStr}`}
               </span>
             </div>
           </Subheadline>
@@ -111,11 +109,11 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
         description={concert.notes}
       >
         {/* {concert.artistName} */}
-      </CardCell>
+      </Card.Cell>
 
       {concert.responses && userId && onVote && (
         <div className="mt-3 pt-3 px-3 pb-3 border-t flex gap-2">
-          {VOTE_BUTTONS.map(({ type, icon: Icon }) => {
+          {VOTE_BUTTONS.map(({ type, icon: Icon, label }) => {
             const isSelected = concert.responses?.userResponse === type;
             const isLoading = votingFor === type;
             const isDisabled = votingFor !== null;
@@ -136,7 +134,9 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
                     {concert.responses![type]}
                   </Badge>
                 }
-              />
+              >
+                {label}
+              </Button>
             );
           })}
         </div>

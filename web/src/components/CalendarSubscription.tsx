@@ -3,7 +3,6 @@ import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import type { WebApp } from "@twa-dev/types";
 import { useCalendar } from "../hooks/useCalendar";
 import { InlineButtons, Spinner, Subheadline } from "@telegram-apps/telegram-ui";
-import { InlineButtonsItem } from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem";
 
 interface CalendarSubscriptionProps {
   userId: number;
@@ -40,14 +39,14 @@ export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionPro
         </div>
         <InlineButtons mode="bezeled">
           {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
-            <InlineButtonsItem
+            <InlineButtons.Item
               key={type}
               text={label}
               disabled={loadingType !== null}
               onClick={() => handleClick(type)}
             >
               {loadingType === type ? <Spinner size="m" /> : <Icon />}
-            </InlineButtonsItem>
+            </InlineButtons.Item>
           ))}
         </InlineButtons>
       </div>

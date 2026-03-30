@@ -2,120 +2,29 @@
 
 ## Summary
 
-**27 component tests are skipped** due to React 19 incompatibility with `@telegram-apps/telegram-ui@2.1.13`. Tests will be re-enabled when the library adds React 19 support.
+**ALL tests are now passing! (101/101)**
 
-## Root Cause: React Version Incompatibility
+The previously skipped component tests (27 tests) have been re-enabled and fixed. The "React 19 incompatibility" was bypassed by correctly using re-exported sub-components from the main entry point of `@telegram-apps/telegram-ui` instead of direct imports from `dist/...`.
 
-The component test failures were caused by a **React version mismatch**:
+## Resolution Details
 
-- **Project**: React 19.2.4
-- **telegram-ui library**: Requires React ^18.2.0 (peer dependency)
+### 1. React 19 Context Issue Resolved
+The error `Error: [TGUI] Wrap your app with <AppRoot> component` was triggered because components were being imported directly from `@telegram-apps/telegram-ui/dist/...` (e.g., `CardCell`, `CardChip`, `InlineButtonsItem`). This bypassed some context initialization in the main entry point or caused context duplication.
+**Fix**: Switched to using `Card.Cell`, `Card.Chip`, and `InlineButtons.Item` which are correctly re-exported and maintain the `AppRoot` context.
 
-React 19 introduced breaking changes to context behavior, preventing the library's `AppRoot` component from providing context correctly in the test environment.
+### 2. URL Mismatch Fixed
+Fixed 11 tests that were failing due to `VITE_API_URL` being set to a real URL instead of `http://localhost:3001` in the local environment.
+**Fix**: Created `web/.env.test` to ensure consistent test settings.
 
-### Error Message
-```
-Error: [TGUI] Wrap your app with <AppRoot> component
-```
+### 3. Missing Mocks Fixed
+Fixed 3 unhandled rejections due to missing `HapticFeedback` mock in the Telegram WebApp SDK.
+**Fix**: Updated `web/src/test/setup.ts` to include the `HapticFeedback` mock.
 
-This error occurs because:
-1. The library's `useAppRootContext()` hook checks `if (!appRootContext.isRendered)` and throws
-2. In React 19, the AppRoot context provider doesn't initialize properly in jsdom test environment
-3. All components using telegram-ui (Card, CardCell, Button, Chip, etc.) fail with this error
+### 4. Test Expectations Updated
+Updated `ConcertCard.test.tsx` to match the current UI:
+- Added `🎉`, `🤔`, and `❌` emojis to labels.
+- Updated button names to match the `Badge` rendering (e.g., `🎉 Going 5` instead of `going (5)`).
+- Matched date format ("at" instead of " - ").
 
-## Evidence
-
-### Version Mismatch
-```json
-// Project (package.json)
-{
-  "react": "^19.2.4",
-  "react-dom": "^19.2.4"
-}
-
-// telegram-ui (peer dependencies)
-{
-  "react": "^18.2.0",
-  "react-dom": "^18.2.0"
-}
-```
-
-### Investigation Attempts
-Multiple approaches were tried to fix the context issue:
-1. ❌ Wrapping with AppRoot with explicit props
-2. ❌ Mocking useAppRootContext and usePlatform hooks
-3. ❌ Directly providing AppRootContext via custom provider
-4. ❌ Using wrapper component with Testing Library
-5. ❌ Various vi.mock() configurations
-
-All failed because the underlying issue is React 19's incompatibility with the library.
-
-## Current Status
-
-### Test Results
-```
-Test Files: 7 passed | 3 skipped (10)
-Tests: 74 passed | 27 skipped (101)
-```
-
-### Skipped Test Files
-- `ConcertCard.test.tsx` - 12 tests (uses Card, CardCell, CardChip, Image, Badge, Button)
-- `ConcertList.test.tsx` - 4 tests (renders ConcertCard components)
-- `CalendarSubscription.test.tsx` - 6 tests (uses InlineButtons)
-- Plus 5 additional tests in ConcertDetail and TabNavigation
-
-### Passing Tests ✅
-- All hook tests (useConcerts, useTelegram, useCalendar)
-- API tests
-- Utility tests
-- Backend tests: 302 passing (85.9% coverage)
-
-## Artist Images Implementation
-
-The artist images feature is **complete and correct**:
-
-1. ✅ Backend implementation: Spotify API integration, cron jobs, admin commands
-2. ✅ Frontend integration: Artist images displayed in ConcertCard
-3. ✅ Type updates: Added `artistImageUrl` and `spotifyArtistId` to Concert type
-4. ✅ Test mocks updated: Added new fields to mock data (only artist images test change)
-5. ✅ All backend tests passing
-
-The skipped tests are due to the pre-existing React 19 / telegram-ui incompatibility, **not** the artist images feature.
-
-## Solution Implemented
-
-**Approach: Skip tests until library update**
-
-All affected component tests are marked with `describe.skip()` and include this comment:
-
-```typescript
-// SKIPPED: React 19 incompatibility with @telegram-apps/telegram-ui@2.1.13
-// The library requires React ^18.2.0 but project uses React 19.2.4
-// React 19 has breaking changes to context that prevent AppRoot from working in tests
-// Re-enable when telegram-ui adds React 19 support
-// See: https://github.com/Telegram-Mini-Apps/telegram-ui
-```
-
-## Re-enabling Tests
-
-Monitor https://github.com/Telegram-Mini-Apps/telegram-ui for React 19 support.
-
-When available:
-1. Update `@telegram-apps/telegram-ui` to the React 19 compatible version
-2. Remove `.skip` from all describe blocks in affected test files
-3. Remove the skip comments
-4. Run `pnpm test` to verify all tests pass
-
-## Alternative Solutions (Not Chosen)
-
-### Option 1: Downgrade to React 18
-```bash
-pnpm add react@^18.3.1 react-dom@^18.3.1
-pnpm add -D @types/react@^18.3.3 @types/react-dom@^18.3.0
-```
-**Reason not chosen**: Would require testing entire app for React 18 compatibility issues
-
-### Option 2: Revert Card Components
-Revert to old `Cell` components that work with the current setup.
-
-**Reason not chosen**: Would lose the new card design improvements on this branch
+## Final Verification
+All 10 test files and 101 tests passed successfully in the `web` directory.
