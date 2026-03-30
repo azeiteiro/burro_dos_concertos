@@ -9,6 +9,8 @@ export interface Concert {
   url: string | null;
   userId: number;
   notified: boolean;
+  artistImageUrl: string | null;
+  spotifyArtistId: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
   responses?: {

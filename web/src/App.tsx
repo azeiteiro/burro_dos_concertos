@@ -50,7 +50,7 @@ export function App() {
 
   return (
     <div className="min-h-screen pb-20">
-      <h1 className="text-2xl font-bold mb-4">
+      <h1 className="text-2xl font-bold mt-2 ml-4">
         {activeTab === "all" ? "All Concerts" : "My Concerts"}
       </h1>
 
@@ -63,7 +63,6 @@ export function App() {
         placeholder="Search concerts..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="mb-4"
       />
 
       <ConcertList

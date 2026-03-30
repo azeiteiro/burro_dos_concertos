@@ -1,12 +1,46 @@
 import { Concert } from "@/types/concert";
 import { format } from "date-fns";
 import { useState } from "react";
-import { Button, Cell } from "@telegram-apps/telegram-ui";
+import { Badge, Button, Card, Headline, Image, Subheadline } from "@telegram-apps/telegram-ui";
+import { FaCalendar, FaCheck, FaMapPin, FaStar, FaX } from "react-icons/fa6";
+import { CardChip } from "@telegram-apps/telegram-ui/dist/components/Blocks/Card/components/CardChip/CardChip";
+import { CardCell } from "@telegram-apps/telegram-ui/dist/components/Blocks/Card/components/CardCell/CardCell";
+import React from "react";
+import { useTelegram } from "@/hooks/useTelegram";
+
+type ResponseType = "going" | "interested" | "not_going";
+
+const VOTE_BUTTONS = [
+  { type: "going" as ResponseType, icon: FaCheck, label: "Going" },
+  { type: "interested" as ResponseType, icon: FaStar, label: "Interested" },
+  { type: "not_going" as ResponseType, icon: FaX, label: "Not Going" },
+] as const;
+
+const RESPONSE_COLORS = {
+  going: {
+    bg: "bg-green-400",
+    border: "border-green-400",
+  },
+  interested: {
+    bg: "bg-amber-400",
+    border: "border-amber-400",
+  },
+  not_going: {
+    bg: "bg-red-600",
+    border: "border-red-600",
+  },
+} as const;
+
+const STATUS_LABELS = {
+  going: "Going",
+  interested: "Interested",
+  not_going: "Not Going",
+} as const;
 
 interface ConcertCardProps {
   concert: Concert;
   onClick?: () => void;
-  onVote?: (responseType: "going" | "interested" | "not_going") => Promise<void>;
+  onVote?: (responseType: ResponseType) => Promise<void>;
   userId?: number;
 }
 
@@ -14,103 +48,99 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
   const concertDate = new Date(concert.concertDate);
   const dateStr = format(concertDate, "MMM dd, yyyy");
   const timeStr = concert.concertTime ? format(new Date(concert.concertTime), "HH:mm") : null;
-  const [isVoting, setIsVoting] = useState(false);
+  const [votingFor, setVotingFor] = useState<ResponseType | null>(null);
+  const { webApp } = useTelegram();
 
-  const handleVote = async (
-    e: React.MouseEvent,
-    responseType: "going" | "interested" | "not_going"
-  ) => {
+  const handleVote = async (e: React.MouseEvent, responseType: ResponseType) => {
     e.stopPropagation();
-    if (!onVote || isVoting) return;
+    if (!onVote || votingFor !== null) return;
 
-    setIsVoting(true);
+    // Medium impact haptic feedback
+    webApp?.HapticFeedback.impactOccurred("medium");
+
+    setVotingFor(responseType);
+
     try {
       await onVote(responseType);
     } finally {
-      setIsVoting(false);
+      setVotingFor(null);
     }
   };
 
-  const getButtonMode = (
-    responseType: "going" | "interested" | "not_going"
-  ): "filled" | "outline" => {
-    const isSelected = concert.responses?.userResponse === responseType;
-    return isSelected ? "filled" : "outline";
-  };
-
-  const getStatusBorderClass = () => {
-    if (!concert.responses?.userResponse) return "";
-
-    switch (concert.responses.userResponse) {
-      case "going":
-        return "border-l-4 border-l-green-500 pl-3";
-      case "interested":
-        return "border-l-4 border-l-amber-500 pl-3";
-      case "not_going":
-        return "border-l-4 border-l-red-600 pl-3";
-      default:
-        return "";
-    }
-  };
+  const getStatusBorderClass = () =>
+    concert.responses?.userResponse ? RESPONSE_COLORS[concert.responses.userResponse].border : "";
 
   return (
-    <div className={`mb-3 ${getStatusBorderClass()}`}>
-      <Cell
+    <Card type="plain" className={`mb-3 rounded-2xl w-full border ${getStatusBorderClass()}`}>
+      {concert.responses?.userResponse && (
+        <CardChip
+          className={`z-10 opacity-50 ${RESPONSE_COLORS[concert.responses.userResponse].bg}`}
+          readOnly
+          mode="outline"
+        >
+          {STATUS_LABELS[concert.responses.userResponse]}
+        </CardChip>
+      )}
+      <Image
+        src={
+          concert.artistImageUrl || "https://images.unsplash.com/photo-1514525253161-7a46d19cd819"
+        }
+        alt={concert.artistName}
+        fallbackIcon="music"
+        className="w-full! h-48! object-cover rounded-t-2xl"
+      />
+      <CardCell
         onClick={onClick}
-        className="cursor-pointer"
-        subhead={
-          <>
-            <div className="flex items-center gap-2 mb-1 text-sm">
-              <span>📍</span>
+        className="cursor-pointer w-full"
+        titleBadge={<Headline weight="1">{concert.artistName}</Headline>}
+        subtitle={
+          <Subheadline caps weight="1" level="2" className="text-gray-300 pt-1">
+            <div className="flex items-center gap-2 mb-1 text-xs">
+              <FaMapPin />
               <span>{concert.venue}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
-              <span>📅</span>
+            <div className="flex items-center gap-2 text-xs">
+              <FaCalendar />
               <span>
                 {dateStr}
-                {timeStr && ` at ${timeStr}`}
+                {timeStr && ` - ${timeStr}`}
               </span>
             </div>
-          </>
+          </Subheadline>
         }
         description={concert.notes}
       >
-        {concert.artistName}
-      </Cell>
+        {/* {concert.artistName} */}
+      </CardCell>
 
       {concert.responses && userId && onVote && (
-        <div className="mt-3 pt-3 px-4 pb-3 border-t flex gap-2">
-          <Button
-            onClick={(e) => handleVote(e, "going")}
-            disabled={isVoting}
-            mode={getButtonMode("going")}
-            size="s"
-            className="flex-1"
-          >
-            🎉 Going ({concert.responses.going})
-          </Button>
+        <div className="mt-3 pt-3 px-3 pb-3 border-t flex gap-2">
+          {VOTE_BUTTONS.map(({ type, icon: Icon }) => {
+            const isSelected = concert.responses?.userResponse === type;
+            const isLoading = votingFor === type;
+            const isDisabled = votingFor !== null;
 
-          <Button
-            onClick={(e) => handleVote(e, "interested")}
-            disabled={isVoting}
-            mode={getButtonMode("interested")}
-            size="s"
-            className="flex-1"
-          >
-            🤔 Interested ({concert.responses.interested})
-          </Button>
-
-          <Button
-            onClick={(e) => handleVote(e, "not_going")}
-            disabled={isVoting}
-            mode={getButtonMode("not_going")}
-            size="s"
-            className="flex-1"
-          >
-            ❌ Not Going ({concert.responses.not_going})
-          </Button>
+            return (
+              <Button
+                key={type}
+                onClick={(e) => handleVote(e, type)}
+                disabled={isDisabled}
+                loading={isLoading}
+                mode={isSelected ? "filled" : "outline"}
+                className={`flex-1 ${isSelected ? `${RESPONSE_COLORS[type].bg}!` : ""}`}
+                before={<Icon />}
+                stretched
+                size="m"
+                after={
+                  <Badge mode="gray" type="number">
+                    {concert.responses![type]}
+                  </Badge>
+                }
+              />
+            );
+          })}
         </div>
       )}
-    </div>
+    </Card>
   );
 }

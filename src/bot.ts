@@ -21,6 +21,7 @@ import {
 import { handlePollAnswer } from "./handlers/pollHandler";
 import { startServer } from "./api/server";
 import { scheduleProfilePhotoSync } from "#/services/profilePhotoService";
+import { scheduleArtistImageSync } from "#/services/artistImageService";
 
 // Load environment-specific .env file
 const envFile =
@@ -61,6 +62,9 @@ registerCommands(bot);
 
 // Schedule profile photo sync
 scheduleProfilePhotoSync(bot);
+
+// Schedule artist image sync
+scheduleArtistImageSync();
 
 // 🪄 Setup dynamic command lists for users and admins
 setupCommands(bot);

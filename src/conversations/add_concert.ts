@@ -7,6 +7,7 @@ import { logAction } from "#/utils/logger";
 import { notifyNewConcert } from "#/notifications/helpers";
 import { BotContext } from "#/types/global";
 import { InlineKeyboard } from "grammy";
+import { updateConcertArtistImage } from "#/services/artistImageService";
 
 // Helper function to save concert
 async function saveConcert(
@@ -39,6 +40,14 @@ async function saveConcert(
       });
 
       logAction(dbUserId, `Added concert "${artistName}" at ${venue}`);
+
+      // Fetch artist image (non-blocking)
+      try {
+        await updateConcertArtistImage(concert.id);
+      } catch (error) {
+        console.warn(`Failed to fetch artist image for concert ${concert.id}:`, error);
+        // Don't fail concert creation if image fetch fails
+      }
 
       return concert;
     } catch (err) {

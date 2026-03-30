@@ -2,7 +2,8 @@ import { useState } from "react";
 import { SiApple, SiSamsung, SiGoogle } from "react-icons/si";
 import type { WebApp } from "@twa-dev/types";
 import { useCalendar } from "../hooks/useCalendar";
-import { Section, Button } from "@telegram-apps/telegram-ui";
+import { InlineButtons, Spinner, Subheadline } from "@telegram-apps/telegram-ui";
+import { InlineButtonsItem } from "@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem";
 
 interface CalendarSubscriptionProps {
   userId: number;
@@ -31,29 +32,28 @@ export function CalendarSubscription({ userId, webApp }: CalendarSubscriptionPro
   };
 
   return (
-    <Section className="p-2">
-      <div className="flex py-4 justify-between items-center">
-        <span className="text-base font-bold">Sync Calendar</span>
-        <span className="text-xs text-gray-500">Stay updated</span>
+    <>
+      <div className="px-4">
+        <div className="flex py-4 justify-between items-center">
+          <Subheadline weight="2">Sync Calendar</Subheadline>
+          <span className="text-xs text-gray-500">Stay updated</span>
+        </div>
+        <InlineButtons mode="bezeled">
+          {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
+            <InlineButtonsItem
+              key={type}
+              text={label}
+              disabled={loadingType !== null}
+              onClick={() => handleClick(type)}
+            >
+              {loadingType === type ? <Spinner size="m" /> : <Icon />}
+            </InlineButtonsItem>
+          ))}
+        </InlineButtons>
       </div>
-
-      <div className="flex gap-2">
-        {CALENDAR_BUTTONS.map(({ type, icon: Icon, label }) => (
-          <Button
-            key={type}
-            before={<Icon />}
-            mode="bezeled"
-            size="m"
-            loading={loadingType === type}
-            disabled={loadingType !== null}
-            onClick={() => handleClick(type)}
-            className="flex-1"
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
-    </Section>
-    // <span className="text-base font-bold">Upcoming Events</span>
+      <Subheadline weight="2" className="ml-4! mt-4!">
+        Upcoming Events
+      </Subheadline>
+    </>
   );
 }

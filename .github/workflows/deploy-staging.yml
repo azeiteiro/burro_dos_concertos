@@ -58,13 +58,19 @@ jobs:
           username: ${{ secrets.DO_STAGING_USER }}
           key: ${{ secrets.DO_STAGING_SSH_KEY }}
           port: ${{ secrets.DO_STAGING_PORT || 22 }}
-          envs: BROWSERLESS_API_KEY
+          envs: BROWSERLESS_API_KEY,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET
           script: |
             cd ${{ secrets.DO_STAGING_APP_PATH }}
 
-            # Update BROWSERLESS_API_KEY in .env file
+            # Update secrets in .env file
             sed -i '/^BROWSERLESS_API_KEY=/d' .env 2>/dev/null || true
             echo "BROWSERLESS_API_KEY=$BROWSERLESS_API_KEY" >> .env
+
+            sed -i '/^SPOTIFY_CLIENT_ID=/d' .env 2>/dev/null || true
+            echo "SPOTIFY_CLIENT_ID=$SPOTIFY_CLIENT_ID" >> .env
+
+            sed -i '/^SPOTIFY_CLIENT_SECRET=/d' .env 2>/dev/null || true
+            echo "SPOTIFY_CLIENT_SECRET=$SPOTIFY_CLIENT_SECRET" >> .env
 
             git fetch origin
             git reset --hard origin/master
@@ -90,3 +96,5 @@ jobs:
             pm2 restart burro_dos_concertos_staging || pm2 start ecosystem.config.js --only burro_dos_concertos_staging
         env:
           BROWSERLESS_API_KEY: ${{ secrets.BROWSERLESS_API_KEY }}
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}

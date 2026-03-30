@@ -15,6 +15,7 @@ Telegram bot to manage concert listings for private groups.
 - 📋 List upcoming concerts
 - 📱 **Telegram Mini App** - Beautiful web interface for browsing concerts
 - 📅 **Calendar Subscriptions** - Subscribe to personal concert calendars (iCal format)
+- 🎨 **Artist Images from Spotify** - Automatic artist photo fetching and display
 - 🔔 Automated daily/weekly/monthly notifications
 - 👥 Role-based permissions (User, Moderator, Admin, SuperAdmin)
 - 🔗 Smart concert link detection with automatic metadata extraction

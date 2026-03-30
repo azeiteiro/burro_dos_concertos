@@ -5,6 +5,7 @@ import { Concert } from "@prisma/client";
 import { ask, canEditConcert } from "#/utils/helpers";
 import { validateConcertInput } from "#/utils/validators";
 import { logAction } from "#/utils/logger";
+import { updateConcertArtistImage } from "#/services/artistImageService";
 
 export const editConcertConversation = async (
   conversation: Conversation,
@@ -198,6 +199,24 @@ export const editConcertConversation = async (
     where: { id: concert.id },
     data: updateData,
   });
+
+  // Re-fetch artist image if artist name changed (always re-fetch on edit)
+  try {
+    // Clear existing image data first
+    await prisma.concert.update({
+      where: { id: concert.id },
+      data: {
+        artistImageUrl: null,
+        spotifyArtistId: null,
+      },
+    });
+
+    // Fetch new image
+    await updateConcertArtistImage(concert.id);
+  } catch (error) {
+    console.warn(`Failed to fetch artist image for concert ${concert.id}:`, error);
+    // Don't fail edit if image fetch fails
+  }
 
   logAction(dbUserId, `Edited concert: ${concert.artistName} at ${concert.venue}`);
 
