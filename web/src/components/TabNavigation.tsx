@@ -1,5 +1,6 @@
 import { TabType } from "@/hooks/useConcerts";
-import { Tabbar } from "@telegram-apps/telegram-ui";
+import { Badge, Tabbar } from "@telegram-apps/telegram-ui";
+import { FaCalendarCheck, FaTicket } from "react-icons/fa6";
 
 interface TabNavigationProps {
   activeTab: TabType;
@@ -15,7 +16,7 @@ export function TabNavigation({ activeTab, onTabChange, myConcertsCount }: TabNa
         onClick={() => onTabChange("all")}
         text="All Concerts"
       >
-        🎵
+        <FaTicket />
       </Tabbar.Item>
 
       <Tabbar.Item
@@ -23,12 +24,12 @@ export function TabNavigation({ activeTab, onTabChange, myConcertsCount }: TabNa
         onClick={() => onTabChange("my")}
         text="My Concerts"
       >
-        <div className="relative">
-          🎤
+        <div>
+          <FaCalendarCheck />
           {myConcertsCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] rounded-full px-1 bg-blue-500 text-white">
+            <Badge className="absolute top-0" mode="primary" type="number">
               {myConcertsCount}
-            </span>
+            </Badge>
           )}
         </div>
       </Tabbar.Item>

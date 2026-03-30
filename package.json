@@ -55,14 +55,15 @@
       "yaml@>=2.0.0 <2.8.3": ">=2.8.3",
       "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
       "brace-expansion@<5.0.5": ">=5.0.5",
-      "handlebars@>=4.0.0 <4.7.9": ">=4.7.9"
+      "handlebars@>=4.0.0 <4.7.9": ">=4.7.9",
+      "path-to-regexp@>=8.0.0 <8.4.0": ">=8.4.0"
     }
   },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@grammyjs/conversations": "^2.1.1",
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "7.5.0",
+    "@prisma/adapter-pg": "^7.6.0",
+    "@prisma/client": "7.6.0",
     "chrono-node": "^2.9.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
@@ -81,7 +82,7 @@
     "metascraper-url": "^5.50.0",
     "node-cron": "^4.2.1",
     "pino": "^10.3.1",
-    "prisma": "7.5.0",
+    "prisma": "7.6.0",
     "puppeteer-core": "^24.40.0"
   },
   "devDependencies": {

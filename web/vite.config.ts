@@ -16,6 +16,7 @@ export default defineConfig({
   server: {
     port: 3000,
     host: true, // Allow external access (needed for ngrok)
+    allowedHosts: ["wintry-wurtzitic-thatcher.ngrok-free.dev"],
     hmr: {
       clientPort: 443, // Use HTTPS port for HMR through ngrok
     },
