@@ -16,8 +16,9 @@ if (!getGroupId()) {
 }
 
 // Escape Markdown special characters to prevent formatting issues
+// Standard Markdown only needs a subset of characters escaped compared to MarkdownV2
 const escapeMarkdown = (text: string): string => {
-  return text.replace(/([_*[\]()~`>#+=|{}.!\-\\])/g, "\\$1");
+  return text.replace(/([_*[\]()~`\\])/g, "\\$1");
 };
 
 export const formatConcertList = (title: string, concerts: Concert[]) => {
