@@ -57,7 +57,7 @@ export function ConcertCard({ concert, onClick, onVote, userId }: ConcertCardPro
     if (!onVote || votingFor !== null) return;
 
     // Medium impact haptic feedback
-    webApp?.HapticFeedback.impactOccurred("medium");
+    webApp?.HapticFeedback.impactOccurred("light");
 
     setVotingFor(responseType);
 
