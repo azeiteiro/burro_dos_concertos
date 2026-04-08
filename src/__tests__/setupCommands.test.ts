@@ -58,6 +58,9 @@ describe("setupCommands", () => {
     setupCommands(bot as any);
 
     expect(bot.api.setMyCommands).toHaveBeenCalledWith([], { scope: { type: "all_group_chats" } });
+    expect(bot.api.setMyCommands).toHaveBeenCalledWith([], {
+      scope: { type: "all_chat_administrators" },
+    });
   });
 
   it("skips middleware if chat is not private", async () => {
@@ -70,7 +73,7 @@ describe("setupCommands", () => {
     await middleware({ chat: { type: "group" } } as any, next);
 
     expect(next).toHaveBeenCalled();
-    expect(bot.api.setMyCommands).toHaveBeenCalledTimes(2);
+    expect(bot.api.setMyCommands).toHaveBeenCalledTimes(3); // base + clear groups + clear admins
   });
 
   it("sets normal user commands in private chat", async () => {
@@ -218,7 +221,7 @@ describe("setupCommands", () => {
     await middleware(ctx as any, next);
     await middleware(ctx as any, next);
 
-    expect(bot.api.setMyCommands).toHaveBeenCalledTimes(3); // base + clear + first user set
+    expect(bot.api.setMyCommands).toHaveBeenCalledTimes(4); // base + clear groups + clear admins + first user set
   });
 
   it("handles DB errors and still calls next()", async () => {
