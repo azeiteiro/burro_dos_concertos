@@ -18,8 +18,9 @@ export const setupCommands = (bot: Bot<BotContext>) => {
     )
     .catch((err) => console.error("Failed to set base commands:", err));
 
-  // Clear commands from groups/channels (optional safety)
+  // Clear commands from groups/channels - this hides the "/" menu button in groups
   bot.api.setMyCommands([], { scope: { type: "all_group_chats" } }).catch(() => {});
+  bot.api.setMyCommands([], { scope: { type: "all_chat_administrators" } }).catch(() => {});
 
   // 🎯 Middleware: per-user dynamic admin command setup
   bot.use(async (ctx, next) => {

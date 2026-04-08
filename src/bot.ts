@@ -57,6 +57,15 @@ bot.use(createConversation(deleteConcertConversation));
 bot.use(createConversation(editConcertConversation));
 bot.use(createConversation(announceConversation));
 
+// 🚫 Block group messages - only allow private chats
+bot.use(async (ctx, next) => {
+  if (ctx.chat?.type !== "private") {
+    // Silently ignore all group/channel messages
+    return;
+  }
+  await next();
+});
+
 // 🧩 Register all commands (these are your handlers)
 registerCommands(bot);
 
