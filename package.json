@@ -58,14 +58,15 @@
       "handlebars@>=4.0.0 <4.7.9": ">=4.7.9",
       "path-to-regexp@>=8.0.0 <8.4.0": ">=8.4.0",
       "lodash@>=4.0.0 <=4.17.23": ">=4.18.0",
-      "lodash@<=4.17.23": ">=4.18.0"
+      "lodash@<=4.17.23": ">=4.18.0",
+      "@hono/node-server@<1.19.13": ">=1.19.13"
     }
   },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
     "@grammyjs/conversations": "^2.1.1",
-    "@prisma/adapter-pg": "^7.6.0",
-    "@prisma/client": "7.6.0",
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "7.7.0",
     "chrono-node": "^2.9.0",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
@@ -84,7 +85,7 @@
     "metascraper-url": "^5.50.0",
     "node-cron": "^4.2.1",
     "pino": "^10.3.1",
-    "prisma": "7.6.0",
+    "prisma": "7.7.0",
     "puppeteer-core": "^24.40.0"
   },
   "devDependencies": {
@@ -110,6 +111,6 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.0"
+    "typescript-eslint": "^8.58.1"
   }
 }
