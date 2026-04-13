@@ -74,7 +74,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.2",
-    "got": "^15.0.1",
+    "got": "^15.0.2",
     "grammy": "^1.42.0",
     "ical-generator": "^10.1.0",
     "metascraper": "^5.50.0",
@@ -111,6 +111,6 @@
     "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
-    "typescript-eslint": "^8.58.1"
+    "typescript-eslint": "^8.58.2"
   }
 }
