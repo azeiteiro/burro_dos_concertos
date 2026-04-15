@@ -1,4 +1,4 @@
-import { Bot } from "grammy";
+import { Bot, GrammyError } from "grammy";
 import {
   fetchAllUserProfilePhotos,
   scheduleProfilePhotoSync,
@@ -7,9 +7,20 @@ import { prisma } from "#/config/db";
 import cron from "node-cron";
 
 // Mock Grammy Bot API
-jest.mock("grammy", () => ({
-  Bot: jest.fn(),
-}));
+jest.mock("grammy", () => {
+  class MockGrammyError extends Error {
+    description: string;
+    constructor(description: string) {
+      super(description);
+      this.description = description;
+      this.name = "GrammyError";
+    }
+  }
+  return {
+    Bot: jest.fn(),
+    GrammyError: MockGrammyError,
+  };
+});
 
 // Mock Prisma
 jest.mock("#/config/db", () => ({
@@ -132,7 +143,9 @@ describe("ProfilePhotoService", () => {
       ];
 
       (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers);
-      mockBot.api.getUserProfilePhotos.mockRejectedValue(new Error("Bot was blocked by the user"));
+      mockBot.api.getUserProfilePhotos.mockRejectedValue(
+        new GrammyError("Forbidden: bot was blocked by the user")
+      );
       (prisma.user.update as jest.Mock).mockResolvedValue({});
 
       const result = await fetchAllUserProfilePhotos(mockBot);
