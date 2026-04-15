@@ -1,4 +1,4 @@
-import { Bot, Api } from "grammy";
+import { Bot, Api, GrammyError } from "grammy";
 import { prisma } from "#/config/db";
 import { User } from "@prisma/client";
 import logger from "#/config/logger";
@@ -7,26 +7,36 @@ import cron from "node-cron";
 interface SyncResult {
   success: number;
   failed: number;
+  skipped: number;
   errors: string[];
 }
 
 /**
- * Fetches single user's profile photo from Telegram
- * @returns Photo URL or null if no photo available
+ * Helper to add delay between API calls
  */
-async function fetchUserProfilePhoto(botOrApi: Bot | Api, user: User): Promise<string | null> {
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Fetches single user's profile photo from Telegram
+ * @returns Photo URL string, null if confirmed no photo, or undefined if error
+ */
+async function fetchUserProfilePhoto(
+  botOrApi: Bot | Api,
+  user: User
+): Promise<string | null | undefined> {
   try {
     // Support both Bot instance and Api instance
     const api = "api" in botOrApi ? botOrApi.api : botOrApi;
 
     // Get user's profile photos (limit 1 = most recent)
+    // Convert BigInt to String to avoid precision loss in JS numbers
     const photos = await api.getUserProfilePhotos(Number(user.telegramId), {
       limit: 1,
     });
 
     // Check if user has any photos
     if (!photos.photos || photos.photos.length === 0) {
-      logger.info(`User ${user.id} has no profile photo`);
+      logger.debug(`User ${user.id} has no profile photo`);
       return null;
     }
 
@@ -49,15 +59,27 @@ async function fetchUserProfilePhoto(botOrApi: Bot | Api, user: User): Promise<s
 
     // Construct full URL using environment variable
     const photoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
-    logger.info(`Fetched photo for user ${user.id}: ${photoUrl}`);
+    logger.debug(`Fetched photo for user ${user.id}: ${photoUrl}`);
 
     return photoUrl;
   } catch (error) {
+    // Distinguish between "Bot blocked" and other transient errors
+    const isBotBlocked =
+      error instanceof GrammyError &&
+      (error.description.includes("blocked") || error.description.includes("deactivated"));
+
+    if (isBotBlocked) {
+      logger.info(`User ${user.id} has blocked the bot, treating as no photo`);
+      return null;
+    }
+
     logger.error(
       { userId: user.id, error: error instanceof Error ? error.message : String(error) },
       `Failed to fetch photo for user ${user.id}`
     );
-    return null;
+
+    // Return undefined to indicate a transient error (don't update DB)
+    return undefined;
   }
 }
 
@@ -72,6 +94,7 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
   const result: SyncResult = {
     success: 0,
     failed: 0,
+    skipped: 0,
     errors: [],
   };
 
@@ -88,13 +111,21 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
       try {
         const photoUrl = await fetchUserProfilePhoto(botOrApi, user);
 
-        // Update user's profile photo URL (null if no photo)
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { profilePhotoUrl: photoUrl },
-        });
+        // Only update if we have a definitive result (URL or Null)
+        // If undefined, it was a transient error, so we skip and keep the old URL
+        if (photoUrl !== undefined) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { profilePhotoUrl: photoUrl },
+          });
+          result.success++;
+        } else {
+          result.skipped++;
+          logger.warn(`Skipped updating user ${user.id} due to transient error`);
+        }
 
-        result.success++;
+        // Rate limiting: small delay between users to avoid Telegram limits
+        await delay(200);
       } catch (error) {
         result.failed++;
         const errorMsg = `User ${user.id} (${user.username || user.firstName}): ${error instanceof Error ? error.message : "Unknown error"}`;
@@ -104,7 +135,7 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
     }
 
     logger.info(
-      `Profile photo sync complete. Success: ${result.success}, Failed: ${result.failed}`
+      `Profile photo sync complete. Success: ${result.success}, Failed: ${result.failed}, Skipped: ${result.skipped}`
     );
 
     return result;
