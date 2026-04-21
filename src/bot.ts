@@ -59,7 +59,9 @@ bot.use(createConversation(announceConversation));
 
 // 🚫 Block group messages - only allow private chats
 bot.use(async (ctx, next) => {
-  if (ctx.chat?.type !== "private") {
+  // Allow updates that don't have a chat property (like poll_answer)
+  // or updates that are in private chats
+  if (ctx.chat && ctx.chat.type !== "private") {
     // Silently ignore all group/channel messages
     return;
   }

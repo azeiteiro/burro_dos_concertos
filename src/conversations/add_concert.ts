@@ -41,7 +41,7 @@ async function saveConcert(
 
       logAction(dbUserId, `Added concert "${artistName}" at ${venue}`);
 
-      // Fetch artist image (non-blocking)
+      // Fetch artist image
       try {
         await updateConcertArtistImage(concert.id);
       } catch (error) {
@@ -49,7 +49,12 @@ async function saveConcert(
         // Don't fail concert creation if image fetch fails
       }
 
-      return concert;
+      // Fetch the updated concert to include artist image fields
+      const updatedConcert = await prisma.concert.findUnique({
+        where: { id: concert.id },
+      });
+
+      return updatedConcert || concert;
     } catch (err) {
       console.error("Failed to create concert:", err);
       throw err;

@@ -22,43 +22,42 @@ export function useConcerts({ isReady, telegramUser }: UseConcertsProps) {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Load user and concerts
-  const loadUserAndConcerts = async () => {
-    if (!isReady) return;
-
-    try {
-      setLoading(true);
-
-      // For local development: use mock user ID from env variable
-      const mockUserId = import.meta.env.VITE_MOCK_USER_ID;
-
-      let internalUserId: number | undefined;
-
-      if (telegramUser) {
-        // Production: Get internal user ID from Telegram ID
-        const userData = await getUserByTelegramId(telegramUser.id);
-        internalUserId = userData.id;
-      } else if (mockUserId) {
-        // Local development with mock user
-        internalUserId = parseInt(mockUserId);
-      }
-
-      setUserId(internalUserId);
-
-      // Fetch concerts (with or without user responses)
-      const data = await fetchUpcomingConcerts(internalUserId);
-      setConcerts(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load concerts");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Initial load
   useEffect(() => {
+    // Load user and concerts
+    const loadUserAndConcerts = async () => {
+      if (!isReady) return;
+
+      try {
+        setLoading(true);
+
+        // For local development: use mock user ID from env variable
+        const mockUserId = import.meta.env.VITE_MOCK_USER_ID;
+
+        let internalUserId: number | undefined;
+
+        if (telegramUser) {
+          // Production: Get internal user ID from Telegram ID
+          const userData = await getUserByTelegramId(telegramUser.id);
+          internalUserId = userData.id;
+        } else if (mockUserId) {
+          // Local development with mock user
+          internalUserId = parseInt(mockUserId);
+        }
+
+        setUserId(internalUserId);
+
+        // Fetch concerts (with or without user responses)
+        const data = await fetchUpcomingConcerts(internalUserId);
+        setConcerts(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load concerts");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadUserAndConcerts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, telegramUser]);
 
   // Refetch when app becomes visible (Telegram Mini App lifecycle)
