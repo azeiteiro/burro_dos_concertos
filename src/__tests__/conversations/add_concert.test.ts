@@ -10,8 +10,13 @@ jest.mock("#/config/db", () => ({
   prisma: {
     concert: {
       create: jest.fn(),
+      findUnique: jest.fn(),
     },
   },
+}));
+
+jest.mock("#/services/artistImageService", () => ({
+  updateConcertArtistImage: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock("#/notifications/helpers", () => ({
@@ -25,6 +30,8 @@ describe("addConcertConversation", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (prisma.concert.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
 
     mockConversation = {
       external: jest.fn((fn: any) => fn()),

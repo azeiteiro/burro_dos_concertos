@@ -174,9 +174,17 @@ export async function notifyNewConcert(ctx: Context, concert: Concert) {
 
     const message = `🎶 New concert added!\n\n🎤 **${artistEscaped}** at *${venueEscaped}*\n📅 ${dateStr}${timeStr}${urlStr}${notesStr}`;
 
-    await ctx.api.sendMessage(groupId, message, {
-      parse_mode: "Markdown",
-    });
+    // If we have an artist image, send it as a photo with the message as caption
+    if (concert.artistImageUrl) {
+      await ctx.api.sendPhoto(groupId, concert.artistImageUrl, {
+        caption: message,
+        parse_mode: "Markdown",
+      });
+    } else {
+      await ctx.api.sendMessage(groupId, message, {
+        parse_mode: "Markdown",
+      });
+    }
 
     logger.info(`Sent new concert notification for "${concert.artistName}" at ${concert.venue}`);
 
