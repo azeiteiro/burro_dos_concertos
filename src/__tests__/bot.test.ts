@@ -1,3 +1,15 @@
+// Mock AWS SDK (required by r2Storage.ts)
+jest.mock("@aws-sdk/client-s3", () => ({
+  S3Client: jest.fn(() => ({
+    send: jest.fn(),
+  })),
+  PutObjectCommand: jest.fn((input) => input),
+  HeadObjectCommand: jest.fn((input) => input),
+}));
+
+// Mock got (required by profilePhotoService.ts)
+jest.mock("got", () => jest.fn());
+
 describe("bot.ts", () => {
   beforeAll(() => {
     jest.spyOn(console, "log").mockImplementation(() => {});

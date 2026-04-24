@@ -1,3 +1,15 @@
+// Mock AWS SDK (required by r2Storage.ts which is imported indirectly)
+jest.mock("@aws-sdk/client-s3", () => ({
+  S3Client: jest.fn(() => ({
+    send: jest.fn(),
+  })),
+  PutObjectCommand: jest.fn((input) => input),
+  HeadObjectCommand: jest.fn((input) => input),
+}));
+
+// Mock got (required by profilePhotoService.ts)
+jest.mock("got", () => jest.fn());
+
 import { Bot } from "grammy";
 import * as concerts from "#/commands/concerts/add_concert";
 import * as deleteConcert from "#/commands/concerts/delete_concert";
