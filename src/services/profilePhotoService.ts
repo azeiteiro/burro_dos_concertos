@@ -3,6 +3,8 @@ import { prisma } from "#/config/db";
 import { User } from "@prisma/client";
 import logger from "#/config/logger";
 import cron from "node-cron";
+import { getR2Storage } from "./r2Storage";
+import got from "got";
 
 interface SyncResult {
   success: number;
@@ -17,19 +19,64 @@ interface SyncResult {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
+ * Download image from Telegram servers
+ * @param fileUrl - Full Telegram file URL
+ * @returns Image buffer
+ */
+async function downloadImageFromTelegram(fileUrl: string): Promise<Buffer> {
+  try {
+    logger.debug({ fileUrl }, "Downloading image from Telegram");
+
+    const response = await got(fileUrl, {
+      responseType: "buffer",
+      timeout: {
+        request: 10000, // 10 second timeout
+      },
+    });
+
+    const imageBuffer = Buffer.from(response.body);
+    logger.debug({ size: imageBuffer.length }, "Successfully downloaded image");
+    return imageBuffer;
+  } catch (error) {
+    logger.error({ error, fileUrl }, "Failed to download image from Telegram");
+    throw error;
+  }
+}
+
+/**
+ * Determine content type from file extension
+ * @param filePath - File path from Telegram (e.g., "photos/file.jpg")
+ * @returns MIME type
+ */
+function getContentType(filePath: string): string {
+  const ext = filePath.split(".").pop()?.toLowerCase();
+
+  switch (ext) {
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "webp":
+      return "image/webp";
+    default:
+      return "image/jpeg"; // Default fallback
+  }
+}
+
+/**
  * Fetches single user's profile photo from Telegram
- * @returns Photo URL string, null if confirmed no photo, or undefined if error
+ * @returns Object with url and fileId, or undefined if error
  */
 async function fetchUserProfilePhoto(
   botOrApi: Bot | Api,
   user: User
-): Promise<string | null | undefined> {
+): Promise<{ url: string | null; fileId: string | null } | undefined> {
   try {
     // Support both Bot instance and Api instance
     const api = "api" in botOrApi ? botOrApi.api : botOrApi;
 
     // Get user's profile photos (limit 1 = most recent)
-    // Convert BigInt to String to avoid precision loss in JS numbers
     const photos = await api.getUserProfilePhotos(Number(user.telegramId), {
       limit: 1,
     });
@@ -37,7 +84,7 @@ async function fetchUserProfilePhoto(
     // Check if user has any photos
     if (!photos.photos || photos.photos.length === 0) {
       logger.debug(`User ${user.id} has no profile photo`);
-      return null;
+      return { url: null, fileId: null };
     }
 
     // Get the smallest photo size (first element is smallest)
@@ -46,22 +93,43 @@ async function fetchUserProfilePhoto(
 
     if (!smallestPhoto) {
       logger.warn(`User ${user.id} photo array is empty`);
-      return null;
+      return { url: null, fileId: null };
     }
 
-    // Get file info to construct URL
+    const currentFileId = smallestPhoto.file_id;
+
+    // Check if file_id changed (if same, skip download/upload)
+    if (user.profilePhotoFileId === currentFileId && user.profilePhotoUrl) {
+      logger.debug(
+        { userId: user.id, fileId: currentFileId },
+        "Profile photo unchanged, skipping upload"
+      );
+      return { url: user.profilePhotoUrl, fileId: currentFileId };
+    }
+
+    // Get file info to download
     const file = await api.getFile(smallestPhoto.file_id);
 
     if (!file.file_path) {
       logger.warn(`User ${user.id} file has no file_path`);
-      return null;
+      return { url: null, fileId: null };
     }
 
-    // Construct full URL using environment variable
-    const photoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
-    logger.debug(`Fetched photo for user ${user.id}: ${photoUrl}`);
+    // Download image from Telegram
+    const telegramUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
+    const imageBuffer = await downloadImageFromTelegram(telegramUrl);
 
-    return photoUrl;
+    // Upload to R2
+    const r2 = getR2Storage();
+    const fileExtension = file.file_path.split(".").pop() || "jpg";
+    const r2Key = `profile-photos/${user.id}.${fileExtension}`;
+    const contentType = getContentType(file.file_path);
+
+    const r2Url = await r2.uploadImage(r2Key, imageBuffer, contentType);
+
+    logger.debug({ userId: user.id, r2Url, fileId: currentFileId }, "Uploaded photo to R2");
+
+    return { url: r2Url, fileId: currentFileId };
   } catch (error) {
     // Distinguish between "Bot blocked" and other transient errors
     const isBotBlocked =
@@ -70,12 +138,12 @@ async function fetchUserProfilePhoto(
 
     if (isBotBlocked) {
       logger.info(`User ${user.id} has blocked the bot, treating as no photo`);
-      return null;
+      return { url: null, fileId: null };
     }
 
     logger.error(
       { userId: user.id, error: error instanceof Error ? error.message : String(error) },
-      `Failed to fetch photo for user ${user.id}`
+      `Failed to fetch/upload photo for user ${user.id}`
     );
 
     // Return undefined to indicate a transient error (don't update DB)
@@ -109,14 +177,17 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
     // Process each user
     for (const user of users) {
       try {
-        const photoUrl = await fetchUserProfilePhoto(botOrApi, user);
+        const photoResult = await fetchUserProfilePhoto(botOrApi, user);
 
-        // Only update if we have a definitive result (URL or Null)
+        // Only update if we have a definitive result
         // If undefined, it was a transient error, so we skip and keep the old URL
-        if (photoUrl !== undefined) {
+        if (photoResult !== undefined) {
           await prisma.user.update({
             where: { id: user.id },
-            data: { profilePhotoUrl: photoUrl },
+            data: {
+              profilePhotoUrl: photoResult.url,
+              profilePhotoFileId: photoResult.fileId,
+            },
           });
           result.success++;
         } else {
