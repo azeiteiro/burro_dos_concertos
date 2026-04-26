@@ -12,6 +12,8 @@ primary_region = "lhr"
   SUPER_ADMIN_ID = "144133589"
   API_PORT = "3001"
   SERVE_STATIC = "true"
+  R2_PUBLIC_URL = "https://cnd.danielazeiteiro.me"
+  R2_PATH_PREFIX = "production"
 
 # BOT_TOKEN set via: fly secrets set BOT_TOKEN=xxx
 
