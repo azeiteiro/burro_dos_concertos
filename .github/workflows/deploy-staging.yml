@@ -58,7 +58,7 @@ jobs:
           username: ${{ secrets.DO_STAGING_USER }}
           key: ${{ secrets.DO_STAGING_SSH_KEY }}
           port: ${{ secrets.DO_STAGING_PORT || 22 }}
-          envs: BROWSERLESS_API_KEY,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET
+          envs: BROWSERLESS_API_KEY,SPOTIFY_CLIENT_ID,SPOTIFY_CLIENT_SECRET,R2_ACCOUNT_ID,R2_ACCESS_KEY_ID,R2_SECRET_ACCESS_KEY,R2_BUCKET_NAME,R2_PUBLIC_URL
           script: |
             cd ${{ secrets.DO_STAGING_APP_PATH }}
 
@@ -71,6 +71,21 @@ jobs:
 
             sed -i '/^SPOTIFY_CLIENT_SECRET=/d' .env 2>/dev/null || true
             echo "SPOTIFY_CLIENT_SECRET=$SPOTIFY_CLIENT_SECRET" >> .env
+
+            sed -i '/^R2_ACCOUNT_ID=/d' .env 2>/dev/null || true
+            echo "R2_ACCOUNT_ID=$R2_ACCOUNT_ID" >> .env
+
+            sed -i '/^R2_ACCESS_KEY_ID=/d' .env 2>/dev/null || true
+            echo "R2_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID" >> .env
+
+            sed -i '/^R2_SECRET_ACCESS_KEY=/d' .env 2>/dev/null || true
+            echo "R2_SECRET_ACCESS_KEY=$R2_SECRET_ACCESS_KEY" >> .env
+
+            sed -i '/^R2_BUCKET_NAME=/d' .env 2>/dev/null || true
+            echo "R2_BUCKET_NAME=$R2_BUCKET_NAME" >> .env
+
+            sed -i '/^R2_PUBLIC_URL=/d' .env 2>/dev/null || true
+            echo "R2_PUBLIC_URL=$R2_PUBLIC_URL" >> .env
 
             git fetch origin
             git reset --hard origin/master
@@ -98,3 +113,8 @@ jobs:
           BROWSERLESS_API_KEY: ${{ secrets.BROWSERLESS_API_KEY }}
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
