@@ -50,15 +50,6 @@ class R2StorageService {
       // Prepend path prefix if configured
       const fullKey = this.pathPrefix ? `${this.pathPrefix}/${key}` : key;
 
-      logger.debug(
-        {
-          originalKey: key,
-          pathPrefix: this.pathPrefix,
-          fullKey: fullKey,
-        },
-        "R2 upload key construction"
-      );
-
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: fullKey,
