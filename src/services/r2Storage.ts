@@ -7,12 +7,14 @@ interface R2Config {
   secretAccessKey: string;
   bucketName: string;
   publicUrl: string;
+  pathPrefix?: string;
 }
 
 class R2StorageService {
   private client: S3Client;
   private bucketName: string;
   private publicUrl: string;
+  private pathPrefix: string;
 
   constructor(config: R2Config) {
     const endpoint = `https://${config.accountId}.r2.cloudflarestorage.com`;
@@ -28,8 +30,12 @@ class R2StorageService {
 
     this.bucketName = config.bucketName;
     this.publicUrl = config.publicUrl;
+    this.pathPrefix = config.pathPrefix || "";
 
-    logger.info({ bucketName: this.bucketName }, "R2 Storage Service initialized");
+    logger.info(
+      { bucketName: this.bucketName, pathPrefix: this.pathPrefix },
+      "R2 Storage Service initialized"
+    );
   }
 
   /**
@@ -41,17 +47,20 @@ class R2StorageService {
    */
   async uploadImage(key: string, buffer: Buffer, contentType: string): Promise<string> {
     try {
+      // Prepend path prefix if configured
+      const fullKey = this.pathPrefix ? `${this.pathPrefix}/${key}` : key;
+
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
-        Key: key,
+        Key: fullKey,
         Body: buffer,
         ContentType: contentType,
       });
 
       await this.client.send(command);
 
-      const publicUrl = `${this.publicUrl}/${key}`;
-      logger.info({ key, publicUrl }, "Successfully uploaded image to R2");
+      const publicUrl = `${this.publicUrl}/${fullKey}`;
+      logger.info({ key: fullKey, publicUrl }, "Successfully uploaded image to R2");
 
       return publicUrl;
     } catch (error) {
@@ -66,10 +75,13 @@ class R2StorageService {
    * @returns true if exists, false otherwise
    */
   async imageExists(key: string): Promise<boolean> {
+    // Prepend path prefix if configured
+    const fullKey = this.pathPrefix ? `${this.pathPrefix}/${key}` : key;
+
     try {
       const command = new HeadObjectCommand({
         Bucket: this.bucketName,
-        Key: key,
+        Key: fullKey,
       });
 
       await this.client.send(command);
@@ -79,7 +91,7 @@ class R2StorageService {
       if (err.name === "NotFound" || err.$metadata?.httpStatusCode === 404) {
         return false;
       }
-      logger.error({ error, key }, "Error checking if image exists in R2");
+      logger.error({ error, key: fullKey }, "Error checking if image exists in R2");
       throw error;
     }
   }
@@ -96,10 +108,19 @@ export function getR2Storage(): R2StorageService {
       secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
       bucketName: process.env.R2_BUCKET_NAME!,
       publicUrl: process.env.R2_PUBLIC_URL!,
+      pathPrefix: process.env.R2_PATH_PREFIX,
     };
 
-    // Validate required env vars
-    const missing = Object.entries(config)
+    // Validate required env vars (pathPrefix is optional)
+    const requiredConfig = {
+      accountId: config.accountId,
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+      bucketName: config.bucketName,
+      publicUrl: config.publicUrl,
+    };
+
+    const missing = Object.entries(requiredConfig)
       .filter(([, value]) => !value)
       .map(([key]) => key);
 
