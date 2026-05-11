@@ -1,6 +1,13 @@
 packages:
   - web
 
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  re2: true
+  unrs-resolver: true
+
 ignoredBuiltDependencies:
   - esbuild
   - puppeteer
