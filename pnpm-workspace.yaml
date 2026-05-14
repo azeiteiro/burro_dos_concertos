@@ -7,19 +7,14 @@ allowBuilds:
   prisma: true
   re2: true
   unrs-resolver: true
+  '@prisma/client': true
+  puppeteer: false
 
-ignoredBuiltDependencies:
-  - esbuild
-  - puppeteer
-  - re2
-
-onlyBuiltDependencies:
-  - '@prisma/client'
-  - '@prisma/engines'
-  - prisma
-  - unrs-resolver
+minimumReleaseAgeExclude:
+  - '@hono/node-server@1.19.13'
 
 overrides:
+  '@hono/node-server@<1.19.13': ^1.19.13
   hono@<4.11.10: '>=4.11.10'
   hono@<4.11.7: '>=4.11.7'
   lodash@>=4.0.0 <=4.17.22: '>=4.17.23'

@@ -9,7 +9,7 @@ const config: Config = {
   setupFilesAfterEnv: ["<rootDir>/src/__tests__/setup.ts"],
 
   // Coverage settings
-  collectCoverage: true,
+  collectCoverage: false, // Disabled due to pnpm 11 + minimatch v10 incompatibility with test-exclude@6
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
     "!src/__tests__/**",
@@ -34,6 +34,15 @@ const config: Config = {
     "^#/(.*)$": "<rootDir>/src/$1",
     "^node-cron$": "<rootDir>/src/__tests__/mocks/node-cron.ts",
   },
+  transform: {
+    "^.+\\.tsx?$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
+  },
+  extensionsToTreatAsEsm: [".ts"],
 };
 
 export default config;

@@ -27,8 +27,9 @@
     "clean": "rimraf dist",
     "build": "pnpm clean && tsc && tsc-alias",
     "start": "node dist/bot.js",
-    "test": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage",
-    "test:ci": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage --ci",
+    "test": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest",
+    "test:coverage": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --coverage",
+    "test:ci": "NODE_OPTIONS='--localstorage-file=./jest-storage' jest --ci",
     "test:watch": "jest --watch",
     "format": "prettier --write \"src/**/*\" \"web/src/**/*\"",
     "lint": "eslint \"src/**/*.{js,ts}\"",
@@ -42,25 +43,7 @@
       "prettier --write"
     ]
   },
-  "pnpm": {
-    "overrides": {
-      "@typescript-eslint/typescript-estree>minimatch": "^9.0.7",
-      "lodash@>=4.0.0 <=4.17.22": ">=4.17.23",
-      "hono@<4.11.7": ">=4.11.7",
-      "hono@<4.11.10": ">=4.11.10",
-      "yauzl@<3.2.1": ">=3.2.1",
-      "flatted@<=3.4.1": ">=3.4.2",
-      "effect@<3.20.0": ">=3.20.0",
-      "yaml@>=2.0.0 <2.8.3": ">=2.8.3",
-      "picomatch@>=4.0.0 <4.0.4": ">=4.0.4",
-      "brace-expansion@<5.0.5": ">=5.0.5",
-      "handlebars@>=4.0.0 <4.7.9": ">=4.7.9",
-      "path-to-regexp@>=8.0.0 <8.4.0": ">=8.4.0",
-      "@hono/node-server": "1.19.13",
-      "@prisma/dev>@hono/node-server": "1.19.13"
-    }
-  },
-  "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
+  "packageManager": "pnpm@11.1.1",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1045.0",
     "@grammyjs/conversations": "^2.1.1",
@@ -82,6 +65,7 @@
     "metascraper-image": "^5.50.1",
     "metascraper-title": "^5.50.1",
     "metascraper-url": "^5.50.1",
+    "minimatch": "^9.0.5",
     "node-cron": "^4.2.1",
     "pino": "^10.3.1",
     "prisma": "7.8.0",
