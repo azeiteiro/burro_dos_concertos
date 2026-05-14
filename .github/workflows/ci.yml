@@ -50,6 +50,7 @@ jobs:
         run: cd web && npm run build
 
       - name: Upload Backend coverage to Coveralls
+        continue-on-error: true  # Coverage disabled due to pnpm 11 + minimatch incompatibility
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -66,6 +67,7 @@ jobs:
           parallel: true
 
       - name: Finish Coveralls
+        continue-on-error: true  # Coverage disabled due to pnpm 11 + minimatch incompatibility
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
