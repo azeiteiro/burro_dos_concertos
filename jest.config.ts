@@ -33,6 +33,7 @@ const config: Config = {
   moduleNameMapper: {
     "^#/(.*)$": "<rootDir>/src/$1",
     "^node-cron$": "<rootDir>/src/__tests__/mocks/node-cron.ts",
+    "^puppeteer-core$": "<rootDir>/src/__tests__/mocks/puppeteer-core.ts",
   },
   transform: {
     "^.+\\.tsx?$": [
