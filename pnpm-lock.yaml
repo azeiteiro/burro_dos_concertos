@@ -55,8 +55,8 @@ importers:
         specifier: ^1.43.0
         version: 1.43.0
       ical-generator:
-        specifier: ^10.2.0
-        version: 10.2.0(@types/node@25.9.1)
+        specifier: ^11.0.0
+        version: 11.0.0(@types/node@25.9.1)
       metascraper:
         specifier: ^5.50.3
         version: 5.50.3(@noble/hashes@1.8.0)
@@ -173,8 +173,8 @@ importers:
         specifier: ^4.3.0
         version: 4.3.0
       ical-generator:
-        specifier: ^10.2.0
-        version: 10.2.0(@types/node@25.9.1)
+        specifier: ^11.0.0
+        version: 11.0.0(@types/node@25.9.1)
       react:
         specifier: ^19.2.6
         version: 19.2.6
@@ -3141,9 +3141,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  ical-generator@10.2.0:
-    resolution: {integrity: sha512-XR5FsiDWCsz5MwBwMA/sQqR3A9H240xkXIeXOabV7uNAiieP+TA9rleVvlwPLRXMz+CXME8cGuDd7cdnE5At6w==}
-    engines: {node: 20 || 22 || >=24}
+  ical-generator@11.0.0:
+    resolution: {integrity: sha512-OScZbXduIbjqtJzq0WLyPpAuKnc106+l28wszD+Wi2O9jXn76NVBfr4Ksv2XFyQn4JNZ9vWr5xAac0uT/FhVag==}
+    engines: {node: 22 || >=24.0.0}
     peerDependencies:
       '@touch4it/ical-timezones': '>=1.6.0'
       '@types/luxon': '>= 1.26.0'
@@ -4257,8 +4257,8 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-is@19.2.6:
-    resolution: {integrity: sha512-XjBR15BhXuylgWGuslhDKqlSayuqvqBX91BP8pauG8kd1zY8kotkNWbXksTCNRarse4kuGbe2kIY05ARtwNIvw==}
+  react-is@19.2.7:
+    resolution: {integrity: sha512-kZFnouyVv7eP/Phmrlo9FK+zcAdriZJvzxXHF1Sl1P377WSGe2G/JxVolhTrB/jeV47lKImhNUsijjHAAbcl/A==}
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -8266,7 +8266,7 @@ snapshots:
 
   husky@9.1.7: {}
 
-  ical-generator@10.2.0(@types/node@25.9.1):
+  ical-generator@11.0.0(@types/node@25.9.1):
     optionalDependencies:
       '@types/node': 25.9.1
 
@@ -9380,7 +9380,7 @@ snapshots:
       '@jest/schemas': 30.4.1
       ansi-styles: 5.2.0
       react-is-18: react-is@18.3.1
-      react-is-19: react-is@19.2.6
+      react-is-19: react-is@19.2.7
 
   pretty-ms@7.0.1:
     dependencies:
@@ -9489,7 +9489,7 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-is@19.2.6: {}
+  react-is@19.2.7: {}
 
   react-remove-scroll-bar@2.3.8(@types/react@19.2.15)(react@19.2.6):
     dependencies:

@@ -58,7 +58,7 @@
     "express-rate-limit": "^8.5.2",
     "got": "^15.0.5",
     "grammy": "^1.43.0",
-    "ical-generator": "^10.2.0",
+    "ical-generator": "^11.0.0",
     "metascraper": "^5.50.3",
     "metascraper-date": "^5.50.1",
     "metascraper-description": "^5.50.1",
