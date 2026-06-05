@@ -43,9 +43,9 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@11.3.0+sha512.2c403d6594527287672b1f7056343a1f7c3634036a67ffabfcc2b3d7595d843768f8787148d1b57cf7956c90606bbd192857c363af19e96d2d0ec9ec5741d215",
+  "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1060.0",
+    "@aws-sdk/client-s3": "^3.1061.0",
     "@grammyjs/conversations": "^2.1.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "7.8.0",
@@ -58,7 +58,7 @@
     "express-rate-limit": "^8.5.2",
     "got": "^15.0.5",
     "grammy": "^1.43.0",
-    "ical-generator": "^10.2.0",
+    "ical-generator": "^11.0.0",
     "metascraper": "^5.50.3",
     "metascraper-date": "^5.50.1",
     "metascraper-description": "^5.50.1",
