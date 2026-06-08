@@ -45,7 +45,7 @@
   },
   "packageManager": "pnpm@11.5.2+sha512.71c631e382066efc25625d5cf029075de07b61b37f6e27350fbd84b1bda5864c8c1967adc280776b45c30a715c0359a3be08fef42d5bb09e2b99029979692916",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1061.0",
+    "@aws-sdk/client-s3": "^3.1064.0",
     "@grammyjs/conversations": "^2.1.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "7.8.0",
@@ -76,7 +76,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "@types/supertest": "^7.2.0",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
@@ -94,6 +94,6 @@
     "tsc-alias": "^1.8.17",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.1"
+    "typescript-eslint": "^8.61.0"
   }
 }
