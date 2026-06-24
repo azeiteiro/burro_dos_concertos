@@ -34,6 +34,8 @@ const config: Config = {
     "^#/(.*)$": "<rootDir>/src/$1",
     "^node-cron$": "<rootDir>/src/__tests__/mocks/node-cron.ts",
     "^puppeteer-core$": "<rootDir>/src/__tests__/mocks/puppeteer-core.ts",
+    "^metascraper$": "<rootDir>/src/__tests__/mocks/metascraper.ts",
+    "^metascraper-(.+)$": "<rootDir>/src/__tests__/mocks/metascraper-$1.ts",
   },
   transform: {
     "^.+\\.tsx?$": [
