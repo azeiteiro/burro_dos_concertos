@@ -45,7 +45,7 @@
   },
   "packageManager": "pnpm@11.18.0",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1104.0",
+    "@aws-sdk/client-s3": "^3.1112.0",
     "@grammyjs/conversations": "^2.1.1",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "7.9.1",
@@ -59,17 +59,17 @@
     "got": "^15.1.0",
     "grammy": "^1.45.1",
     "ical-generator": "^11.1.0",
-    "metascraper": "^5.53.0",
-    "metascraper-date": "^5.53.0",
-    "metascraper-description": "^5.53.0",
-    "metascraper-image": "^5.53.0",
-    "metascraper-title": "^5.53.0",
-    "metascraper-url": "^5.53.0",
+    "metascraper": "^5.56.2",
+    "metascraper-date": "^5.56.2",
+    "metascraper-description": "^5.56.2",
+    "metascraper-image": "^5.56.2",
+    "metascraper-title": "^5.56.2",
+    "metascraper-url": "^5.56.2",
     "minimatch": "^10.2.6",
     "node-cron": "^4.6.0",
     "pino": "^10.3.1",
     "prisma": "7.9.1",
-    "puppeteer-core": "^25.7.0"
+    "puppeteer-core": "^25.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -91,7 +91,7 @@
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
-    "tsc-alias": "^1.9.1",
+    "tsc-alias": "^1.9.2",
     "tsx": "^4.23.12",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.67.0"
