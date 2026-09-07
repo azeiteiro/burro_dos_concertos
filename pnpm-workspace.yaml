@@ -9,6 +9,7 @@ allowBuilds:
   unrs-resolver: true
   '@prisma/client': true
   puppeteer: false
+  '@parcel/watcher': true
 
 minimumReleaseAgeExclude:
   - '@hono/node-server@1.19.13'
@@ -29,3 +30,5 @@ overrides:
   js-yaml@>=4.0.0 <4.3.1: ^4.3.1
   lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
   minimatch@<10.2.1: '>=10.2.1'
+  mysql2@<3.22.0: ^3.22.0
+  mysql2@<=3.23.0: ^3.23.1
