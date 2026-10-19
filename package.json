@@ -68,7 +68,7 @@
     "minimatch": "^10.2.6",
     "node-cron": "^4.6.0",
     "pino": "^10.4.0",
-    "prisma": "7.10.0",
+    "prisma": "7.10.1",
     "puppeteer-core": "^25.14.0"
   },
   "devDependencies": {
