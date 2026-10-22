@@ -10,26 +10,30 @@ if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
 
-const isProd = process.env.NODE_ENV === "production";
+const env = process.env.NODE_ENV;
+const isProd = env === "production";
+// pino-pretty is a dev dependency: only use it for local development and tests
+const usePretty = !env || env === "development" || env === "test";
 
 const logger = pino({
   level: isProd ? "info" : "debug",
-  transport: isProd
+  transport: usePretty
     ? {
-        targets: [
-          {
-            target: "pino/file",
-            options: { destination: path.join(logsDir, "app.log") },
-          },
-        ],
-      }
-    : {
         target: "pino-pretty",
         options: {
           colorize: true,
           translateTime: "SYS:standard",
           ignore: "pid,hostname",
         },
+      }
+    : {
+        targets: [
+          {
+            target: "pino/file",
+            options: { destination: path.join(logsDir, "app.log") },
+          },
+          { target: "pino/file", options: { destination: 1 } },
+        ],
       },
 });
 
