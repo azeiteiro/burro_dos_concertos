@@ -56,14 +56,19 @@ ENV NODE_ENV=production
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml prisma.config.ts ./
 COPY prisma ./prisma
 
-# Fetch only production dependencies to store (faster)
-RUN pnpm fetch --prod
-
-# Install production dependencies using offline mode
-RUN pnpm install --prod --frozen-lockfile --offline
-
-# Generate Prisma client in production (prisma must be in dependencies)
-RUN pnpm exec prisma generate
+# Fetch, install, generate the Prisma client and delete the pnpm store in ONE layer.
+# A rm in a later layer does not shrink the image, so the store must never be
+# written into a layer of its own.
+RUN pnpm fetch --prod \
+ && pnpm install --prod --frozen-lockfile --offline \
+ && pnpm exec prisma generate \
+ && rm -rf \
+    /root/.local/share/pnpm \
+    /root/.npm \
+    /root/.cache \
+    /tmp/* \
+    /app/.pnpm-store \
+    /root/.cache/node/corepack
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
@@ -71,14 +76,7 @@ COPY --from=builder /app/dist ./dist
 # Copy built Mini App from builder
 COPY --from=builder /app/web/dist ./web/dist
 
-# Aggressive cleanup - remove pnpm and all caches
-RUN rm -rf \
-    /root/.local/share/pnpm \
-    /root/.npm \
-    /root/.cache \
-    /tmp/* \
-    /app/.pnpm-store \
-    $(which pnpm) \
-    /root/.cache/node/corepack
+# Remove pnpm itself (tiny, kept last)
+RUN rm -f "$(which pnpm)"
 
 CMD ["node", "dist/bot.js"]
