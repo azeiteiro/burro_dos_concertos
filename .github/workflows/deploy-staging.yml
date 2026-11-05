@@ -1,4 +1,4 @@
-name: Deploy Staging to Digital Ocean
+name: Deploy Staging to NAS
 
 permissions:
   contents: read
