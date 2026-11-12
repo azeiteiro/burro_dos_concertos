@@ -2,6 +2,7 @@ import { Bot, GrammyError } from "grammy";
 import {
   fetchAllUserProfilePhotos,
   scheduleProfilePhotoSync,
+  syncUserProfilePhoto,
 } from "#/services/profilePhotoService";
 import { prisma } from "#/config/db";
 import cron from "node-cron";
@@ -62,6 +63,43 @@ describe("ProfilePhotoService", () => {
       },
       token: "test_bot_token_123",
     } as any;
+  });
+
+  describe("syncUserProfilePhoto", () => {
+    const user = {
+      id: 7,
+      telegramId: BigInt(555),
+      profilePhotoFileId: null,
+      profilePhotoUrl: null,
+    } as any;
+
+    it("stores the R2 url (never the Telegram url containing the bot token)", async () => {
+      const r2Url = "https://test-bucket.example.com/profile-photos/7.jpg";
+      mockBot.api.getUserProfilePhotos.mockResolvedValue({
+        photos: [[{ file_id: "small_7" }]],
+      } as any);
+      mockBot.api.getFile.mockResolvedValue({ file_path: "photos/7.jpg" } as any);
+      (got as unknown as jest.Mock).mockResolvedValue({ body: Buffer.from("img") });
+      (getR2Storage as jest.Mock).mockReturnValue({
+        uploadImage: jest.fn().mockResolvedValue(r2Url),
+      });
+      (prisma.user.update as jest.Mock).mockResolvedValue({});
+
+      await syncUserProfilePhoto(mockBot.api as any, user);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 7 },
+        data: { profilePhotoUrl: r2Url, profilePhotoFileId: "small_7" },
+      });
+    });
+
+    it("leaves the DB untouched on transient errors", async () => {
+      mockBot.api.getUserProfilePhotos.mockRejectedValue(new Error("network"));
+
+      await syncUserProfilePhoto(mockBot.api as any, user);
+
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
   });
 
   describe("fetchAllUserProfilePhotos", () => {

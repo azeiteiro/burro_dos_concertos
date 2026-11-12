@@ -1,5 +1,6 @@
 import startCommand from "#/commands/start";
 import { prisma } from "#/config/db";
+import { syncUserProfilePhoto } from "#/services/profilePhotoService";
 
 jest.mock("#/config/db", () => ({
   prisma: {
@@ -8,20 +9,19 @@ jest.mock("#/config/db", () => ({
 }));
 
 jest.mock("#/config/logger");
+jest.mock("#/services/profilePhotoService", () => ({
+  syncUserProfilePhoto: jest.fn(),
+}));
 
 describe("startCommand", () => {
   let ctx: any;
 
   beforeEach(() => {
-    process.env.BOT_TOKEN = "test_token";
+    jest.clearAllMocks();
     ctx = {
       from: { id: 123, username: "test", first_name: "TestUser", last_name: "User" },
       reply: jest.fn(),
-      t: jest.fn((key) => key), // simple mock for translation
-      api: {
-        getUserProfilePhotos: jest.fn(),
-        getFile: jest.fn(),
-      },
+      api: {},
     };
   });
 
@@ -29,19 +29,13 @@ describe("startCommand", () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
     await startCommand(ctx);
     expect(ctx.reply).toHaveBeenCalledWith("You are already registered!");
+    expect(prisma.user.create).not.toHaveBeenCalled();
   });
 
-  it("creates a new user if not exists", async () => {
+  it("creates a new user without storing any Telegram file URL", async () => {
+    const createdUser = { id: 1 };
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-    (prisma.user.create as jest.Mock).mockResolvedValue({ id: 1 });
-
-    // Mock profile photo API calls
-    ctx.api.getUserProfilePhotos.mockResolvedValue({
-      photos: [[{ file_id: "photo123" }]],
-    });
-    ctx.api.getFile.mockResolvedValue({
-      file_path: "photos/test.jpg",
-    });
+    (prisma.user.create as jest.Mock).mockResolvedValue(createdUser);
 
     await startCommand(ctx);
 
@@ -51,7 +45,6 @@ describe("startCommand", () => {
         username: "test",
         firstName: "TestUser",
         lastName: "User",
-        profilePhotoUrl: "https://api.telegram.org/file/bottest_token/photos/test.jpg",
       },
     });
     expect(ctx.reply).toHaveBeenCalledWith(
@@ -59,11 +52,20 @@ describe("startCommand", () => {
     );
   });
 
+  it("syncs the profile photo through the R2 service after registering", async () => {
+    const createdUser = { id: 1 };
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (prisma.user.create as jest.Mock).mockResolvedValue(createdUser);
+
+    await startCommand(ctx);
+
+    expect(syncUserProfilePhoto).toHaveBeenCalledWith(ctx.api, createdUser);
+  });
+
   it("defaults firstName to 'friend' if missing", async () => {
     ctx.from.first_name = undefined;
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: 1 });
-    ctx.api.getUserProfilePhotos.mockResolvedValue({ photos: [] });
 
     await startCommand(ctx);
 
@@ -72,23 +74,13 @@ describe("startCommand", () => {
     );
   });
 
-  it("handles profile photo fetch failure gracefully", async () => {
+  it("still registers the user if profile photo sync fails", async () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
     (prisma.user.create as jest.Mock).mockResolvedValue({ id: 1 });
-    ctx.api.getUserProfilePhotos.mockRejectedValue(new Error("API error"));
+    (syncUserProfilePhoto as jest.Mock).mockRejectedValue(new Error("R2 down"));
 
-    await startCommand(ctx);
+    await expect(startCommand(ctx)).resolves.not.toThrow();
 
-    // Should still create user with null profilePhotoUrl
-    expect(prisma.user.create).toHaveBeenCalledWith({
-      data: {
-        telegramId: 123,
-        username: "test",
-        firstName: "TestUser",
-        lastName: "User",
-        profilePhotoUrl: null,
-      },
-    });
     expect(ctx.reply).toHaveBeenCalledWith(
       "Welcome, TestUser! You have been registered successfully."
     );

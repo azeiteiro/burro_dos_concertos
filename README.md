@@ -57,12 +57,14 @@ Create `.env.local`:
 ```bash
 BOT_TOKEN=your_telegram_bot_token
 DATABASE_URL=postgresql://user:password@localhost:5432/concerts_bot
-GROUP_ID=-100123456789  # Your Telegram group ID (optional for notifications)
+GROUP_ID=-100123456789  # Your Telegram group ID: only its members can use the bot, and notifications go here
 
 # Optional: Browserless.io API key for JavaScript-rendered concert sites
 # Get free tier (1000 units/month) at https://account.browserless.io/signup
 BROWSERLESS_API_KEY=your_api_key_here
 ```
+
+**Invite-only access:** the bot only responds to members of `GROUP_ID`. The bot must be a member of that group for the check to work, and `SUPER_ADMIN_ID` bypasses it. If `GROUP_ID` is unset, the membership check is disabled.
 
 **About Browserless.io (Optional):**
 - Enables extraction from JavaScript-heavy sites (e.g., queue-protected ticket sites)

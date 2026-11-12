@@ -1,6 +1,7 @@
 import { Context } from "grammy";
 import { prisma } from "../config/db";
 import logger from "#/config/logger";
+import { syncUserProfilePhoto } from "#/services/profilePhotoService";
 
 export const startCommand = async (ctx: Context) => {
   const telegramId = ctx.from?.id;
@@ -16,36 +17,23 @@ export const startCommand = async (ctx: Context) => {
     return ctx.reply("You are already registered!");
   }
 
-  // Fetch profile photo from Telegram
-  let profilePhotoUrl: string | null = null;
-  try {
-    const photos = await ctx.api.getUserProfilePhotos(telegramId!, { limit: 1 });
-    if (photos.photos && photos.photos.length > 0) {
-      const photo = photos.photos[0];
-      const smallestPhoto = photo[0];
-      if (smallestPhoto) {
-        const file = await ctx.api.getFile(smallestPhoto.file_id);
-        if (file.file_path) {
-          profilePhotoUrl = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${file.file_path}`;
-        }
-      }
-    }
-  } catch (error) {
-    logger.error({ error, telegramId }, "Failed to fetch profile photo during registration");
-    // Continue with registration even if photo fetch fails
-  }
-
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       telegramId: telegramId!,
       username,
       firstName,
       lastName,
-      profilePhotoUrl,
     },
   });
 
   await ctx.reply(`Welcome, ${firstName}! You have been registered successfully.`);
+
+  // Upload profile photo to R2 (never store Telegram file URLs, they embed the bot token)
+  try {
+    await syncUserProfilePhoto(ctx.api, user);
+  } catch (error) {
+    logger.error({ error, telegramId }, "Failed to sync profile photo during registration");
+  }
 };
 
 export default startCommand;
