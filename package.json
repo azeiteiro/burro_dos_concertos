@@ -35,6 +35,7 @@
     "lint": "eslint \"src/**/*.{js,ts}\"",
     "lint:fix": "pnpm lint --fix",
     "seed": "node dist/prisma/seed.js",
+    "audit:members": "tsx scripts/auditGroupMembers.ts",
     "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') { require('child_process').execSync('husky', {stdio: 'inherit'}) }\""
   },
   "lint-staged": {

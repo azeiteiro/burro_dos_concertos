@@ -24,8 +24,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * @returns Image buffer
  */
 async function downloadImageFromTelegram(fileUrl: string): Promise<Buffer> {
+  // The URL embeds the bot token, so never log it as-is
+  const safeUrl = fileUrl.replace(/\/bot[^/]+\//, "/bot<redacted>/");
+
   try {
-    logger.debug({ fileUrl }, "Downloading image from Telegram");
+    logger.debug({ fileUrl: safeUrl }, "Downloading image from Telegram");
 
     const response = await got(fileUrl, {
       responseType: "buffer",
@@ -38,7 +41,10 @@ async function downloadImageFromTelegram(fileUrl: string): Promise<Buffer> {
     logger.debug({ size: imageBuffer.length }, "Successfully downloaded image");
     return imageBuffer;
   } catch (error) {
-    logger.error({ error, fileUrl }, "Failed to download image from Telegram");
+    logger.error(
+      { error: error instanceof Error ? error.message : String(error), fileUrl: safeUrl },
+      "Failed to download image from Telegram"
+    );
     throw error;
   }
 }
@@ -149,6 +155,23 @@ async function fetchUserProfilePhoto(
     // Return undefined to indicate a transient error (don't update DB)
     return undefined;
   }
+}
+
+/**
+ * Fetches a single user's profile photo, uploads it to R2 and updates the DB
+ * Transient errors are swallowed (DB left untouched) so callers can fire-and-forget
+ */
+export async function syncUserProfilePhoto(api: Api, user: User): Promise<void> {
+  const photoResult = await fetchUserProfilePhoto(api, user);
+  if (photoResult === undefined) return;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      profilePhotoUrl: photoResult.url,
+      profilePhotoFileId: photoResult.fileId,
+    },
+  });
 }
 
 /**

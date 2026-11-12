@@ -9,6 +9,7 @@ import { type BotContext } from "./types/global";
 import { editConcertConversation } from "./conversations/edit_concert";
 import { announceConversation } from "./conversations/announce";
 import { registerCommands } from "./bot/commands";
+import { groupMembershipMiddleware } from "./middleware/groupMembership";
 import { startNotifications } from "./notifications/notifications";
 import { setupCommands } from "./setupCommands";
 import { helpCommand, handleHelpCallbacks, calendarCommand } from "./commands/help";
@@ -67,6 +68,9 @@ bot.use(async (ctx, next) => {
   }
   await next();
 });
+
+// 🔒 Invite only - only members of GROUP_ID (and SUPER_ADMIN_ID) can use the bot
+bot.use(groupMembershipMiddleware);
 
 // 🧩 Register all commands (these are your handlers)
 registerCommands(bot);
