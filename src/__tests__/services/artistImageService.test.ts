@@ -354,6 +354,8 @@ describe("ArtistImageService - scheduleArtistImageSync", () => {
     scheduleArtistImageSync();
 
     expect(cron.schedule).toHaveBeenCalledTimes(1);
-    expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function));
+    expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function), {
+      timezone: "Europe/Lisbon",
+    });
   });
 });

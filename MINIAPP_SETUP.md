@@ -207,7 +207,6 @@ Built files will be in `web/dist/`
   - Returns: `text/calendar` with ICS format
   - Filters: Only "going" and "interested" concerts, upcoming only
   - Headers: Proper `Content-Disposition` for calendar subscription
-- `GET /api/users/:userId/calendar-debug` - Debug endpoint returning JSON representation of calendar
 
 **Health:**
 - `GET /health` - Health check endpoint

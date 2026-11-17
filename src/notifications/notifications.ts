@@ -14,10 +14,14 @@ export const startNotifications = (bot: Bot) => {
 
   schedules.forEach(({ name, expression, handler }) => {
     try {
-      cron.schedule(expression, async () => {
-        logger.info(`Running ${name.toLowerCase()} notification job`);
-        await handler(bot);
-      });
+      cron.schedule(
+        expression,
+        async () => {
+          logger.info(`Running ${name.toLowerCase()} notification job`);
+          await handler(bot);
+        },
+        { timezone: "Europe/Lisbon" }
+      );
 
       logger.info(`Scheduled ${name.toLowerCase()} notifications: ${expression}`);
     } catch (error) {

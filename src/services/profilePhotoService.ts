@@ -244,18 +244,24 @@ export async function fetchAllUserProfilePhotos(botOrApi: Bot | Api): Promise<Sy
  */
 export function scheduleProfilePhotoSync(bot: Bot): void {
   // Sunday at 3:00 AM (Europe/Lisbon timezone)
-  cron.schedule("0 3 * * 0", async () => {
-    logger.info("Starting scheduled profile photo sync (cron job)");
-    try {
-      const result = await fetchAllUserProfilePhotos(bot);
-      logger.info(`Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}`);
-      if (result.errors.length > 0) {
-        logger.error({ errors: result.errors }, "Sync errors");
+  cron.schedule(
+    "0 3 * * 0",
+    async () => {
+      logger.info("Starting scheduled profile photo sync (cron job)");
+      try {
+        const result = await fetchAllUserProfilePhotos(bot);
+        logger.info(
+          `Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}`
+        );
+        if (result.errors.length > 0) {
+          logger.error({ errors: result.errors }, "Sync errors");
+        }
+      } catch (error) {
+        logger.error({ error }, "Scheduled profile photo sync failed");
       }
-    } catch (error) {
-      logger.error({ error }, "Scheduled profile photo sync failed");
-    }
-  });
+    },
+    { timezone: "Europe/Lisbon" }
+  );
 
   logger.info("Profile photo sync cron job scheduled (every Sunday at 3 AM)");
 }
