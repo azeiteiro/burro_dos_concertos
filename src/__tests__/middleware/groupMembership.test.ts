@@ -74,8 +74,25 @@ describe("groupMembershipMiddleware", () => {
     expect(ctx.reply).not.toHaveBeenCalled();
   });
 
+  // Real poll_answer updates have no ctx.from or ctx.chat, the voter is in pollAnswer.user
+  const makePollAnswerCtx = (userId = 111) =>
+    makeCtx({
+      from: undefined,
+      chat: undefined,
+      pollAnswer: { poll_id: "1", user: { id: userId }, option_ids: [0] },
+    });
+
+  it("lets poll answers from group members through", async () => {
+    const ctx = makePollAnswerCtx();
+
+    await groupMembershipMiddleware(ctx, next);
+
+    expect(ctx.api.getChatMember).toHaveBeenCalledWith("-100123", 111);
+    expect(next).toHaveBeenCalled();
+  });
+
   it("silently ignores non-member poll answers (no chat to reply to)", async () => {
-    const ctx = makeCtx({ chat: undefined });
+    const ctx = makePollAnswerCtx();
     ctx.api.getChatMember.mockResolvedValue({ status: "left" });
 
     await groupMembershipMiddleware(ctx, next);
