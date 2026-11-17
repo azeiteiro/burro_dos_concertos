@@ -8,6 +8,7 @@ import { notifyNewConcert } from "#/notifications/helpers";
 import { BotContext } from "#/types/global";
 import { InlineKeyboard } from "grammy";
 import { updateConcertArtistImage } from "#/services/artistImageService";
+import { findPossibleDuplicate } from "#/services/duplicateConcertService";
 
 // Helper function to save concert
 async function saveConcert(
@@ -21,11 +22,47 @@ async function saveConcert(
   url: string | null,
   notes: string | null
 ) {
-  const savedConcert = await conversation.external(async () => {
-    const formattedDate = format(concertDate, "yyyy-MM-dd");
-    const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
-    const concertTimeObj = concertTime ? parseISO(`${formattedDate}T${concertTime}:00Z`) : null;
+  const formattedDate = format(concertDate, "yyyy-MM-dd");
+  const concertDateObj = parseISO(`${formattedDate}T00:00:00Z`);
+  const concertTimeObj = concertTime ? parseISO(`${formattedDate}T${concertTime}:00Z`) : null;
 
+  // Warn before creating a concert that is probably already in the list. The artist name is
+  // ignored on purpose: people re-add a concert to fix a title. Failing to check never blocks.
+  // Only plain data can come out of external(), so this is not the full Concert row.
+  const duplicate = await conversation.external(async () => {
+    try {
+      return await findPossibleDuplicate({ url, venue, concertDate: concertDateObj });
+    } catch (error) {
+      console.warn("Failed to check for duplicate concerts:", error);
+      return null;
+    }
+  });
+
+  if (duplicate) {
+    const keyboard = new InlineKeyboard()
+      .text("➕ Add anyway", "duplicate_add_anyway")
+      .text("❌ Cancel", "duplicate_cancel");
+
+    await ctx.reply(
+      `⚠️ This looks like a concert that was already added (same ${duplicate.matchedBy === "url" ? "link" : "venue and date"}):\n\n` +
+        `🎤 ${duplicate.artistName}\n🏟️ ${duplicate.venue}\n📅 ${duplicate.concertDate}\n\n` +
+        `To change its details, cancel and use /edit_concert. Add this one anyway?`,
+      { reply_markup: keyboard }
+    );
+
+    const choice = await conversation.waitForCallbackQuery(
+      ["duplicate_add_anyway", "duplicate_cancel"],
+      { otherwise: (ctx) => ctx.reply("Please use the buttons to add it anyway or cancel.") }
+    );
+    await choice.answerCallbackQuery();
+
+    if (choice.callbackQuery.data === "duplicate_cancel") {
+      await ctx.reply("❌ Concert not added.");
+      return;
+    }
+  }
+
+  const savedConcert = await conversation.external(async () => {
     try {
       const concert = await prisma.concert.create({
         data: {

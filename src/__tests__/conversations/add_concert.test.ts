@@ -11,6 +11,7 @@ jest.mock("#/config/db", () => ({
     concert: {
       create: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
   },
 }));
@@ -32,6 +33,7 @@ describe("addConcertConversation", () => {
     jest.clearAllMocks();
 
     (prisma.concert.findUnique as jest.Mock).mockResolvedValue({ id: 1 });
+    (prisma.concert.findMany as jest.Mock).mockResolvedValue([]);
 
     mockConversation = {
       external: jest.fn((fn: any) => fn()),
@@ -407,6 +409,95 @@ describe("addConcertConversation", () => {
       (call: any) => call[0] && typeof call[0] === "string" && call[0].includes("⏰")
     );
     expect(hasTimeMessage).toBe(true);
+  });
+
+  describe("duplicate detection", () => {
+    // Same venue and date as the concert being added, but a corrected title
+    const existing = {
+      id: 56,
+      artistName: "Old Title",
+      venue: "Venue Name",
+      concertDate: new Date("2025-10-15T00:00:00Z"),
+      url: null,
+    };
+
+    const answerFullFlow = () =>
+      (ask as jest.Mock)
+        .mockResolvedValueOnce("New Title")
+        .mockResolvedValueOnce("Venue Name")
+        .mockResolvedValueOnce(new Date("2025-10-15"))
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
+
+    const pressButton = (data: string) =>
+      mockConversation.waitForCallbackQuery.mockResolvedValue({
+        answerCallbackQuery: jest.fn(),
+        callbackQuery: { data },
+      });
+
+    it("asks for confirmation when the same venue and date already exist", async () => {
+      answerFullFlow();
+      (prisma.concert.findMany as jest.Mock).mockResolvedValue([existing]);
+      pressButton("duplicate_cancel");
+
+      await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 });
+
+      expect(mockCtx.reply).toHaveBeenCalledWith(
+        expect.stringContaining("already added"),
+        expect.objectContaining({ reply_markup: expect.anything() })
+      );
+      expect(mockCtx.reply).toHaveBeenCalledWith(expect.stringContaining("Old Title"), {
+        reply_markup: expect.anything(),
+      });
+    });
+
+    it("does not create the concert when the user cancels", async () => {
+      answerFullFlow();
+      (prisma.concert.findMany as jest.Mock).mockResolvedValue([existing]);
+      pressButton("duplicate_cancel");
+
+      await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 });
+
+      expect(prisma.concert.create).not.toHaveBeenCalled();
+      expect(mockCtx.reply).toHaveBeenCalledWith("❌ Concert not added.");
+    });
+
+    it("creates the concert when the user chooses to add it anyway", async () => {
+      answerFullFlow();
+      (prisma.concert.findMany as jest.Mock).mockResolvedValue([existing]);
+      (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 57 });
+      pressButton("duplicate_add_anyway");
+
+      await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 });
+
+      expect(prisma.concert.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ artistName: "New Title" }) })
+      );
+    });
+
+    it("does not prompt when nothing matches", async () => {
+      answerFullFlow();
+      (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 57 });
+
+      await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 });
+
+      expect(mockConversation.waitForCallbackQuery).not.toHaveBeenCalled();
+      expect(prisma.concert.create).toHaveBeenCalled();
+    });
+
+    it("still adds the concert when the duplicate lookup fails", async () => {
+      answerFullFlow();
+      (prisma.concert.findMany as jest.Mock).mockRejectedValue(new Error("db down"));
+      (prisma.concert.create as jest.Mock).mockResolvedValue({ id: 57 });
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+      await addConcertConversation(mockConversation, mockCtx, { dbUserId: 42 });
+
+      expect(mockConversation.waitForCallbackQuery).not.toHaveBeenCalled();
+      expect(prisma.concert.create).toHaveBeenCalled();
+      warn.mockRestore();
+    });
   });
 
   it("handles confirm with missing artist field", async () => {
