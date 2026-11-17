@@ -349,7 +349,9 @@ describe("ProfilePhotoService", () => {
     it("schedules cron job for Sunday 3 AM", () => {
       scheduleProfilePhotoSync(mockBot);
 
-      expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function));
+      expect(cron.schedule).toHaveBeenCalledWith("0 3 * * 0", expect.any(Function), {
+        timezone: "Europe/Lisbon",
+      });
     });
   });
 });

@@ -28,4 +28,20 @@ describe("startNotifications", () => {
     expect(spyMonth).toHaveBeenCalledWith(bot);
     expect(cron.schedule).toHaveBeenCalledTimes(3);
   });
+
+  it("schedules every job in the Europe/Lisbon timezone", () => {
+    jest.spyOn(helpers, "sendTodayConcerts").mockResolvedValue(undefined);
+    jest.spyOn(helpers, "sendWeekConcerts").mockResolvedValue(undefined);
+    jest.spyOn(helpers, "sendMonthConcerts").mockResolvedValue(undefined);
+
+    notifications.startNotifications(bot);
+
+    const calls = (cron.schedule as jest.Mock).mock.calls;
+    expect(calls.map(([expression]) => expression)).toEqual([
+      "0 9 * * *",
+      "0 9 * * 1",
+      "0 9 1 * *",
+    ]);
+    calls.forEach(([, , options]) => expect(options).toEqual({ timezone: "Europe/Lisbon" }));
+  });
 });

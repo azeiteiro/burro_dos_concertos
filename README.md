@@ -152,7 +152,6 @@ Users can subscribe to their personal concert calendars (concerts marked as "goi
 - Frontend: `CalendarSubscription` component with platform-specific buttons
 - Hook: `useCalendar` handles subscription logic and Telegram WebApp integration
 - Backend: Express route generates ICS feed with proper HTTP headers
-- Debug endpoint: `/api/users/:userId/calendar-debug` returns JSON for troubleshooting
 
 ## Concert Link Detection
 

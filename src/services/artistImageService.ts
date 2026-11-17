@@ -183,21 +183,25 @@ export async function syncAllArtistImages(): Promise<{
  * Schedule weekly artist image sync (Sunday 3 AM)
  */
 export function scheduleArtistImageSync(): void {
-  // Sunday at 3:00 AM
-  cron.schedule("0 3 * * 0", async () => {
-    logger.info("Starting scheduled artist image sync (cron job)");
-    try {
-      const result = await syncAllArtistImages();
-      logger.info(
-        `Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}, Skipped: ${result.skipped}`
-      );
-      if (result.errors.length > 0) {
-        logger.error({ errors: result.errors }, "Sync errors");
+  // Sunday at 3:00 AM (Europe/Lisbon timezone)
+  cron.schedule(
+    "0 3 * * 0",
+    async () => {
+      logger.info("Starting scheduled artist image sync (cron job)");
+      try {
+        const result = await syncAllArtistImages();
+        logger.info(
+          `Scheduled sync complete. Success: ${result.success}, Failed: ${result.failed}, Skipped: ${result.skipped}`
+        );
+        if (result.errors.length > 0) {
+          logger.error({ errors: result.errors }, "Sync errors");
+        }
+      } catch (error) {
+        logger.error({ error }, "Scheduled artist image sync failed");
       }
-    } catch (error) {
-      logger.error({ error }, "Scheduled artist image sync failed");
-    }
-  });
+    },
+    { timezone: "Europe/Lisbon" }
+  );
 
   logger.info("Artist image sync cron job scheduled (every Sunday at 3 AM)");
 }

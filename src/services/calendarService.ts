@@ -10,7 +10,6 @@ type ConcertWithResponse = Concert & {
 
 /**
  * Generate an iCal calendar from a list of concerts
- * Eliminates duplication between /calendar.ics and /calendar-debug endpoints
  */
 export const generateCalendar = (concerts: ConcertWithResponse[]) => {
   try {
