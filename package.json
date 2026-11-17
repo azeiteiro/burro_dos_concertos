@@ -46,7 +46,7 @@
   },
   "packageManager": "pnpm@12.18.0",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1166.0",
+    "@aws-sdk/client-s3": "^3.1169.0",
     "@grammyjs/conversations": "^2.1.1",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "7.10.1",
@@ -87,7 +87,7 @@
     "jiti": "^2.7.0",
     "lint-staged": "^17.6.0",
     "pino-pretty": "^13.2.0",
-    "prettier": "^3.10.0",
+    "prettier": "^3.10.1",
     "rimraf": "^6.1.4",
     "supertest": "^7.3.2",
     "ts-jest": "^29.4.15",
