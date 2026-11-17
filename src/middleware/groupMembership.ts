@@ -62,7 +62,8 @@ export const groupMembershipMiddleware = async (ctx: BotContext, next: NextFunct
     return next();
   }
 
-  const userId = ctx.from?.id;
+  // ctx.from doesn't cover poll_answer updates, the voter is in pollAnswer.user
+  const userId = ctx.from?.id ?? ctx.pollAnswer?.user?.id;
 
   // Fail closed: nothing we can attribute to a user gets through
   if (!userId) return;
