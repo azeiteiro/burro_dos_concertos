@@ -1,8 +1,8 @@
 import { prisma } from "#/config/db";
 import { BotContext } from "#/types/global";
-import { UserFromGetMe } from "grammy/types";
+import { User } from "grammy/types";
 
-export const findOrCreateUser = (tgUser: UserFromGetMe) => {
+export const findOrCreateUser = (tgUser: User) => {
   return prisma.user.upsert({
     where: { telegramId: BigInt(tgUser.id) },
     update: {
