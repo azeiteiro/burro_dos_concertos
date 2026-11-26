@@ -24,6 +24,7 @@ minimumReleaseAgeExclude:
 overrides:
   '@hono/node-server@<1.19.13': ^1.19.13
   deepmerge-ts@<8.0.0: ^8.0.0
+  effect@<=3.22.0: ^3.22.1
   glob@>=9.0.0 <=14.0.1: ^14.0.2
   hono@<4.11.10: '>=4.11.10'
   hono@<4.11.7: '>=4.11.7'
